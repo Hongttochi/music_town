@@ -396,9 +396,15 @@ dialog.delete-account-dialog {
 }
 .delete-account-actions .town-button {
   flex: 1;
-  min-height: 44px;
+  min-height: 34px;
+  padding: 6px 12px;
+  border-radius: var(--town-radius);
 }
 .delete-account-confirm.town-button {
   background: #b8463f;
   color: #fffdf3;
+}
+
+.delete-account-confirm.town-button:hover:not(:disabled) {
+  background: #a43b35;
 }

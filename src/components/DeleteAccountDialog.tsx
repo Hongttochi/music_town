@@ -50,6 +50,7 @@ export function DeleteAccountDialog({
           취소
         </Button>
         <Button
+          variant="secondary"
           className="delete-account-confirm"
           disabled={pending || demo}
           data-sound="ok"
