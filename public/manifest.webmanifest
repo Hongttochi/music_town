@@ -1,1 +1,17 @@
-{"name":"MUSIC TOWN","short_name":"MUSIC TOWN","start_url":"./","display":"standalone","orientation":"landscape","background_color":"#eef0df","theme_color":"#385c49","icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]}
+{
+  "name": "MUSIC TOWN",
+  "short_name": "MUSIC TOWN",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#dce6ec",
+  "theme_color": "#dce6ec",
+  "icons": [
+    {
+      "src": "favicon-v3.png",
+      "sizes": "1280x1280",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
