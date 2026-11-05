@@ -366,6 +366,7 @@ export function Park(props: Props) {
     }
     let nearbyBench: T.Vector3 | null = null;
     let seatedBench: T.Vector3 | null = null;
+    let seatZoom = 0;
     let standingPosition: Position | null = null;
     let shownBenchAction: 'sit' | null = null;
     const seatPosition = (bench: T.Vector3) => new T.Vector3(bench.x - 0.2, 0, bench.z + 0.25);
@@ -757,7 +758,18 @@ export function Park(props: Props) {
       focus.lerp(player.position, 1 - Math.exp(-dt * 5));
       const portrait = camera.aspect < 1;
       camera.position.set(focus.x, focus.y + (portrait ? 17 : 14), focus.z + (portrait ? 23 : 19));
-      target.set(focus.x, focus.y + 0.3, focus.z - 3);
+      const desiredSeatZoom = seatedBench ? 1 : 0;
+      seatZoom = reducedMotion
+        ? desiredSeatZoom
+        : seatZoom + (desiredSeatZoom - seatZoom) * (1 - Math.exp(-dt * 4.5));
+      if (Math.abs(desiredSeatZoom - seatZoom) < 0.001) seatZoom = desiredSeatZoom;
+      const zoom = 1 + seatZoom * 0.6;
+      if (camera.zoom !== zoom) {
+        camera.zoom = zoom;
+        camera.updateProjectionMatrix();
+      }
+      // Center the seated upper body as the surrounding park moves out of frame.
+      target.set(focus.x, focus.y + 0.3 + seatZoom * 0.7, focus.z - 3 * (1 - seatZoom));
       camera.lookAt(target);
       camera.updateMatrixWorld();
       const bubbleBench = seatedBench ? null : nearbyBench;
