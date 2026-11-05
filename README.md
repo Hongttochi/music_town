@@ -116,6 +116,20 @@ TypeScript 검사 후 `dist/`에 배포 파일을 생성합니다.
 
 ## 배포 전 확인
 
+### Vercel
+
+1. Vercel에서 `Hongttochi/music_town` GitHub 저장소를 Import합니다. Root Directory는 저장소 루트입니다.
+2. Framework Preset은 **Vite**입니다. `vercel.json`에 설치 명령 `npm ci`, 빌드 명령 `npm run build`, 출력 폴더 `dist`를 지정했습니다.
+3. Environment Variables에 `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`를 등록한 뒤 Deploy합니다. 환경 변수를 바꾸면 재배포해야 합니다.
+4. Supabase Authentication의 Site URL과 Redirect URLs에 실제 Vercel 배포 주소를 등록합니다. 이 앱의 로그인 복귀 주소는 `https://배포도메인/`입니다.
+5. 모바일 가로 화면으로 로그인·프로필·채널 입장을 확인하고 `/terms/`, `/privacy/`, `/safety/`도 직접 열어 확인합니다.
+
+정책 문서는 각 정적 HTML로 연결하며, 앱은 `/`에서 실행됩니다. 기존 `.openai/hosting.json`은 제거했습니다. Vercel 대시보드에서 프로젝트 연결과 환경 변수 등록은 별도로 진행해야 합니다.
+
+설정 기준: [Vercel의 Vite 배포 안내](https://vercel.com/docs/frameworks/frontend/vite), [vercel.json 설정](https://vercel.com/docs/project-configuration/vercel-json).
+
+### 서비스 연결 확인
+
 - 빌드 시 `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`를 주입합니다. `.env`와 비밀키는 Git에 올리지 않습니다.
 - OAuth Site URL과 Redirect URLs를 실제 배포 주소에 맞춥니다.
 - **현재 저장소에는 안내 문서에서 참조하는 `supabase/migrations/*.sql`과 `tests/*.test.mjs`가 없습니다.** DB 파일을 확보하고 실제 스키마·권한·RPC를 확인한 뒤 로그인, 채널 입장, 신고 접수를 검증해야 합니다. 프런트엔드 빌드 성공만으로 DB 동작을 보장하지 않습니다.
