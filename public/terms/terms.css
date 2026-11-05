@@ -1,0 +1,14 @@
+.terms-page a { text-decoration: none; }
+.terms-hero { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 8px 0 26px; }
+.terms-hero h1 { margin: 0 0 16px; }
+.terms-hero .meta { margin: 0; }
+.terms-character { width: 96px; height: 96px; object-fit: contain; flex: none; }
+.terms-shortcuts { display: flex; flex-wrap: wrap; gap: 14px 26px; padding: 18px 22px; background: #f7f8fa; border-radius: 6px; margin-bottom: 12px; }
+.terms-shortcuts a { color: #525e6e; font-size: 14px; }
+.terms-section { padding: 36px 0; border-bottom: 1px solid #eceef2; scroll-margin-top: 24px; }
+.terms-section h2 { margin: 0 0 24px; scroll-margin-top: 24px; }
+.terms-section p { margin: 0 0 16px; }
+.terms-section p:last-child { margin-bottom: 0; }
+.terms-section ul { margin-bottom: 0; }
+.terms-section li::marker { color: #8a93a0; }
+@media (max-width: 600px) { .terms-character { width: 78px; height: 78px; } .terms-section { padding: 28px 0; } .terms-shortcuts { gap: 12px 22px; padding: 16px; } .terms-shortcuts a { font-size: 13px; } }
