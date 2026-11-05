@@ -189,6 +189,8 @@ export function Park(props: Props) {
     );
     const obstacles: { x: number; z: number; r: number }[] = [];
     function tree(x: number, z: number, s = 1) {
+      // Keep trunks and their broad sprite canopies clear of the river.
+      if (x > RIVER.left - 2.4 * s && x < RIVER.right + 2.4 * s) return;
       scenery.prop(Math.round(x + z) % 3 === 0 ? 0 : 2, x, z, 5.1 * s);
       obstacles.push({ x, z, r: s * 0.6 });
     }
@@ -214,18 +216,54 @@ export function Park(props: Props) {
       95,
       '#78c7cd',
     );
-    water.material.roughness = 0.28;
-    for (let z = -35; z < 40; z += 1.6) ball(15.8, -0.06, z, 0.7, 0.25, 0.9, '#d3cf9c');
-    for (let i = 0; i < 30; i++)
-      box(
-        17 + random() * 6,
-        0.01,
-        -30 + random() * 65,
-        0.7 + random() * 1.4,
-        0.015,
-        0.04,
-        '#b9e6dc',
-      ).castShadow = false;
+    // A seamless painted surface: darker channel, pale shallows and broken ripples.
+    const waterCanvas = document.createElement('canvas');
+    waterCanvas.width = 512;
+    waterCanvas.height = 1024;
+    const waterCtx = waterCanvas.getContext('2d')!;
+    const depth = waterCtx.createLinearGradient(0, 0, 512, 0);
+    depth.addColorStop(0, '#92cfc5');
+    depth.addColorStop(0.16, '#60b9bd');
+    depth.addColorStop(0.48, '#368fa8');
+    depth.addColorStop(0.8, '#59b4bb');
+    depth.addColorStop(1, '#a2d5c9');
+    waterCtx.fillStyle = depth;
+    waterCtx.fillRect(0, 0, 512, 1024);
+    for (let i = 0; i < 240; i++) {
+      const x = random() * 512,
+        y = random() * 1024;
+      const width = 14 + random() * 75;
+      waterCtx.strokeStyle = i % 3 === 0 ? 'rgba(224,251,230,0.28)' : 'rgba(24,105,137,0.13)';
+      waterCtx.lineWidth = 1 + random() * 3;
+      waterCtx.beginPath();
+      waterCtx.moveTo(x, y);
+      waterCtx.quadraticCurveTo(x + width / 2, y - 5, x + width, y);
+      waterCtx.stroke();
+    }
+    const waterTexture = new T.CanvasTexture(waterCanvas);
+    waterTexture.colorSpace = T.SRGBColorSpace;
+    waterTexture.wrapS = waterTexture.wrapT = T.RepeatWrapping;
+    waterTexture.repeat.set(1, 8);
+    water.material.color.set('#ffffff');
+    water.material.map = waterTexture;
+    water.material.roughness = 0.38;
+    water.castShadow = false;
+    // Raised irregular boulders catch light on top and cast shadows onto the shallows.
+    function riverStone(x: number, z: number) {
+      const stone = mesh(
+        new T.IcosahedronGeometry(1, 1),
+        ['#b3b6a2', '#c6c6b2', '#a5ad9e'][Math.floor(random() * 3)],
+        x + (random() - 0.5) * 0.18,
+        0.12,
+        z,
+      );
+      stone.scale.set(0.48 + random() * 0.2, 0.27 + random() * 0.15, 0.62 + random() * 0.2);
+      stone.rotation.y = random() * Math.PI;
+    }
+    for (let z = -46; z < 47; z += 1.45) {
+      riverStone(RIVER.left - 0.2, z);
+      riverStone(RIVER.right + 0.2, z);
+    }
     scenery.prop(1, -5, -8, 5.3);
     obstacles.push({ x: -5, z: -8, r: 2.5 });
     [
@@ -247,7 +285,6 @@ export function Park(props: Props) {
     }
 
     // Connect the east bank to a walkable riverside clearing.
-    for (let z = -35; z < 40; z += 1.6) ball(24.2, -0.06, z, 0.7, 0.25, 0.9, '#d3cf9c');
     path([new T.Vector3(12, 0, 4.5), new T.Vector3(15, 0, 4.5)], 1.1);
     path(
       [
@@ -564,6 +601,7 @@ export function Park(props: Props) {
       }
       const dt = Math.min((time - last) / 1000, 0.04);
       last = time;
+      waterTexture.offset.y = (time * 0.000008) % 1;
       const p = latest.current,
         key = JSON.stringify(p.avatar);
       const present = new Set(p.participants.map((person) => person.id));
@@ -769,6 +807,7 @@ export function Park(props: Props) {
     return () => {
       useBench.current = () => {};
       scenery.dispose();
+      waterTexture.dispose();
       glowTexture.dispose();
       lanternMaterial.dispose();
       haloMaterial.dispose();
