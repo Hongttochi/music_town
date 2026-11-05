@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { Avatar } from './model';
+import { composeSeatedAvatar } from './seatedAvatar';
 import { loadAvatarLayers, composeAvatar } from './modularAvatar';
 
 /** Six character rows, each with front/right/back/left views. */
@@ -67,32 +68,15 @@ export function createImageCharacters() {
       const seated = actor.group.userData.seated === true;
       if (actor.standingImage && actor.seated !== seated) {
         if (seated && !actor.seatedImage) {
-          // Keep the head and torso intact; fold the lower body toward the seat.
-          const image = actor.standingImage;
-          const folded = document.createElement('canvas');
-          folded.width = image.width;
-          folded.height = image.height;
-          const context = folded.getContext('2d')!;
-          const torso = Math.round(image.height * 0.68);
-          const drop = Math.round(image.height * 0.12);
-          context.drawImage(image, 0, 0, image.width, torso, 0, drop, image.width, torso);
-          context.drawImage(
-            image,
-            0,
-            torso,
-            image.width,
-            image.height - torso,
-            0,
-            torso + drop,
-            image.width,
-            image.height - torso - drop,
-          );
-          actor.seatedImage = folded;
+          actor.seatedImage = composeSeatedAvatar(actor.standingImage);
         }
         actor.texture.image = seated ? actor.seatedImage! : actor.standingImage;
         actor.texture.needsUpdate = true;
         actor.seated = seated;
       }
+      // Anchor the hips to the seat rather than anchoring seated feet to the ground.
+      actor.sprite.center.set(0.5, seated ? 0.25 : 0.05);
+      actor.sprite.position.y = seated ? 0.68 : 0;
       const angle = Math.atan2(Math.sin(actor.group.rotation.y), Math.cos(actor.group.rotation.y));
       const cell =
         Math.abs(angle) < Math.PI / 4

@@ -654,9 +654,11 @@ export function Park(props: Props) {
       (player.userData.limbs as T.Object3D[]).forEach((l, i) => {
         l.rotation.x = walking ? Math.sin(time / 130 + (i < 2 ? 0 : Math.PI)) * 0.42 : 0;
       });
-      player.position.y += walking
-        ? Math.abs(Math.sin(time / 130)) * 0.055
-        : Math.sin(time / 700) * 0.012;
+      player.position.y += seatedBench
+        ? 0
+        : walking
+          ? Math.abs(Math.sin(time / 130)) * 0.055
+          : Math.sin(time / 700) * 0.012;
       if (entranceReady && entranceStart === null) entranceStart = time;
       const arrival = reducedMotion
         ? 1
