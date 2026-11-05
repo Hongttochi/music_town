@@ -1,3 +1,4 @@
+import { useAmbientAudio } from './useAmbientAudio';
 import { ProfileIcon } from './components/ProfileIcon';
 import { DeviceGuide } from './components/DeviceGuide';
 import { ErrorModal } from './components/ui/ErrorModal';
@@ -185,6 +186,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
     town.clientId,
     microphone.stream,
   );
+  useAmbientAudio(position, entered, microphone.state === 'on' || voice.status === 'listening');
   const stages = account.demo ? demoStages : town.stages;
   const populations = account.demo ? demoPopulations : town.state.channels.map((c) => c.count);
   const selectedMusician = town.state.participants.find(
