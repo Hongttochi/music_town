@@ -1,0 +1,258 @@
+/* One typography rule for every editor field, across all viewport sizes. */
+.character-workshop .workshop-desk .editor-field-title {
+  display: block;
+  font-family: var(--font-town);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: -0.02em;
+  color: #59684c;
+  margin: 16px 0 8px;
+}
+.character-workshop .workshop-desk > .editor-field-title:first-child {
+  margin-top: 0;
+}
+.character-workshop .workshop-desk .nickname-input {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.character-workshop .part-options span {
+  font-size: 11px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+.character-workshop .workshop-mirror {
+  padding: 8px;
+}
+.town-panel[data-panel='avatar'] .workshop-mirror {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+.town-panel[data-panel='avatar'] .avatar-turntable {
+  border: 0;
+  box-shadow: none;
+  outline: none;
+}
+.town-panel[data-panel='avatar'] .avatar-turntable:focus-visible {
+  outline: none;
+}
+.town-panel[data-panel='avatar'] .workshop-mirror > p {
+  align-self: center;
+  max-width: 100%;
+  padding: 6px 16px;
+  margin: 8px 0 0;
+  background: #fff;
+  border: 1px solid #e3e8dc;
+  border-radius: 10px;
+  box-shadow: none;
+  color: #56654b;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.town-panel[data-panel='avatar'] .panel-heading {
+  margin-bottom: 16px;
+  align-items: center;
+}
+.town-panel[data-panel='avatar'] .modal-title {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.4;
+}
+.town-panel[data-panel='avatar'] .character-workshop {
+  margin-top: 0;
+}
+.equipment-accessories {
+  display: flex;
+  gap: 8px;
+}
+.equipment-accessories .town-button {
+  flex: 1;
+  justify-content: center;
+  gap: 8px;
+}
+.equipment-editor .equipment-options .modular-portrait {
+  height: 82px;
+}
+@media (min-width: 650px) and (orientation: landscape) {
+  dialog.town-panel[data-panel='avatar'] {
+    width: 840px;
+    max-width: 94vw;
+    padding: 20px 24px;
+    max-height: 94dvh;
+  }
+  .town-panel[data-panel='avatar'] .character-workshop {
+    grid-template-columns: minmax(190px, 32%) minmax(0, 1fr);
+    gap: 24px;
+    align-items: stretch;
+  }
+  .town-panel[data-panel='avatar'] .workshop-mirror {
+    width: auto;
+    align-self: stretch;
+    justify-content: center;
+    padding: 16px;
+    position: sticky;
+    top: 0;
+  }
+  .town-panel[data-panel='avatar'] .workshop-mirror .avatar-turntable-wrap {
+    width: 100%;
+    max-width: 240px;
+  }
+  .town-panel[data-panel='avatar'] .workshop-mirror .avatar-turntable .modular-portrait {
+    width: 100%;
+    max-width: 240px;
+  }
+  .town-panel[data-panel='avatar'] .workshop-mirror > p {
+    margin: 12px 0 0;
+    font-size: 14px;
+  }
+  .town-panel[data-panel='avatar'] .workshop-desk {
+    display: flex;
+    flex-direction: column;
+  }
+  .town-panel[data-panel='avatar'] #part-panel {
+    flex: 1;
+    min-height: 160px;
+  }
+  .town-panel[data-panel='avatar'] .village-confirm {
+    position: static;
+    margin-top: 16px;
+    box-shadow: 0 2px 0 #50683b;
+  }
+  .town-panel[data-panel='avatar'] .part-tabs {
+    margin-top: 14px;
+  }
+  .town-panel[data-panel='avatar'] .part-options .modular-portrait {
+    height: 86px;
+  }
+}
+@media (min-width: 650px) and (max-height: 500px) and (orientation: landscape) {
+  dialog.town-panel[data-panel='avatar'] {
+    padding: 14px 20px;
+  }
+  .town-panel[data-panel='avatar'] .panel-heading {
+    margin-bottom: 10px;
+  }
+  .town-panel[data-panel='avatar'] .character-workshop {
+    grid-template-columns: 28% minmax(0, 1fr);
+    gap: 20px;
+  }
+  .town-panel[data-panel='avatar'] .workshop-mirror .avatar-turntable-wrap {
+    max-width: 190px;
+  }
+  .town-panel[data-panel='avatar'] .part-options .modular-portrait {
+    height: 58px;
+  }
+  .town-panel[data-panel='avatar'] .editor-field-title {
+    margin-top: 10px;
+    margin-bottom: 6px;
+  }
+  .town-panel[data-panel='avatar'] #part-panel {
+    min-height: 140px;
+  }
+  .town-panel[data-panel='avatar'] .village-confirm {
+    margin-top: 10px;
+  }
+}
+
+.character-workshop .part-catalog {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-height: 230px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  gap: 8px;
+  padding: 2px 4px 4px 2px;
+  scrollbar-width: thin;
+}
+.town-panel[data-panel='avatar'] .part-catalog .modular-portrait {
+  height: 68px;
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .character-workshop .part-catalog {
+    max-height: 145px;
+  }
+  .town-panel[data-panel='avatar'] .part-catalog .modular-portrait {
+    height: 48px;
+  }
+}
+
+/* Brief feedback without shifting the editor layout. */
+.avatar-preview-motion {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.character-workshop #part-panel {
+  animation: editor-panel-enter 180ms ease-out both;
+}
+.character-workshop .town-button {
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease,
+    transform 130ms ease;
+}
+.character-workshop .town-button:active:not(:disabled) {
+  transform: scale(0.96);
+}
+.character-workshop .part-catalog .town-button[aria-pressed='true'] {
+  animation: editor-choice-settle 220ms ease-out;
+}
+@media (hover: hover) {
+  .character-workshop .part-catalog .town-button:hover {
+    transform: translateY(-2px);
+  }
+  .character-workshop .part-catalog .town-button:active {
+    transform: scale(0.96);
+  }
+}
+@keyframes editor-panel-enter {
+  from {
+    opacity: 0.3;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes editor-choice-settle {
+  0% {
+    transform: scale(0.97);
+  }
+  65% {
+    transform: scale(1.015);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .character-workshop #part-panel,
+  .character-workshop .part-catalog .town-button[aria-pressed='true'] {
+    animation: none;
+  }
+  .character-workshop .town-button {
+    transition: none;
+  }
+  .character-workshop .town-button:hover,
+  .character-workshop .town-button:active:not(:disabled) {
+    transform: none;
+  }
+}
+.character-workshop .part-tabs {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.character-workshop .part-tabs .town-button {
+  flex: 1 0 auto;
+  white-space: nowrap;
+  padding-inline: 10px;
+}
+.clothing-catalog .modular-portrait {
+  pointer-events: none;
+}

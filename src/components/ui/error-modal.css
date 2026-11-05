@@ -1,0 +1,49 @@
+.error-modal {
+  width: 350px;
+  max-width: calc(100vw - 40px);
+  padding: 24px;
+  background: #fffdf5;
+  color: #504f47;
+  border: 1px solid #e3dece;
+  border-radius: 12px;
+  box-shadow: 0 16px 48px #27371924;
+  font-family: var(--font-town);
+}
+.error-modal::backdrop {
+  background: #2f342b55;
+}
+.error-modal-icon {
+  color: #b58b64;
+  margin-bottom: 14px;
+}
+.error-modal h2 {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+  margin: 0 0 10px;
+}
+.error-modal p {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #858278;
+  margin: 0 0 22px;
+  word-break: keep-all;
+}
+.error-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.error-modal-actions .town-button {
+  min-height: 36px;
+  min-width: 90px;
+  font-size: 12px;
+}
+.error-modal .town-button:focus,
+.error-modal .town-button:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.error-modal .town-button:focus-visible {
+  text-decoration: none;
+}
