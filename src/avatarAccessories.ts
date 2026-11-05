@@ -38,17 +38,33 @@ export function drawAccessories(
         box(x + 6, 344, side ? 34 : 86, 44, 12, '#aac2b3');
       }
     } else {
+      // Keep the bag on the free hip, behind the arm in side views.
+      const carrying = !!avatar.instrument && avatar.instrument !== 'none';
+      const bagX = side
+        ? carrying
+          ? right
+            ? 193
+            : 272
+          : right
+            ? 269
+            : 191
+        : carrying
+          ? 154
+          : 278;
+      const bagWidth = side ? 47 : 61;
+      const bagY = carrying ? 364 : 355;
+      const strapEnd = bagX + bagWidth / 2;
       ctx.beginPath();
-      ctx.moveTo(side ? 256 : 215, 277);
-      ctx.lineTo(side ? (right ? 285 : 227) : 302, 377);
+      ctx.moveTo(side ? 256 : carrying ? (back ? 223 : 289) : back ? 297 : 215, 277);
+      ctx.lineTo(back ? (carrying ? 328 : 204) : strapEnd, bagY + 16);
       ctx.stroke();
       if (!back) {
         ctx.strokeStyle = '#856449';
         ctx.lineWidth = 4;
-        box(side ? (right ? 269 : 191) : 278, 355, side ? 51 : 69, 62, 13, '#c99c6b');
+        box(bagX, bagY, bagWidth, 57, 13, '#c99c6b');
         ctx.beginPath();
-        ctx.moveTo(side ? (right ? 276 : 198) : 287, 376);
-        ctx.lineTo(side ? (right ? 310 : 232) : 338, 376);
+        ctx.moveTo(bagX + 8, bagY + 21);
+        ctx.lineTo(bagX + bagWidth - 8, bagY + 21);
         ctx.stroke();
       }
     }

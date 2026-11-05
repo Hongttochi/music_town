@@ -139,3 +139,41 @@ accessories.forEach(([key, value], row) => {
 });
 writeFileSync('tmp/qa/avatar-accessories.png', accessorySheet.toBuffer('image/png'));
 console.log('Accessories: nine items render distinctly in all four directions.');
+
+// Inspect every hair/hat combination and instrument/bag combination in all four views.
+const hats = ['beanie', 'snapback', 'bucket'];
+const hatSheet = createCanvas(1024, 9 * hats.length * 256);
+const hatCtx = hatSheet.getContext('2d');
+hatCtx.fillStyle = '#e9eddb';
+hatCtx.fillRect(0, 0, hatSheet.width, hatSheet.height);
+for (let hair = 0; hair < 9; hair++)
+  for (let h = 0; h < hats.length; h++) {
+    const row = hair * hats.length + h;
+    const sprite = composeAvatar(layers, { hair, headwear: hats[h] });
+    hatCtx.drawImage(sprite, 0, row * 256, 1024, 256);
+    hatCtx.fillStyle = '#263d35';
+    hatCtx.font = '14px sans-serif';
+    hatCtx.fillText(`${hair} ${hats[h]}`, 8, row * 256 + 18);
+  }
+writeFileSync('tmp/qa/avatar-hat-fit.png', hatSheet.toBuffer('image/png'));
+const bagInstruments = ['none', 'microphone', 'ukulele', 'guitar', 'electric', 'tambourine'];
+const bagSheet = createCanvas(1024, bagInstruments.length * 256);
+const bagCtx = bagSheet.getContext('2d');
+bagCtx.fillStyle = '#e9eddb';
+bagCtx.fillRect(0, 0, bagSheet.width, bagSheet.height);
+bagInstruments.forEach((instrument, row) => {
+  bagCtx.drawImage(
+    composeAvatar(layers, { hair: 3, bag: 'crossbody', instrument }),
+    0,
+    row * 256,
+    1024,
+    256,
+  );
+  bagCtx.fillStyle = '#263d35';
+  bagCtx.font = '14px sans-serif';
+  bagCtx.fillText(instrument, 8, row * 256 + 18);
+});
+writeFileSync('tmp/qa/avatar-bag-fit.png', bagSheet.toBuffer('image/png'));
+console.log(
+  'Fit sheets: 27 hair/hat combinations and six crossbody/instrument combinations, four directions each.',
+);

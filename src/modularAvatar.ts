@@ -191,7 +191,17 @@ export function composeAvatar(layers: Layers, avatar: Partial<Avatar>) {
               : 235
             : [178, 215, 200, 178, 210, 178, 280, 230, 220][p.hair];
     const hairY = p.hair === 7 ? 10 : tied ? 24 : 42;
+    ctx.save();
+    if (avatar.headwear && avatar.headwear !== 'none') {
+      // Tuck crown volume and tied hair under the hat while keeping the lower hairstyle.
+      const brim = avatar.headwear === 'bucket' ? 155 : 136;
+      ctx.beginPath();
+      ctx.rect(116, brim, 280, 45);
+      ctx.rect(0, brim + 45, 512, 512);
+      ctx.clip();
+    }
     ctx.drawImage(hair, 256 - hairWidth / 2, hairY, hairWidth, hairHeight);
+    ctx.restore();
     if (direction !== 2) {
       const eyes = tinted(
         piece(p.eyes < 3 ? layers.features : layers.featuresExtra, 3, 2, p.eyes % 3, 0),
