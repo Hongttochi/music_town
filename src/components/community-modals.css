@@ -294,7 +294,8 @@ dialog.town-panel:is([data-panel='profile'], [data-panel='report']) {
 /* The speech bubble follows the bench's projected position in the park. */
 .bench-action.town-button {
   position: absolute;
-  transform: translate(-50%, -100%);
+  /* Keep anchoring independent of the shared button :active transform. */
+  translate: -50% -100%;
   z-index: 6;
   display: flex;
   align-items: center;
