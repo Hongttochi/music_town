@@ -49,6 +49,16 @@ dialog.town-panel:is([data-panel='profile'], [data-panel='report']) {
   font-size: 11px;
 }
 .musician-social:empty { display: none; }
+.stage-microphone {
+  max-width: min(340px, 80vw);
+  margin: 10px auto;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #ffffff12;
+  line-height: 1.6;
+}
+.stage-microphone small { display: block; margin-top: 6px; opacity: 0.8; }
+.stage-microphone p { margin: 6px 0; color: #ffe4b1; }
 .musician-profile-link {
   display: flex;
   flex-wrap: wrap;

@@ -2,6 +2,7 @@ import { ProfileIcon } from './components/ProfileIcon';
 import { DeviceGuide } from './components/DeviceGuide';
 import { ErrorModal } from './components/ui/ErrorModal';
 import { useTown, type Participant } from './useTown';
+import { useStageMicrophone } from './useStageMicrophone';
 import { ParticipantProfile } from './components/ParticipantProfile';
 import { ReportForm } from './components/ReportForm';
 import { ProfileLoader } from './components/ProfileLoader';
@@ -119,6 +120,10 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
     localStorage.setItem(storagePrefix + '-follow', JSON.stringify(follow));
   }, [follow]);
   const town = useTown(account.id, !account.demo, position);
+  const microphone = useStageMicrophone(
+    entered && !account.demo && town.state.channel !== null && Boolean(town.performance),
+    town.performance?.stage_id ?? null,
+  );
   const stages = account.demo ? demoStages : town.stages;
   const populations = account.demo ? demoPopulations : town.state.channels.map((c) => c.count);
   const selectedMusician = town.state.participants.find(
@@ -397,6 +402,20 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                       )
                     : 0}
                   초 남음
+                  <div className="stage-microphone" role="status">
+                    <span>
+                      {microphone.state === 'on' ? '● 마이크 켜짐' :
+                        microphone.state === 'requesting' ? '마이크 권한 확인 중…' : '마이크 꺼짐'}
+                    </span>
+                    <Button
+                      disabled={microphone.state === 'requesting'}
+                      onClick={microphone.state === 'on' ? microphone.turnOff : microphone.turnOn}
+                    >
+                      {microphone.state === 'on' ? '마이크 끄기' : '마이크 켜기'}
+                    </Button>
+                    {microphone.error && <p>{microphone.error}</p>}
+                    <small>마이크 입력만 켜져요. 관객에게 음성 송출은 아직 지원하지 않아요.</small>
+                  </div>
                   <Button
                     onClick={async () => {
                       try {

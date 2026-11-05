@@ -67,7 +67,7 @@ export function BuskingBook({
             </p>
           </li>
         </ol>
-        <p className="book-demo-note">현재는 마이크 없이 공연을 체험할 수 있어요.</p>
+        <p className="book-demo-note">내 차례가 되면 마이크 권한을 요청해요. 관객에게 음성 송출은 아직 지원하지 않아요.</p>
         <a
           className="book-conduct-link"
           href="/terms/#conduct"
