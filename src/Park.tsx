@@ -270,9 +270,72 @@ export function Park(props: Props) {
       )
         ? STAGE_SURFACE_HEIGHT
         : 0;
+    // Shared soft glow for lantern halos and the pools of light beneath them.
+    const glowCanvas = document.createElement('canvas');
+    glowCanvas.width = glowCanvas.height = 128;
+    const glowContext = glowCanvas.getContext('2d')!;
+    const gradient = glowContext.createRadialGradient(64, 64, 0, 64, 64, 64);
+    gradient.addColorStop(0, 'rgba(255, 224, 157, 0.8)');
+    gradient.addColorStop(0.25, 'rgba(255, 200, 112, 0.35)');
+    gradient.addColorStop(1, 'rgba(255, 184, 85, 0)');
+    glowContext.fillStyle = gradient;
+    glowContext.fillRect(0, 0, 128, 128);
+    const glowTexture = new T.CanvasTexture(glowCanvas);
+    glowTexture.colorSpace = T.SRGBColorSpace;
+    const lanternMaterial = new T.MeshStandardMaterial({
+      color: '#fff0c2',
+      emissive: '#ffcb76',
+      emissiveIntensity: 0,
+      roughness: 0.4,
+    });
+    const haloMaterial = new T.SpriteMaterial({
+      map: glowTexture,
+      transparent: true,
+      depthWrite: false,
+      blending: T.AdditiveBlending,
+      toneMapped: false,
+      opacity: 0.65,
+    });
+    const poolMaterial = new T.MeshBasicMaterial({
+      map: glowTexture,
+      transparent: true,
+      depthWrite: false,
+      blending: T.AdditiveBlending,
+      toneMapped: false,
+      opacity: 0.42,
+    });
+    const nightLamps: { light: T.PointLight; halo: T.Sprite; pool: T.Mesh }[] = [];
+    function streetlamp(x: number, z: number) {
+      // Behind the stage, leaving the audience side and microphone unobstructed.
+      cyl(x, 0.15, z, 0.25, 0.34, 0.3, '#36474a');
+      cyl(x, 1.75, z, 0.065, 0.1, 3.2, '#36474a');
+      box(x, 3.3, z, 0.68, 0.12, 0.68, '#36474a');
+      const lantern = new T.Mesh(new T.BoxGeometry(0.46, 0.65, 0.46), lanternMaterial);
+      lantern.position.set(x, 3.67, z);
+      scene.add(lantern);
+      for (const dx of [-0.26, 0.26])
+        for (const dz of [-0.26, 0.26]) box(x + dx, 3.67, z + dz, 0.05, 0.72, 0.05, '#36474a');
+      cyl(x, 4.08, z, 0.04, 0.5, 0.3, '#36474a');
+      ball(x, 4.3, z, 0.08, 0.12, 0.08, '#c8aa70');
+      const light = new T.PointLight('#ffcf87', 0, 11, 2);
+      light.position.set(x, 3.5, z);
+      // No additional shadow maps: keep mobile rendering affordable.
+      scene.add(light);
+      const halo = new T.Sprite(haloMaterial);
+      halo.position.set(x, 3.7, z);
+      halo.scale.set(2.4, 2.4, 1);
+      scene.add(halo);
+      const pool = new T.Mesh(new T.PlaneGeometry(9, 9), poolMaterial);
+      pool.rotation.x = -Math.PI / 2;
+      pool.position.set(x, 0.035, z);
+      scene.add(pool);
+      nightLamps.push({ light, halo, pool });
+      obstacles.push({ x, z, r: 0.35 });
+    }
     latest.current.liveStages.forEach((s) => {
       const p = world(s),
         pad = cyl(p.x, 0.1, p.z, STAGE_RADIUS, 2.25, 0.2, '#d6b786');
+      streetlamp(p.x - 2.8, p.z - 1.7);
       pad.userData.stage = s.id;
       stageMeshes.push(pad);
       for (let i = -3; i <= 3; i++)
@@ -538,9 +601,20 @@ export function Park(props: Props) {
       target.set(focus.x, focus.y + 0.3, focus.z - 3);
       camera.lookAt(target);
       const night = koreanHour() < 6 || koreanHour() >= 19;
-      hemi.intensity = night ? 1.2 : 2.5;
-      sun.intensity = night ? 0.65 : 3.2;
-      (scene.background as T.Color).set(night ? '#748eaa' : '#b9dce0');
+      hemi.intensity = night ? 0.85 : 2.5;
+      hemi.color.set(night ? '#8eabed' : '#fff4db');
+      hemi.groundColor.set(night ? '#293650' : '#8b9f63');
+      sun.intensity = night ? 0.5 : 3.2;
+      sun.color.set(night ? '#a9bdff' : '#fff3d3');
+      const skyColor = night ? '#101d42' : '#b9dce0';
+      (scene.background as T.Color).set(skyColor);
+      (scene.fog as T.Fog).color.set(skyColor);
+      lanternMaterial.emissiveIntensity = night ? 3 : 0;
+      nightLamps.forEach(({ light, halo, pool }) => {
+        light.intensity = night ? 45 : 0;
+        halo.visible = pool.visible = night;
+      });
+      scenery.setNight(night);
       document.body.classList.toggle('night', night);
       p.liveStages.forEach((s) => {
         const label = document.getElementById(`label-${s.id}`);
@@ -581,6 +655,10 @@ export function Park(props: Props) {
     frame = requestAnimationFrame(animate);
     return () => {
       scenery.dispose();
+      glowTexture.dispose();
+      lanternMaterial.dispose();
+      haloMaterial.dispose();
+      poolMaterial.dispose();
       entranceMaterial.dispose();
       imageCharacters.dispose();
       alive = false;

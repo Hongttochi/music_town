@@ -89,6 +89,10 @@ export function createVillageProps(scene: THREE.Scene) {
   return {
     prop,
     ground,
+    setNight(night: boolean) {
+      // Billboard trees and houses do not receive scene lighting.
+      materials.forEach((material) => material.color.set(night ? '#8293bd' : '#ffffff'));
+    },
     dispose() {
       disposed = true;
       textures.forEach((t) => t.dispose());
