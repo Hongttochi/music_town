@@ -36,8 +36,10 @@ export function createImageCharacters() {
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.repeat.set(0.25, 1);
     texture.offset.set(0, 0);
-    texture.generateMipmaps = false;
-    texture.minFilter = THREE.LinearFilter;
+    // The 512px view is usually displayed at a fraction of its native size in the park.
+    texture.generateMipmaps = true;
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
     if (ready) texture.needsUpdate = true;
     const material = new THREE.SpriteMaterial({
       map: texture,

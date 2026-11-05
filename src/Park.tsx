@@ -46,7 +46,6 @@ export function Park(props: Props) {
       return;
     }
     const touchDevice = matchMedia('(pointer: coarse)').matches;
-    renderer.setPixelRatio(Math.min(devicePixelRatio, touchDevice ? 1.3 : 1.7));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = T.PCFShadowMap;
     renderer.toneMapping = T.ACESFilmicToneMapping;
@@ -552,6 +551,13 @@ export function Park(props: Props) {
     document.addEventListener('visibilitychange', clear);
     const resize = () => {
       if (!el.clientWidth || !el.clientHeight) return;
+      // Keep high-density phones crisp without allocating an unbounded tablet framebuffer.
+      const pixelRatio = Math.min(
+        devicePixelRatio,
+        2,
+        Math.sqrt(3_000_000 / (el.clientWidth * el.clientHeight)),
+      );
+      renderer.setPixelRatio(pixelRatio);
       renderer.setSize(el.clientWidth, el.clientHeight, false);
       camera.aspect = el.clientWidth / el.clientHeight;
       camera.updateProjectionMatrix();
