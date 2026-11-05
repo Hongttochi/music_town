@@ -7,6 +7,7 @@ export function useStageMicrophone(active: boolean, stageId: number | null) {
   const [error, setError] = useState('');
   const [attempt, setAttempt] = useState(0);
   const [enabled, setEnabled] = useState(true);
+  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
 
   useEffect(() => {
     setEnabled(true);
@@ -17,17 +18,21 @@ export function useStageMicrophone(active: boolean, stageId: number | null) {
     let stream: MediaStream | undefined;
     const stop = () => stream?.getTracks().forEach((track) => track.stop());
     if (!active || !enabled) {
+      setMediaStream(null);
       setState('off');
       setError('');
       return;
     }
 
     setState('requesting');
+    setMediaStream(null);
     setError('');
     const start = async () => {
       try {
         if (!navigator.mediaDevices?.getUserMedia) {
-          throw new Error('이 브라우저에서는 마이크를 사용할 수 없어요. HTTPS 주소에서 다시 열어 주세요.');
+          throw new Error(
+            '이 브라우저에서는 마이크를 사용할 수 없어요. HTTPS 주소에서 다시 열어 주세요.',
+          );
         }
         stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
         if (cancelled) {
@@ -42,11 +47,13 @@ export function useStageMicrophone(active: boolean, stageId: number | null) {
           track.onended = () => {
             if (cancelled) return;
             stop();
+            setMediaStream(null);
             setState('error');
             setError('마이크 연결이 끊겼어요. 연결을 확인하고 다시 켜 주세요.');
           };
         });
         setState('on');
+        setMediaStream(stream);
       } catch (failure) {
         stop();
         if (cancelled) return;
@@ -59,7 +66,9 @@ export function useStageMicrophone(active: boolean, stageId: number | null) {
               ? '연결된 마이크가 없어요. 마이크를 연결한 뒤 다시 켜 주세요.'
               : name === 'NotReadableError'
                 ? '마이크를 열지 못했어요. 다른 앱에서 사용 중인지 확인해 주세요.'
-                : failure instanceof Error ? failure.message : '마이크를 켜지 못했어요.',
+                : failure instanceof Error
+                  ? failure.message
+                  : '마이크를 켜지 못했어요.',
         );
       }
     };
@@ -68,6 +77,7 @@ export function useStageMicrophone(active: boolean, stageId: number | null) {
       cancelled = true;
       stop();
       setEnabled(false);
+      setMediaStream(null);
       setState('off');
     };
     window.addEventListener('pagehide', onPageHide);
@@ -79,6 +89,7 @@ export function useStageMicrophone(active: boolean, stageId: number | null) {
   }, [active, stageId, enabled, attempt]);
 
   return {
+    stream: active && enabled ? mediaStream : null,
     state: active ? state : 'off',
     error,
     turnOff: () => setEnabled(false),

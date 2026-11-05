@@ -175,6 +175,7 @@ export function useTown(
     };
   });
   return {
+    clientId: client.current,
     state,
     stages,
     error,

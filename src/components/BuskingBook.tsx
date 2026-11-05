@@ -67,7 +67,10 @@ export function BuskingBook({
             </p>
           </li>
         </ol>
-        <p className="book-demo-note">내 차례가 되면 마이크 권한을 요청해요. 관객에게 음성 송출은 아직 지원하지 않아요.</p>
+        <p className="book-demo-note">
+          내 차례가 되면 마이크 권한을 요청해요. 허용하면 가까운 관객에게 목소리가 전달돼요. 이어폰
+          사용을 권장해요.
+        </p>
         <a
           className="book-conduct-link"
           href="/terms/#conduct"

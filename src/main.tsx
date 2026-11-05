@@ -3,6 +3,7 @@ import { DeviceGuide } from './components/DeviceGuide';
 import { ErrorModal } from './components/ui/ErrorModal';
 import { useTown, type Participant } from './useTown';
 import { useStageMicrophone } from './useStageMicrophone';
+import { useLiveAudio } from './useLiveAudio';
 import { ParticipantProfile } from './components/ParticipantProfile';
 import { ReportForm } from './components/ReportForm';
 import { ProfileLoader } from './components/ProfileLoader';
@@ -120,9 +121,33 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
     localStorage.setItem(storagePrefix + '-follow', JSON.stringify(follow));
   }, [follow]);
   const town = useTown(account.id, !account.demo, position);
+  const currentPerformance =
+    town.performance && Date.parse(town.performance.ends_at) > now.getTime()
+      ? town.performance
+      : undefined;
   const microphone = useStageMicrophone(
-    entered && !account.demo && town.state.channel !== null && Boolean(town.performance),
-    town.performance?.stage_id ?? null,
+    entered && !account.demo && town.state.channel !== null && Boolean(currentPerformance),
+    currentPerformance?.stage_id ?? null,
+  );
+  const audiblePerformance =
+    currentPerformance ??
+    town.state.performances.find(
+      (item) =>
+        item.stage_id === near?.id &&
+        !muted.includes(item.stage_id) &&
+        Date.parse(item.ends_at) > now.getTime(),
+    );
+  const voice = useLiveAudio(
+    entered && !account.demo && town.state.channel !== null && audiblePerformance
+      ? {
+          channel: town.state.channel,
+          stage: audiblePerformance.stage_id,
+          performerId: audiblePerformance.user_id,
+          endsAt: audiblePerformance.ends_at,
+        }
+      : null,
+    town.clientId,
+    microphone.stream,
   );
   const stages = account.demo ? demoStages : town.stages;
   const populations = account.demo ? demoPopulations : town.state.channels.map((c) => c.count);
@@ -404,8 +429,11 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                   초 남음
                   <div className="stage-microphone" role="status">
                     <span>
-                      {microphone.state === 'on' ? '● 마이크 켜짐' :
-                        microphone.state === 'requesting' ? '마이크 권한 확인 중…' : '마이크 꺼짐'}
+                      {microphone.state === 'on'
+                        ? '● 마이크 켜짐'
+                        : microphone.state === 'requesting'
+                          ? '마이크 권한 확인 중…'
+                          : '마이크 꺼짐'}
                     </span>
                     <Button
                       disabled={microphone.state === 'requesting'}
@@ -414,7 +442,11 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                       {microphone.state === 'on' ? '마이크 끄기' : '마이크 켜기'}
                     </Button>
                     {microphone.error && <p>{microphone.error}</p>}
-                    <small>마이크 입력만 켜져요. 관객에게 음성 송출은 아직 지원하지 않아요.</small>
+                    <small>
+                      {voice.status === 'live'
+                        ? '관객에게 실시간 송출 중'
+                        : '음성 송출 연결을 확인해 주세요.'}
+                    </small>
                   </div>
                   <Button
                     onClick={async () => {
@@ -453,9 +485,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
               )}
             </div>
             <div className="map-card" role="img" aria-label="공원 지도">
-              <span>
-                OUR LITTLE PARK
-              </span>
+              <span>OUR LITTLE PARK</span>
               <svg viewBox="0 0 180 95">
                 <rect width="180" height="95" rx="14" fill="#c4d6a5" />
                 <path
@@ -486,6 +516,32 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
               </svg>
               <span className="map-caption">나만의 속도로 걸어보세요</span>
             </div>
+            {audiblePerformance && (
+              <div className="live-audio-status" role="status">
+                <span>
+                  {voice.status === 'live'
+                    ? '● LIVE · 송출 중'
+                    : voice.status === 'listening'
+                      ? '♫ 공연 듣는 중'
+                      : voice.status === 'connecting' || voice.status === 'reconnecting'
+                        ? '음성 연결 중…'
+                        : voice.status === 'error'
+                          ? '음성 연결 필요'
+                          : '마이크 송출 대기 중'}
+                </span>
+                {voice.blocked && (
+                  <Button variant="secondary" onClick={() => void voice.startAudio()}>
+                    소리 켜기
+                  </Button>
+                )}
+                {voice.error && <small>{voice.error}</small>}
+                {voice.status === 'error' && (
+                  <Button variant="secondary" onClick={voice.retry}>
+                    다시 연결
+                  </Button>
+                )}
+              </div>
+            )}
             <Button
               className="stage-toggle"
               onClick={() => {
@@ -658,9 +714,13 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                       }}
                     >
                       {selected.artist}
-                      <span>프로필 보기 <ArrowUpRight size={14} /></span>
+                      <span>
+                        프로필 보기 <ArrowUpRight size={14} />
+                      </span>
                     </Button>
-                  ) : selected.artist}
+                  ) : (
+                    selected.artist
+                  )}
                 </h2>
                 <span className="pill">{selected.genre}</span>
               </div>
@@ -731,7 +791,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
               </Button>
             </div>
             <p className="notice">
-              현재 무대와 대기 순서는 공유돼요. 실시간 음성 송출은 아직 연결되지 않았어요.
+              무대 가까이 가면 공연을 들을 수 있어요. 소리가 나지 않으면 ‘소리 켜기’를 눌러 주세요.
             </p>
           </>
         )}
@@ -816,13 +876,13 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <DeviceGuide>
-    <LoginGate>
-      {(account) => (
-        <ProfileLoader key={account.id} account={account}>
-          {(initial) => <App account={account} initial={initial} />}
-        </ProfileLoader>
-      )}
-    </LoginGate>
+      <LoginGate>
+        {(account) => (
+          <ProfileLoader key={account.id} account={account}>
+            {(initial) => <App account={account} initial={initial} />}
+          </ProfileLoader>
+        )}
+      </LoginGate>
     </DeviceGuide>
   </React.StrictMode>,
 );
