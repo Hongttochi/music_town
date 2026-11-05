@@ -45,3 +45,24 @@ for (let i = 0; i < looks.length; i++) {
   ctx.fillText(looks[i].clothingStyle, 8, i * 256 + 18);
 }
 writeFileSync('tmp/clothing-preview.png', canvas.toBuffer('image/png'));
+
+const tankCanvas = createCanvas(1024, 1024),
+  tankCtx = tankCanvas.getContext('2d');
+tankCtx.fillStyle = '#e9eddb';
+tankCtx.fillRect(0, 0, 1024, 1024);
+['', '#ffdbb8', '#c78e61', '#865638'].forEach((skinTone, i) => {
+  tankCtx.drawImage(
+    composeAvatar(layers, {
+      hair: 0,
+      skinTone,
+      clothingStyle: 'tank',
+      shirt: '#f5f0df',
+      pants: '#647f99',
+    }),
+    0,
+    i * 256,
+    1024,
+    256,
+  );
+});
+writeFileSync('tmp/qa/tank-fit.png', tankCanvas.toBuffer('image/png'));

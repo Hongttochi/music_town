@@ -91,26 +91,15 @@ export function drawOutfit(
     }
   }
   if (style === 'tank') {
-    // Cover the old sleeves with the selected skin before drawing narrow shoulder straps.
-    const skin = avatar.skinTone || '#f3c79f';
-    if (side) panel(239, 295, 35, 65, skin, 14);
-    else {
-      panel(199, 295, 29, 60, skin, 14);
-      panel(286, 295, 29, 60, skin, 14);
+    // Sleeves are recolored in the source garment mask, preserving the original arm outline.
+    if (!side) {
+      ctx.strokeStyle = '#c7c5b780';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(233, 280);
+      ctx.quadraticCurveTo(256, 324, 279, 280);
+      ctx.stroke();
     }
-    panel(x + 5, 297, width - 10, 69, shirt, 8);
-    panel(x + 5, 280, 13, 32, shirt, 5);
-    panel(x + width - 18, 280, 13, 32, shirt, 5);
-    if (!back)
-      line(
-        [
-          [x + 18, 289],
-          [x + width / 2, 305],
-          [x + width - 18, 289],
-        ],
-        '#c7c5b7',
-        2,
-      );
   } else if (style === 'dress' || style === 'monk') {
     panel(x, 282, width, 77, shirt, 12);
     poly(

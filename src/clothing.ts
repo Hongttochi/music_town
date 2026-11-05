@@ -44,6 +44,27 @@ export function dressBase(
   const image = ctx.getImageData(0, 0, output.width, output.height);
   const source = input.getContext('2d')!.getImageData(0, 0, input.width, input.height).data;
   const shirt = hexRgb(avatar.shirt || '') || [238, 227, 202];
+  // Sample the already tinted arm so sleeveless garments share its skin and shading.
+  const skin = [0, 0, 0];
+  let skinSamples = 0;
+  if (avatar.clothingStyle === 'tank') {
+    for (let y = Math.floor(output.height * 0.65); y < output.height * 0.81; y++)
+      for (let x = 0; x < output.width; x++) {
+        const i = (y * output.width + x) * 4;
+        if (
+          source[i + 3] > 240 &&
+          source[i] - source[i + 1] > 25 &&
+          source[i + 1] - source[i + 2] > 15
+        ) {
+          for (let c = 0; c < 3; c++) skin[c] += image.data[i + c];
+          skinSamples++;
+        }
+      }
+  }
+  const armSkin = skinSamples
+    ? skin.map((v) => v / skinSamples)
+    : hexRgb(avatar.skinTone || '') || [243, 199, 159];
+  const bodyWidth = (418 * output.width) / output.height;
   const pants = hexRgb(avatar.pants || '') || [69, 158, 150];
   for (let y = 0; y < output.height; y++)
     for (let x = 0; x < output.width; x++) {
@@ -60,6 +81,14 @@ export function dressBase(
       const bottom = ny > 0.73 && ny < 0.87 && g > r * 1.18 && b > r * 1.12;
       if (!top && !bottom) continue;
       let color: number[] = top ? shirt : pants;
+      if (top && avatar.clothingStyle === 'tank') {
+        const wx = 256 + (nx - 0.5) * bodyWidth,
+          wy = 58 + ny * 418;
+        const side = direction === 1 || direction === 3;
+        const bareArm = side ? wx > 241 && wx < 281 && wy > 296 && wy < 354 : wx < 223 || wx > 289;
+        const neckline = !side && ((wx - 256) / 23) ** 2 + ((wy - 278) / 24) ** 2 < 1;
+        if (bareArm || neckline) color = armSkin;
+      }
       if (top && avatar.clothingStyle === 'stripe' && Math.floor(ny * 48) % 2 === 0)
         color = [238, 232, 215];
       if (
