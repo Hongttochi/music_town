@@ -1,0 +1,89 @@
+dialog.town-panel[data-panel='participant'],
+dialog.town-panel[data-panel='report'] {
+  width: 430px;
+  max-width: calc(100vw - 28px);
+}
+.participant-identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.participant-identity .modular-portrait {
+  width: 76px;
+}
+.participant-identity small {
+  color: #747d6c;
+  font-size: 11px;
+}
+.participant-identity h3 {
+  margin: 7px 0 0;
+  font-size: 19px;
+}
+.participant-bio {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #f3f3ec;
+  padding: 16px;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.participant-socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 18px 0;
+}
+.participant-socials a {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 12px;
+}
+.participant-profile .participant-report {
+  color: #a15a51;
+  margin-top: 14px;
+}
+.report-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 13px;
+}
+.report-form p {
+  margin: 0;
+  line-height: 1.7;
+}
+.report-form fieldset {
+  border: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.report-form legend {
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.report-form fieldset label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.report-form textarea {
+  padding: 12px;
+  border: 1px solid #d4d9ca;
+  border-radius: 6px;
+  resize: vertical;
+  font: inherit;
+}
+.report-form small,
+.report-form .report-disclosure {
+  font-size: 11px;
+  color: #737c69;
+}
+.report-form .report-error {
+  color: #a2463e;
+}
+.report-receipt {
+  overflow-wrap: anywhere;
+  font-size: 11px;
+}

@@ -1,41 +1,620 @@
-import {useEffect,useRef} from 'react';
-import {Avatar,Stage,stages,koreanHour} from './model';
-export type Position={x:number;y:number};
-type Props={avatar:Avatar;position:React.MutableRefObject<Position>;motion:React.MutableRefObject<Position>;onMove:(p:Position)=>void;onStage:(s:Stage)=>void;performing:number|null;reaction:{symbol:string;at:number}|null};
-export function Park({avatar,position,motion,onMove,onStage,performing,reaction}:Props){
- const canvas=useRef<HTMLCanvasElement>(null);const latest=useRef({avatar,onMove,onStage,performing,reaction});latest.current={avatar,onMove,onStage,performing,reaction};
- useEffect(()=>{const el=canvas.current!;const c=el.getContext('2d')!;let w=0,h=0,frame=0,last=0,scale=1,ox=0,oy=0;const keys=new Set<string>();let targets:{s:Stage;x:number;y:number}[]=[];
- const resize=()=>{w=el.clientWidth;h=el.clientHeight;const d=Math.min(devicePixelRatio,2);el.width=w*d;el.height=h*d;c.setTransform(d,0,0,d,0,0)};const observer=new ResizeObserver(resize);observer.observe(el);resize();
- const keydown=(e:KeyboardEvent)=>{if(document.querySelector('dialog[open]')||/INPUT|TEXTAREA/.test((e.target as HTMLElement).tagName))return;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(e.key)){keys.add(e.key);e.preventDefault()}};const keyup=(e:KeyboardEvent)=>keys.delete(e.key);const clear=()=>{keys.clear();motion.current={x:0,y:0}};window.addEventListener('keydown',keydown);window.addEventListener('keyup',keyup);window.addEventListener('blur',clear);
- const ellipse=(x:number,y:number,rx:number,ry:number,color:string)=>{c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.fill()};
- const line=(points:number[][],color:string,width:number)=>{c.strokeStyle=color;c.lineWidth=width;c.lineCap='round';c.lineJoin='round';c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke()};
- const round=(x:number,y:number,ww:number,hh:number,r:number,color:string)=>{c.fillStyle=color;c.beginPath();c.roundRect(x,y,ww,hh,r);c.fill()};
- function tree(x:number,y:number,size=1){c.save();c.translate(x,y);c.scale(size,size);ellipse(8,9,40,13,'#56714422');round(-6,-43,12,49,4,'#9b7954');line([[0,-13],[-18,-36]],'#9b7954',5);ellipse(-18,-55,26,29,'#6b9158');ellipse(18,-56,28,30,'#70985a');ellipse(0,-77,31,32,'#7ea464');ellipse(-10,-87,18,15,'#8fb374');ellipse(20,-64,12,14,'#7fa461');c.restore()}
- function person(x:number,y:number,a:Avatar,walk=0,self=false){c.save();c.translate(x,y);ellipse(0,1,14,5,'#405a392a');const step=Math.sin(walk)*3;line([[-6,-10],[-6+step,0]],a.pants,7);line([[6,-10],[6-step,0]],a.pants,7);round(-12,-34,24,24,7,a.shirt);line([[-12,-29],[-16,-17-step]],a.skin,5);line([[12,-29],[16,-17+step]],a.skin,5);ellipse(0,-45,16,18,a.skin);ellipse(0,-54,17,12,a.hair===1?'#9b6b44':'#554339');if(a.hair===2){ellipse(-13,-43,5,15,'#554339');ellipse(13,-43,5,15,'#554339')}else{ellipse(-12,-48,5,9,a.hair===1?'#9b6b44':'#554339')}ellipse(-5,-44,1.4,2,'#3e3931');ellipse(5,-44,1.4,2,'#3e3931');ellipse(-9,-39,3,1.5,'#da96836b');ellipse(9,-39,3,1.5,'#da96836b');line([[-2,-37],[2,-37]],'#a97760',1);if(self){c.font='bold 10px sans-serif';c.textAlign='center';round(-17,10,34,16,8,'#fff9e7');c.fillStyle='#56704e';c.fillText('나',0,21)}c.restore()}
- function bench(x:number,y:number){ellipse(x,y+8,33,8,'#405a3920');line([[x-23,y],[x-23,y+13]],'#736e55',4);line([[x+23,y],[x+23,y+13]],'#736e55',4);round(x-32,y-8,64,11,3,'#b99466');round(x-30,y-27,60,7,2,'#caaa77');round(x-30,y-17,60,6,2,'#c4a16f')}
- function lamp(x:number,y:number,night:boolean){line([[x,y],[x,y-66]],'#73836a',4);round(x-8,y-79,16,17,4,night?'#fbe7a0':'#f5edce');line([[x-10,y-81],[x+10,y-81]],'#71816b',4);if(night){const g=c.createRadialGradient(x,y-70,3,x,y-70,70);g.addColorStop(0,'#ffeb9b55');g.addColorStop(1,'#ffeb9b00');ellipse(x,y-70,70,70,g as unknown as string)}}
- function draw(t:number){const dt=Math.min((t-last)/1000,.04);last=t;const blocked=!!document.querySelector('dialog[open]')||latest.current.performing!==null;let dx=blocked?0:motion.current.x+(keys.has('d')||keys.has('ArrowRight')?1:0)-(keys.has('a')||keys.has('ArrowLeft')?1:0),dy=blocked?0:motion.current.y+(keys.has('s')||keys.has('ArrowDown')?1:0)-(keys.has('w')||keys.has('ArrowUp')?1:0);const length=Math.hypot(dx,dy);if(length>1){dx/=length;dy/=length}if(dx||dy){position.current={x:Math.max(240,Math.min(1170,position.current.x+dx*150*dt)),y:Math.max(150,Math.min(790,position.current.y+dy*150*dt))};latest.current.onMove({...position.current})}
- const hour=koreanHour(),night=hour<6||hour>=19,dusk=hour>=17&&hour<19;document.body.classList.toggle('night',night);c.clearRect(0,0,w,h);const bg=c.createLinearGradient(0,0,0,h);bg.addColorStop(0,night?'#647e76':dusk?'#e5d5ac':'#e2e9cd');bg.addColorStop(1,night?'#58755e':'#c3d6a5');c.fillStyle=bg;c.fillRect(0,0,w,h);
- scale=Math.min(w/1430,h/910)*1.17;if(w<650)scale=Math.max(w/1000,h/1200);ox=w*.48-700*scale;oy=h*.53-440*scale;c.save();c.translate(ox,oy);c.scale(scale,scale);
- // Soft island silhouettes and winding gravel paths.
- ellipse(710,480,665,385,night?'#78916b':'#bdd298');ellipse(680,430,610,330,night?'#819970':'#c5dba2');
- c.strokeStyle=night?'#b2ad8a':'#ecdfbd';c.lineWidth=80;c.lineCap='round';c.beginPath();c.moveTo(70,630);c.bezierCurveTo(300,680,480,380,715,440);c.bezierCurveTo(970,490,1040,720,1350,680);c.stroke();c.lineWidth=58;c.beginPath();c.moveTo(700,70);c.bezierCurveTo(640,250,780,330,715,440);c.bezierCurveTo(640,590,680,780,780,900);c.stroke();c.lineWidth=33;c.beginPath();c.moveTo(715,420);c.bezierCurveTo(820,310,950,340,1040,190);c.stroke();
- for(let i=0;i<170;i++){const x=150+(i*173%1120),y=130+(i*97%650);ellipse(x,y,2.3,1.2,i%3?'#8cae6a33':'#f1edbd77')}
- // Pond with grassy banks and ripples.
- ellipse(1040,242,133,68,'#a9bd87');ellipse(1040,232,121,61,'#f0e4bc');ellipse(1040,229,112,53,night?'#729d9a':'#98c9c4');ellipse(1030,223,89,39,'#a8d5cc');line([[994,210],[1030,210]],'#d4e7d5',2);line([[1047,242],[1093,242]],'#d4e7d5',2);ellipse(1085,212,12,5,'#83ac72');ellipse(1087,210,4,3,'#eed7c1');
- // Central fountain, shaded stone base and water.
- ellipse(706,445,91,42,'#78945622');ellipse(700,427,75,36,'#b9b9a0');ellipse(700,417,75,35,'#e9e2c9');ellipse(700,414,64,27,'#8ebfb6');ellipse(700,411,55,21,'#b5d8c6');round(692,377,16,37,5,'#ded9bd');ellipse(700,376,28,12,'#eae3ca');ellipse(700,372,24,8,'#a4ccc0');line([[700,371],[700,345]],'#c9e9d5',3);ellipse(700,345+Math.sin(t/400)*2,4,5,'#d6eee1');
- const objects:{y:number;draw:()=>void}[]=[];
- const trees=[[250,250,1.2],[340,210,1],[418,170,1.2],[550,145,.9],[680,130,1.1],[950,140,1],[1160,170,1.3],[1210,330,1.2],[1190,470,1],[1290,590,1.2],[1180,800,1.2],[980,820,1],[850,850,1.2],[560,840,1.3],[350,810,1.3],[230,700,1],[220,470,1.1],[300,370,.85],[1100,380,.8],[530,570,.8],[940,600,.85]];trees.forEach(([x,y,s])=>objects.push({y,draw:()=>tree(x,y,s)}));
- [[570,290],[790,565],[980,350],[340,560],[950,760]].forEach(([x,y])=>objects.push({y,draw:()=>bench(x,y)}));[[570,430],[920,480],[460,730],[770,230],[1100,680]].forEach(([x,y])=>objects.push({y,draw:()=>lamp(x,y,night)}));
- for(let i=0;i<50;i++){const x=285+(i*97%840),y=200+(i*139%560);if(i%3===0){line([[x,y],[x,y-6]],'#859c66',1);ellipse(x-2,y-7,3,2,i%2?'#eadca7':'#f0c0a4');ellipse(x+2,y-7,3,2,i%2?'#eadca7':'#f0c0a4')}}
- targets=[];stages.forEach(s=>{ellipse(s.x,s.y+3,66,30,'#7c925e20');ellipse(s.x,s.y-3,63,29,'#b49468');ellipse(s.x,s.y-10,63,28,'#ddc39a');for(let j=-2;j<=2;j++)line([[s.x-48,s.y-10+j*7],[s.x+48,s.y-10+j*7]],'#c7ab8170',1);objects.push({y:s.y,draw:()=>{if(s.artist||latest.current.performing===s.id){person(s.x,s.y-12,latest.current.performing===s.id?latest.current.avatar:{...latest.current.avatar,skin:'#ebc2a0',shirt:s.color,hair:s.id%3},0);line([[s.x+18,s.y-8],[s.x+18,s.y-48]],'#5c6252',2);ellipse(s.x+16,s.y-49,4,3,'#535e50');line([[s.x+11,s.y-7],[s.x+25,s.y-7]],'#5c6252',2);round(s.x-49,s.y-30,14,22,3,'#5c6653');ellipse(s.x-42,s.y-20,4,5,'#414e40');}else{c.font='20px sans-serif';c.textAlign='center';c.fillStyle='#a48b63';c.fillText('♫',s.x,s.y-7)}}});targets.push({s,x:ox+s.x*scale,y:oy+(s.y-92)*scale});
- if(s.artist){for(let j=0;j<Math.min(s.listeners,4);j++){const x=s.x-35+j*25,y=s.y+48+(j%2)*13;objects.push({y,draw:()=>person(x,y,{...latest.current.avatar,shirt:['#e0b489','#a4b7a1','#bca9be','#e0cf9f'][j],hair:j%3},Math.sin(t/1000+j))})}}});
- if(latest.current.performing===null)objects.push({y:position.current.y,draw:()=>person(position.current.x,position.current.y,latest.current.avatar,(dx||dy)?t/110:0,true)});objects.sort((a,b)=>a.y-b.y).forEach(o=>o.draw());
- const react=latest.current.reaction;if(react){const elapsed=(Date.now()-react.at)/1000;if(elapsed<2){c.globalAlpha=1-elapsed/2;c.font='30px sans-serif';c.fillStyle='#d98076';c.textAlign='center';c.fillText(react.symbol,position.current.x,position.current.y-70-elapsed*65);c.globalAlpha=1}}c.restore();
- targets.forEach(({s,x,y})=>{const label=document.getElementById(`label-${s.id}`);if(label){label.style.left=x+'px';label.style.top=y+'px';label.style.display=x>100&&x<w-180&&y>90&&y<h-120?'block':'none'}});frame=requestAnimationFrame(draw)}frame=requestAnimationFrame(draw);
- const click=(e:MouseEvent)=>{const box=el.getBoundingClientRect();const x=(e.clientX-box.left-ox)/scale,y=(e.clientY-box.top-oy)/scale;const s=stages.find(s=>Math.hypot(s.x-x,(s.y-20-y)*1.5)<70);if(s)latest.current.onStage(s)};el.addEventListener('click',click);
- return()=>{cancelAnimationFrame(frame);observer.disconnect();window.removeEventListener('keydown',keydown);window.removeEventListener('keyup',keyup);window.removeEventListener('blur',clear);el.removeEventListener('click',click)};
- },[position,motion]);
- return <canvas ref={canvas} id="park" aria-label="음악 공원. 방향키 또는 조이스틱으로 이동하세요."/>;
+import { useEffect, useRef, useState } from 'react';
+import * as T from 'three';
+import { Avatar, Stage, stages, koreanHour } from './model';
+import { createImageCharacters } from './imageCharacter';
+import { loadAvatarLayers } from './modularAvatar';
+import { npcAppearance } from './avatarParts';
+import { createVillageProps } from './villageProps';
+import { CHARACTER_ASSET, loadCharacterAsset, type CharacterRuntime } from './characterAsset';
+import type { Participant } from './useTown';
+export type Position = { x: number; y: number };
+type Props = {
+  liveStages: Stage[];
+  participants: Participant[];
+  demo: boolean;
+  avatar: Avatar;
+  position: React.MutableRefObject<Position>;
+  motion: React.MutableRefObject<Position>;
+  onMove: (p: Position) => void;
+  onStage: (s: Stage) => void;
+  onParticipant: (person: Participant) => void;
+  performing: number | null;
+  reaction: { symbol: string; at: number } | null;
+};
+const world = (p: Position) => new T.Vector3((p.x - 700) / 25, 0, (p.y - 450) / 25);
+const STAGE_RADIUS = 2.2;
+const STAGE_SURFACE_HEIGHT = 0.24;
+export function Park(props: Props) {
+  const canvas = useRef<HTMLCanvasElement>(null),
+    latest = useRef(props);
+  latest.current = props;
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    const el = canvas.current!;
+    let renderer: T.WebGLRenderer;
+    try {
+      renderer = new T.WebGLRenderer({ canvas: el, antialias: true });
+    } catch {
+      setError(true);
+      return;
+    }
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.7));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = T.PCFShadowMap;
+    renderer.toneMapping = T.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    const scene = new T.Scene();
+    scene.background = new T.Color('#b9dce0');
+    scene.fog = new T.Fog('#b9dce0', 42, 88);
+    const camera = new T.PerspectiveCamera(35, 1, 0.1, 140);
+    const hemi = new T.HemisphereLight('#fff4db', '#8b9f63', 2.5);
+    scene.add(hemi);
+    const sun = new T.DirectionalLight('#fff3d3', 3.2);
+    sun.position.set(-18, 30, 18);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    Object.assign(sun.shadow.camera, {
+      left: -40,
+      right: 40,
+      top: 40,
+      bottom: -40,
+      near: 1,
+      far: 90,
+    });
+    sun.shadow.normalBias = 0.04;
+    scene.add(sun);
+    const mats = new Map<string, T.MeshStandardMaterial>();
+    const mat = (color: string) => {
+      if (!mats.has(color)) mats.set(color, new T.MeshStandardMaterial({ color, roughness: 0.86 }));
+      return mats.get(color)!;
+    };
+    function mesh(
+      g: T.BufferGeometry,
+      color: string,
+      x: number,
+      y: number,
+      z: number,
+      parent: T.Object3D = scene,
+    ) {
+      const m = new T.Mesh(g, mat(color));
+      m.position.set(x, y, z);
+      m.castShadow = true;
+      m.receiveShadow = true;
+      parent.add(m);
+      return m;
+    }
+    function ball(
+      x: number,
+      y: number,
+      z: number,
+      sx: number,
+      sy: number,
+      sz: number,
+      color: string,
+      parent: T.Object3D = scene,
+    ) {
+      const m = mesh(new T.SphereGeometry(1, 16, 12), color, x, y, z, parent);
+      m.scale.set(sx, sy, sz);
+      return m;
+    }
+    function box(
+      x: number,
+      y: number,
+      z: number,
+      sx: number,
+      sy: number,
+      sz: number,
+      color: string,
+      parent: T.Object3D = scene,
+    ) {
+      return mesh(new T.BoxGeometry(sx, sy, sz), color, x, y, z, parent);
+    }
+    function cyl(
+      x: number,
+      y: number,
+      z: number,
+      r1: number,
+      r2: number,
+      height: number,
+      color: string,
+      parent: T.Object3D = scene,
+    ) {
+      return mesh(new T.CylinderGeometry(r1, r2, height, 24), color, x, y, z, parent);
+    }
+    const scenery = createVillageProps(scene);
+    const ground = box(0, -0.35, 0, 100, 0.6, 100, '#ffffff');
+    ground.castShadow = false;
+    ground.material.map = scenery.ground;
+    let seed = 123;
+    const random = () => {
+      seed = (seed * 16807) % 2147483647;
+      return (seed - 1) / 2147483646;
+    };
+    function path(points: T.Vector3[], width: number) {
+      const curve = new T.CatmullRomCurve3(points),
+        g = new T.BufferGeometry(),
+        v: number[] = [],
+        indices: number[] = [];
+      for (let i = 0; i <= 100; i++) {
+        const p = curve.getPoint(i / 100),
+          t = curve.getTangent(i / 100);
+        v.push(
+          p.x - t.z * width,
+          0.015,
+          p.z + t.x * width,
+          p.x + t.z * width,
+          0.015,
+          p.z - t.x * width,
+        );
+        if (i < 100) {
+          const n = i * 2;
+          indices.push(n, n + 2, n + 1, n + 1, n + 2, n + 3);
+        }
+      }
+      g.setAttribute('position', new T.Float32BufferAttribute(v, 3));
+      g.setIndex(indices);
+      g.computeVertexNormals();
+      const m = new T.Mesh(g, mat('#dcc797'));
+      m.material.side = T.DoubleSide;
+      m.receiveShadow = true;
+      scene.add(m);
+    }
+    path(
+      [
+        new T.Vector3(-40, 0, 6),
+        new T.Vector3(-15, 0, 5),
+        new T.Vector3(0, 0, 3),
+        new T.Vector3(17, 0, 12),
+        new T.Vector3(40, 0, 13),
+      ],
+      1.1,
+    );
+    path(
+      [
+        new T.Vector3(0, 0, 35),
+        new T.Vector3(-2, 0, 12),
+        new T.Vector3(0, 0, 0),
+        new T.Vector3(-1, 0, -30),
+      ],
+      1,
+    );
+    const obstacles: { x: number; z: number; r: number }[] = [];
+    function tree(x: number, z: number, s = 1) {
+      scenery.prop(Math.round(x + z) % 3 === 0 ? 0 : 2, x, z, 5.1 * s);
+      obstacles.push({ x, z, r: s * 0.6 });
+    }
+    for (let i = 0; i < 24; i++) {
+      const a = (i / 24) * Math.PI * 2;
+      tree(Math.cos(a) * 27, Math.sin(a) * 24, 1 + random() * 0.3);
+    }
+    [
+      [-14, -4],
+      [-11, -15],
+      [10, -18],
+      [20, -6],
+      [-17, 11],
+      [13, 18],
+      [-8, 18],
+    ].forEach(([x, z]) => tree(x, z));
+    const water = box(20, -0.025, 0, 8, 0.04, 95, '#78c7cd');
+    water.material.roughness = 0.28;
+    for (let z = -35; z < 40; z += 1.6) ball(15.8, -0.06, z, 0.7, 0.25, 0.9, '#d3cf9c');
+    for (let i = 0; i < 30; i++)
+      box(
+        17 + random() * 6,
+        0.01,
+        -30 + random() * 65,
+        0.7 + random() * 1.4,
+        0.015,
+        0.04,
+        '#b9e6dc',
+      ).castShadow = false;
+    scenery.prop(1, -5, -8, 5.3);
+    obstacles.push({ x: -5, z: -8, r: 2.5 });
+    [
+      [-9, -6],
+      [-1, -6],
+      [-12, 3],
+      [8, 8],
+      [10, -11],
+      [-8, 12],
+    ].forEach(([x, z]) => scenery.prop(3, x, z, 1.1));
+    [
+      [4, 9],
+      [-12, 10],
+      [12, -8],
+    ].forEach(([x, z]) => scenery.prop(4, x, z, 1.3));
+    for (let x = -20; x < 14; x += 3.4) scenery.prop(5, x, -17, 1.2);
+    // A small wooden footbridge makes the river part of the walk.
+    for (let x = 15; x < 25.3; x += 0.45) box(x, 0.14, 4.5, 0.42, 0.2, 2.6, '#bd9767');
+    for (const z of [3.15, 5.85]) {
+      for (let x = 15; x < 25.3; x += 2) cyl(x, 0.65, z, 0.075, 0.075, 1.3, '#a88054');
+      box(20, 1.12, z, 10.5, 0.09, 0.09, '#c6a476');
+    }
+
+    // Connect the east bank to a walkable riverside clearing.
+    for (let z = -35; z < 40; z += 1.6) ball(24.2, -0.06, z, 0.7, 0.25, 0.9, '#d3cf9c');
+    path([new T.Vector3(12, 0, 4.5), new T.Vector3(15, 0, 4.5)], 1.1);
+    path(
+      [
+        new T.Vector3(24.5, 0, 4.5),
+        new T.Vector3(29, 0, 4.5),
+        new T.Vector3(33, 0, 8),
+        new T.Vector3(37, 0, 9),
+      ],
+      1.1,
+    );
+    path([new T.Vector3(30, 0, -10), new T.Vector3(29, 0, 3), new T.Vector3(31, 0, 15)], 0.8);
+    [
+      [28, -12],
+      [34, -11],
+      [39, -6],
+      [39, 15],
+      [33, 17],
+    ].forEach(([x, z]) => tree(x, z));
+    [
+      [27, 8],
+      [35, 12],
+      [31, -7],
+    ].forEach(([x, z]) => scenery.prop(3, x, z, 1.1));
+    scenery.prop(4, 34, 5, 1.3);
+    path([new T.Vector3(32, 0, 4.5), new T.Vector3(32, 0, 2)], 0.8);
+    const stageMeshes: T.Object3D[] = [];
+    const stageCenters = latest.current.liveStages.map(world);
+    const surfaceHeight = (position: T.Vector3) =>
+      stageCenters.some(
+        (center) => Math.hypot(position.x - center.x, position.z - center.z) <= STAGE_RADIUS,
+      )
+        ? STAGE_SURFACE_HEIGHT
+        : 0;
+    latest.current.liveStages.forEach((s) => {
+      const p = world(s),
+        pad = cyl(p.x, 0.1, p.z, STAGE_RADIUS, 2.25, 0.2, '#d6b786');
+      pad.userData.stage = s.id;
+      stageMeshes.push(pad);
+      for (let i = -3; i <= 3; i++)
+        box(
+          p.x,
+          0.205,
+          p.z + i * 0.45,
+          Math.sqrt(4.3 - (i * 0.45) ** 2) * 2,
+          0.008,
+          0.025,
+          '#b9976e',
+        );
+      cyl(p.x + 1.1, 0.9, p.z, 0.035, 0.035, 1.7, '#616957');
+      ball(p.x + 1.1, 1.8, p.z, 0.1, 0.17, 0.1, '#4c5549');
+      box(p.x - 1.5, 0.4, p.z, 0.45, 0.6, 0.4, '#5d6858');
+      ball(p.x - 1.5, 0.42, p.z + 0.21, 0.14, 0.18, 0.02, '#343e36');
+    });
+    const imageCharacters = createImageCharacters();
+    let villagerIndex = 1;
+    function character(a: Avatar) {
+      return imageCharacters.create(
+        a === latest.current.avatar ? a : npcAppearance(villagerIndex++),
+      );
+    }
+    let player = character(latest.current.avatar);
+    scene.add(player);
+    let avatarKey = JSON.stringify(latest.current.avatar);
+    (latest.current.demo ? stages : [])
+      .filter((s) => s.artist)
+      .forEach((s) => {
+        const p = world(s),
+          g = character({ ...latest.current.avatar, shirt: s.color, hair: s.id % 3 });
+        g.position.copy(p);
+        g.position.y = STAGE_SURFACE_HEIGHT;
+        scene.add(g);
+        for (let j = 0; j < 3; j++) {
+          const a = character({
+            ...latest.current.avatar,
+            shirt: ['#d3b680', '#91a79e', '#ba9cac'][j],
+            hair: j,
+          });
+          a.position.set(p.x + (j - 1) * 1.2, 0, p.z + 3.3 + (j % 2) * 0.4);
+          a.rotation.y = Math.PI;
+          scene.add(a);
+        }
+      });
+    let asset: CharacterRuntime | null = null,
+      alive = true;
+    if (CHARACTER_ASSET.url) {
+      loadCharacterAsset(CHARACTER_ASSET.url)
+        .then((runtime) => {
+          if (!alive) {
+            runtime.dispose();
+            return;
+          }
+          asset = runtime;
+          scene.add(runtime.object);
+        })
+        .catch((error) =>
+          console.error(
+            'Character asset could not be activated; retaining prototype model.',
+            error,
+          ),
+        );
+    }
+    const keys = new Set<string>();
+    const down = (e: KeyboardEvent) => {
+      if (
+        document.querySelector('dialog[open]') ||
+        /INPUT|TEXTAREA/.test((e.target as HTMLElement).tagName)
+      )
+        return;
+      if (['w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+        keys.add(e.key);
+      }
+    };
+    const up = (e: KeyboardEvent) => keys.delete(e.key);
+    const clear = () => {
+      keys.clear();
+      latest.current.motion.current = { x: 0, y: 0 };
+    };
+    window.addEventListener('keydown', down);
+    window.addEventListener('keyup', up);
+    window.addEventListener('blur', clear);
+    const resize = () => {
+      renderer.setSize(el.clientWidth, el.clientHeight, false);
+      camera.aspect = el.clientWidth / el.clientHeight;
+      camera.updateProjectionMatrix();
+    };
+    const observer = new ResizeObserver(resize);
+    observer.observe(el);
+    resize();
+    const raycaster = new T.Raycaster();
+    const click = (e: MouseEvent) => {
+      const r = el.getBoundingClientRect();
+      raycaster.setFromCamera(
+        new T.Vector2(
+          ((e.clientX - r.left) / r.width) * 2 - 1,
+          (-(e.clientY - r.top) / r.height) * 2 + 1,
+        ),
+        camera,
+      );
+      const personHit = raycaster.intersectObjects(
+        [...visitors.values()].map((v) => v.group),
+        true,
+      )[0];
+      if (personHit) {
+        let object: T.Object3D | null = personHit.object;
+        while (object && !object.userData.participantId) object = object.parent;
+        const person = latest.current.participants.find(
+          (p) => p.id === object?.userData.participantId,
+        );
+        if (person) {
+          latest.current.onParticipant(person);
+          return;
+        }
+      }
+      const hit = raycaster.intersectObjects(stageMeshes)[0];
+      if (hit) {
+        const stage = latest.current.liveStages.find((s) => s.id === hit.object.userData.stage);
+        if (stage) latest.current.onStage(stage);
+      }
+    };
+    el.addEventListener('click', click);
+    let frame = 0,
+      last = 0,
+      lastMove = 0;
+    const focus = world(latest.current.position.current),
+      target = new T.Vector3();
+    const visitors = new Map<string, { group: T.Group; appearance: string }>();
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let entranceReady = false,
+      entranceStart: number | null = null;
+    void loadAvatarLayers()
+      .then(() => {
+        entranceReady = true;
+      })
+      .catch(() => {});
+    const entranceMaterial = new T.MeshBasicMaterial({
+      color: '#fff2c3',
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      side: T.DoubleSide,
+    });
+    const entranceRing = new T.Mesh(new T.RingGeometry(0.45, 0.53, 48), entranceMaterial);
+    entranceRing.rotation.x = -Math.PI / 2;
+    entranceRing.position.copy(world(latest.current.position.current));
+    entranceRing.position.y = 0.04;
+    scene.add(entranceRing);
+    function animate(time: number) {
+      const dt = Math.min((time - last) / 1000, 0.04);
+      last = time;
+      const p = latest.current,
+        key = JSON.stringify(p.avatar);
+      const present = new Set(p.participants.map((person) => person.id));
+      for (const [id, visitor] of visitors) {
+        if (!present.has(id)) {
+          scene.remove(visitor.group);
+          visitors.delete(id);
+        }
+      }
+      for (const person of p.participants) {
+        const appearance = JSON.stringify(person.avatar);
+        let visitor = visitors.get(person.id);
+        if (!visitor || visitor.appearance !== appearance) {
+          if (visitor) scene.remove(visitor.group);
+          const group = imageCharacters.create(person.avatar);
+          group.userData.participantId = person.id;
+          group.position.copy(world(person));
+          scene.add(group);
+          visitor = { group, appearance };
+          visitors.set(person.id, visitor);
+        }
+        const destination = world(person),
+          delta = destination.clone().sub(visitor.group.position);
+        if (delta.length() > 0.02) visitor.group.rotation.y = Math.atan2(delta.x, delta.z);
+        visitor.group.position.lerp(destination, 1 - Math.exp(-dt * 6));
+        visitor.group.position.y = surfaceHeight(visitor.group.position);
+      }
+      if (key !== avatarKey) {
+        scene.remove(player);
+        player.traverse((o) => {
+          if (o instanceof T.Mesh) o.geometry.dispose();
+        });
+        player = character(p.avatar);
+        scene.add(player);
+        avatarKey = key;
+      }
+      let dx =
+          p.motion.current.x +
+          Number(keys.has('d') || keys.has('ArrowRight')) -
+          Number(keys.has('a') || keys.has('ArrowLeft')),
+        dz =
+          p.motion.current.y +
+          Number(keys.has('s') || keys.has('ArrowDown')) -
+          Number(keys.has('w') || keys.has('ArrowUp'));
+      if (document.querySelector('dialog[open]') || p.performing !== null) {
+        dx = 0;
+        dz = 0;
+      }
+      const len = Math.hypot(dx, dz);
+      if (len > 1) {
+        dx /= len;
+        dz /= len;
+      }
+      const next = {
+          x: Math.max(240, Math.min(1650, p.position.current.x + dx * 105 * dt)),
+          y: Math.max(150, Math.min(790, p.position.current.y + dz * 105 * dt)),
+        },
+        point = world(next);
+      if (
+        !(point.x > 15.5 && point.x < 24.5 && (point.z < 3.2 || point.z > 5.8)) &&
+        !obstacles.some((o) => Math.hypot(point.x - o.x, point.z - o.z) < o.r + 0.35)
+      )
+        p.position.current = next;
+      if ((dx || dz) && time - lastMove > 70) {
+        p.onMove({ ...p.position.current });
+        lastMove = time;
+      }
+      player.position.copy(world(p.position.current));
+      player.position.y = surfaceHeight(player.position);
+      if (dx || dz) player.rotation.y = Math.atan2(dx, dz);
+      const walking = !!(dx || dz);
+      (player.userData.limbs as T.Object3D[]).forEach((l, i) => {
+        l.rotation.x = walking ? Math.sin(time / 130 + (i < 2 ? 0 : Math.PI)) * 0.42 : 0;
+      });
+      player.position.y += walking
+        ? Math.abs(Math.sin(time / 130)) * 0.055
+        : Math.sin(time / 700) * 0.012;
+      if (entranceReady && entranceStart === null) entranceStart = time;
+      const arrival = reducedMotion
+        ? 1
+        : entranceStart === null
+          ? 0
+          : Math.min(1, (time - entranceStart) / 850);
+      const settle = 1 - Math.pow(1 - arrival, 3);
+      player.position.y += (1 - settle) * 0.75;
+      player.scale.setScalar(0.86 + 0.14 * settle);
+      player.traverse((object) => {
+        if (object instanceof T.Sprite) object.material.opacity = Math.min(1, arrival * 3);
+      });
+      entranceRing.visible = arrival > 0 && arrival < 1;
+      entranceRing.scale.setScalar(0.6 + arrival * 2.4);
+      entranceMaterial.opacity = Math.sin(arrival * Math.PI) * 0.5;
+      focus.lerp(player.position, 1 - Math.exp(-dt * 5));
+      const portrait = camera.aspect < 1;
+      camera.position.set(focus.x, focus.y + (portrait ? 17 : 14), focus.z + (portrait ? 23 : 19));
+      target.set(focus.x, focus.y + 0.3, focus.z - 3);
+      camera.lookAt(target);
+      const night = koreanHour() < 6 || koreanHour() >= 19;
+      hemi.intensity = night ? 1.2 : 2.5;
+      sun.intensity = night ? 0.65 : 3.2;
+      (scene.background as T.Color).set(night ? '#748eaa' : '#b9dce0');
+      document.body.classList.toggle('night', night);
+      p.liveStages.forEach((s) => {
+        const label = document.getElementById(`label-${s.id}`);
+        if (!label) return;
+        const v = world(s);
+        v.y = 3;
+        v.project(camera);
+        const x = (v.x * 0.5 + 0.5) * el.clientWidth,
+          y = (-v.y * 0.5 + 0.5) * el.clientHeight;
+        label.style.left = x + 'px';
+        label.style.top = y + 'px';
+        label.style.display =
+          v.z < 1 && x > 60 && x < el.clientWidth - 60 && y > 85 && y < el.clientHeight - 120
+            ? 'block'
+            : 'none';
+      });
+      const react = p.reaction,
+        bubble = document.getElementById('player-reaction');
+      if (bubble && react) {
+        const age = (Date.now() - react.at) / 1000,
+          v = player.position.clone();
+        v.y += 2.8 + age;
+        v.project(camera);
+        bubble.style.left = (v.x * 0.5 + 0.5) * el.clientWidth + 'px';
+        bubble.style.top = (-v.y * 0.5 + 0.5) * el.clientHeight + 'px';
+        bubble.style.opacity = String(Math.max(0, 1 - age / 2));
+      }
+      if (asset) {
+        player.visible = false;
+        asset.object.position.copy(player.position);
+        asset.object.rotation.y = player.rotation.y + CHARACTER_ASSET.facingRadians;
+        asset.update(dt, walking);
+      }
+      imageCharacters.update(player, walking, time);
+      renderer.render(scene, camera);
+      frame = requestAnimationFrame(animate);
+    }
+    frame = requestAnimationFrame(animate);
+    return () => {
+      scenery.dispose();
+      entranceMaterial.dispose();
+      imageCharacters.dispose();
+      alive = false;
+      asset?.dispose();
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener('keydown', down);
+      window.removeEventListener('keyup', up);
+      window.removeEventListener('blur', clear);
+      el.removeEventListener('click', click);
+      scene.traverse((o) => {
+        if (o instanceof T.Mesh) o.geometry.dispose();
+      });
+      mats.forEach((m) => m.dispose());
+      renderer.dispose();
+    };
+  }, []);
+  return (
+    <>
+      <canvas
+        ref={canvas}
+        id="park"
+        aria-label="3D 음악 공원. 조이스틱 또는 방향키로 산책하세요."
+      />
+      <span
+        id="player-reaction"
+        className="player-reaction pointer-events-none absolute z-10"
+        aria-hidden="true"
+      >
+        {props.reaction && (
+          <span
+            key={props.reaction.at}
+            className="reaction-burst"
+            data-kind={props.reaction.symbol}
+          >
+            {[0, 1, 2].map((index) => (
+              <img
+                key={index}
+                src={`/icons/${props.reaction?.symbol === '♡' ? 'heart' : props.reaction?.symbol === '👏' ? 'clap' : 'lightstick'}.png`}
+                alt=""
+              />
+            ))}
+          </span>
+        )}
+      </span>
+      {error && (
+        <div className="absolute inset-0 grid place-items-center bg-[#e5ead8] p-8 text-center">
+          이 브라우저에서 3D를 시작하지 못했어요. WebGL을 지원하는 브라우저에서 다시 열어 주세요.
+        </div>
+      )}
+    </>
+  );
 }

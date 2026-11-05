@@ -1,45 +1,789 @@
-import React,{useEffect,useRef,useState} from 'react';
-import {createRoot} from 'react-dom/client';
-import {Bell,Music2,Heart,ArrowUpRight,Sun,Moon,VolumeX,MapPin,Mic,Hand,ArrowRight,X,Check} from 'lucide-react';
-import {Park,Position} from './Park';
-import {Avatar,Stage,stages,populations,defaultAvatar,readSaved,nearestStage,koreanHour} from './model';
+import { ProfileIcon } from './components/ProfileIcon';
+import { ErrorModal } from './components/ui/ErrorModal';
+import { useTown, type Participant } from './useTown';
+import { ParticipantProfile } from './components/ParticipantProfile';
+import { ReportForm } from './components/ReportForm';
+import { ProfileLoader } from './components/ProfileLoader';
+import { saveProfile, type SavedProfile } from './profileRepository';
+import {
+  RolePicker,
+  Registration,
+  emptyProfile,
+  type MemberProfile,
+} from './components/Registration';
+import { BuskingBook } from './components/BuskingBook';
+import { ChannelPicker } from './components/ChannelPicker';
+import { AccountPanel } from './components/AccountPanel';
+import { HourlyClock } from './components/HourlyClock';
+import { DialogPanel, PanelHeading } from './components/ui/Panel';
+import { Button } from './components/ui/Button';
+import { Flaticon } from './Flaticon';
+import { AvatarEditor } from './AvatarEditor';
+import { LoginGate, type Account } from './LoginGate';
+import React, { useEffect, useRef, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import {
+  Bell,
+  Settings,
+  Music2,
+  Heart,
+  ArrowUpRight,
+  Sun,
+  Moon,
+  VolumeX,
+  MapPin,
+  Mic,
+  Hand,
+  ArrowRight,
+  X,
+} from 'lucide-react';
+import { Park, Position } from './Park';
+import {
+  Avatar,
+  Stage,
+  stages as demoStages,
+  populations as demoPopulations,
+  defaultAvatar,
+  readSaved,
+  koreanHour,
+} from './model';
 import './style.css';
+import './components/ui/town-ui.css';
 
-type Panel='welcome'|'avatar'|'channels'|'profile'|'map'|'following'|'queue'|'report'|null;
-const channels=['01','02','03','04','05'];
-function App(){
- const [avatar,setAvatar]=useState<Avatar>(()=>readSaved('mt-avatar',defaultAvatar));const [panel,setPanel]=useState<Panel>(null);const [selected,setSelected]=useState<Stage>(stages[0]);const [channel,setChannel]=useState(0);const [near,setNear]=useState<Stage|null>(null);const [follow,setFollow]=useState<number[]>(()=>readSaved('mt-follow',[]));const [muted,setMuted]=useState<number[]>([]);const [toast,setToast]=useState('');const [queue,setQueue]=useState<number|null>(null);const [deadline,setDeadline]=useState(0);const [remaining,setRemaining]=useState(300);const [performing,setPerforming]=useState<number|null>(null);const [reaction,setReaction]=useState<{symbol:string;at:number}|null>(null);const [demo,setDemo]=useState(false);const [report,setReport]=useState('욕설·혐오 표현');const [reportSent,setReportSent]=useState(false);const [now,setNow]=useState(new Date());const dialog=useRef<HTMLDialogElement>(null);const position=useRef<Position>({x:650,y:610});const motion=useRef<Position>({x:0,y:0});const toastTimer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined);const hiddenAt=useRef(0);
- const notify=(text:string)=>{setToast(text);clearTimeout(toastTimer.current);toastTimer.current=setTimeout(()=>setToast(''),3500)};
- useEffect(()=>{if(panel){motion.current={x:0,y:0};dialog.current?.showModal()}else dialog.current?.close()},[panel]);
- useEffect(()=>{localStorage.setItem('mt-avatar',JSON.stringify(avatar))},[avatar]);useEffect(()=>{localStorage.setItem('mt-follow',JSON.stringify(follow))},[follow]);
- useEffect(()=>{const timer=setInterval(()=>{setNow(new Date());if(queue!==null&&deadline){const left=Math.max(0,Math.ceil((deadline-Date.now())/1000));setRemaining(left);if(left===0){position.current={x:stages[queue].x,y:stages[queue].y};setPerforming(queue);setQueue(null);setDeadline(0);notify('내 차례예요! 공연 시뮬레이션이 시작됐어요.')}}},1000);return()=>clearInterval(timer)},[queue,deadline]);
- useEffect(()=>{const visibility=()=>{if(document.hidden){setQueue(null);setDeadline(0);hiddenAt.current=Date.now();}else if(performing!==null){if(Date.now()-hiddenAt.current>=30000){setPerforming(null);notify('30초가 지나 공연이 종료됐어요.')}else notify('돌아왔어요. 공연 시뮬레이션을 이어갑니다.')}};document.addEventListener('visibilitychange',visibility);return()=>document.removeEventListener('visibilitychange',visibility)},[performing]);
- const openStage=(s:Stage)=>{setSelected(s);setPanel(s.artist?'profile':'queue')};
- const move=(p:Position)=>{const s=nearestStage(p.x,p.y);setNear(Math.hypot(s.x-p.x,s.y-p.y)<155?s:null)};
- const join=(s:Stage)=>{if(!demo){setPanel('welcome');return}if(performing!==null){notify('현재 공연을 마친 뒤 신청할 수 있어요.');return}if(queue!==null&&queue!==s.id){notify('한 번에 한 자리에서만 대기할 수 있어요.');return}if(s.artist){setQueue(s.id);setDeadline(Date.now()+300000);setRemaining(300);notify('대기 신청 완료 · 5분 뒤 자동으로 무대에 올라가요.')}else{position.current={x:s.x,y:s.y};setPerforming(s.id);setNear(s);notify('버스킹 시작! 현재는 마이크를 사용하지 않는 시뮬레이션이에요.')}setPanel(null)};
- const changeChannel=(id:number)=>{if(populations[id]>=30){notify('가득 찬 채널이에요. 다른 채널을 선택해 주세요.');return}setChannel(id);setQueue(null);setDeadline(0);setPerforming(null);setNear(null);position.current={x:650,y:610};setPanel(null);notify(`CH ${channels[id]}에 오신 것을 환영해요.`)};
- const followArtist=()=>{if(!demo){setPanel('welcome');return}const has=follow.includes(selected.id);setFollow(has?follow.filter(id=>id!==selected.id):[...follow,selected.id]);notify(has?'팔로우를 취소했어요.':'팔로우했어요. 공연 알림은 서비스 연결 후 제공돼요.')};
- const title=(eyebrow:string,name:string)=><><div className="flex items-center justify-between"><span className="text-[9px] tracking-[2px] text-[#80916e] font-bold">{eyebrow}</span><button className="close grid place-items-center" onClick={()=>setPanel(null)} aria-label="닫기"><X size={17}/></button></div><h2 className="modal-title">{name}</h2></>;
- const hour=koreanHour();const night=hour<6||hour>=19;
- return <><main id="app"><Park avatar={avatar} position={position} motion={motion} onMove={move} onStage={openStage} performing={performing} reaction={reaction}/>
- <header className="topbar"><button className="brand" onClick={()=>setPanel('welcome')}><span className="brandmark"><Music2 size={25}/></span><span>MUSIC TOWN<small>A LITTLE WALK, A NEW SOUND.</small></span></button><div className="header-center"><span className="live-dot"/><span>초록 공원 · CH {channels[channel]}</span><button className="tiny" onClick={()=>setPanel('channels')}>채널 변경 ↗</button></div><div className="header-right"><span id="clock">{now.toLocaleTimeString('ko-KR',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',hour12:false})} KST</span><button className="icon-button" onClick={()=>setPanel('following')} aria-label="팔로우한 뮤지션"><Bell size={19}/></button><button className="avatar-button" onClick={()=>setPanel('avatar')} aria-label="내 캐릭터 꾸미기" style={{background:avatar.shirt}}>나</button></div></header>
- <aside className="intro"><span className="eyebrow">YOUR EVERYDAY MUSIC ESCAPE</span><h1>오늘은 어떤 음악을<br/>만나게 될까요?</h1><p>발길이 닿는 곳에서, 새로운 목소리를 만나세요.</p><div className="weather">{night?<Moon size={16}/>:<Sun size={16}/>}<span>{night?'별빛이 머무는 밤':hour>=17?'노을이 물드는 저녁':'햇살 좋은 오후'}</span><i/>채팅 없이, 음악으로 함께</div></aside>
- <aside className="stage-list"><div className="section-title"><h2>공원의 소리 <span>LIVE</span></h2><span>{populations[channel]} / 30</span></div>{stages.map(s=><button className="stage-item" key={s.id} onClick={()=>openStage(s)}><span className="stage-avatar" style={{background:s.color+'55'}}>{s.artist?<Music2 size={18}/>:<Mic size={16}/>}</span><span className="stage-info"><strong>{performing===s.id?avatar.name:s.artist||'당신의 무대'}{!s.artist&&performing!==s.id&&<em>비어 있어요</em>}</strong><small>{s.name}</small></span>{s.artist?<span className="equalizer"><i/><i/><i/></span>:<ArrowUpRight size={13} className="text-[#9aa789]"/>}</button>)}<div className="list-foot"><span className="live-dot"/>가까운 무대의 소리가 들려요</div></aside>
- <div id="world-labels">{stages.map(s=><button key={s.id} id={`label-${s.id}`} className={`world-label ${s.artist?'':'empty'} ${near?.id===s.id?'selected':''}`} onClick={()=>openStage(s)}><b>{String(s.id+1).padStart(2,'0')}</b>{performing===s.id?avatar.name:s.artist||'빈 버스킹 자리'}{s.artist&&<span className="ml-2 opacity-60">♫</span>}</button>)}</div>
- <div className="location-pill"><MapPin size={11} className="inline mr-1"/><span>{near?.name||'느긋한 산책로'}</span><span className="divider">|</span><span id="sound-state">{near?.artist?(muted.includes(near.id)?'음소거한 공연이에요':`${near.artist}의 무대 · 음성 데모 준비 중`):'가까운 무대로 걸어가 보세요'}</span></div>
- <div className="movement"><div id="joystick" role="button" tabIndex={0} aria-label="이동 조이스틱" onPointerDown={e=>{e.currentTarget.setPointerCapture(e.pointerId);const rect=e.currentTarget.getBoundingClientRect();motion.current={x:Math.max(-1,Math.min(1,(e.clientX-rect.left-rect.width/2)/35)),y:Math.max(-1,Math.min(1,(e.clientY-rect.top-rect.height/2)/35))};const stick=e.currentTarget.querySelector<HTMLElement>('#stick')!;stick.style.transform=`translate(${motion.current.x*22}px,${motion.current.y*22}px)`}} onPointerMove={e=>{if(!e.currentTarget.hasPointerCapture(e.pointerId))return;const r=e.currentTarget.getBoundingClientRect();motion.current={x:Math.max(-1,Math.min(1,(e.clientX-r.left-r.width/2)/35)),y:Math.max(-1,Math.min(1,(e.clientY-r.top-r.height/2)/35))};e.currentTarget.querySelector<HTMLElement>('#stick')!.style.transform=`translate(${motion.current.x*22}px,${motion.current.y*22}px)`}} onPointerUp={e=>{motion.current={x:0,y:0};e.currentTarget.querySelector<HTMLElement>('#stick')!.style.transform='';e.currentTarget.releasePointerCapture(e.pointerId)}} onLostPointerCapture={e=>{motion.current={x:0,y:0};e.currentTarget.querySelector<HTMLElement>('#stick')!.style.transform=''}}><span className="north">⌃</span><span className="west">‹</span><span className="east">›</span><span className="south">⌄</span><div id="stick"/></div><span>산책하기 <kbd>W A S D</kbd></span></div>
- <div className="bottom-center">{queue!==null&&<div id="queue-status">{stages[queue].name} · 대기 1번 · {Math.floor(remaining/60)}:{String(remaining%60).padStart(2,'0')}<button onClick={()=>{setQueue(null);setDeadline(0)}}>취소</button></div>}{performing!==null&&<div id="queue-status">♫ 공연 시뮬레이션 중<button onClick={()=>{setPerforming(null);position.current.y+=70;notify('공연을 마쳤어요. 수고했어요!')}}>공연 종료</button></div>}<div className="reaction-bar"><span>마음을 보내요</span>{[{s:'♡',icon:<Heart size={24}/>,label:'하트'},{s:'👏',icon:<Hand size={23}/>,label:'박수'},{s:'✦',icon:<span>✦</span>,label:'응원봉'}].map(r=><button className="flex flex-col items-center justify-center" key={r.s} aria-label={r.label+' 보내기'} onClick={()=>setReaction({symbol:r.s,at:Date.now()})}>{r.icon}<small>{r.label}</small></button>)}<div className="reaction-divider"/><button className="flex flex-col items-center justify-center" onClick={()=>{setSelected(near||stages[3]);setPanel('queue')}}><Mic size={22}/><small>버스킹</small></button></div><p>목소리는 무대에서만 · 응원은 어디서나</p></div>
- <button className="map-card" onClick={()=>setPanel('map')}><span>OUR LITTLE PARK <ArrowUpRight size={11}/></span><svg viewBox="0 0 180 95"><rect width="180" height="95" rx="14" fill="#c4d6a5"/><path d="M0 50Q45 10 90 50T180 40M85 0Q65 50 100 95" stroke="#eee3c8" strokeWidth="14" fill="none"/><ellipse cx="145" cy="20" rx="25" ry="13" fill="#91c6c4"/><g fill="#668753"><circle cx="18" cy="19" r="8"/><circle cx="163" cy="74" r="10"/><circle cx="30" cy="80" r="11"/></g><g fill="#fcf8e8" stroke="#a57c50" strokeWidth="2">{stages.map(s=><circle key={s.id} cx={s.x/8} cy={s.y/9} r="5"/>)}</g><circle cx={position.current.x/8} cy={position.current.y/9} r="5" fill="#ef976c" stroke="white" strokeWidth="2"/></svg><span className="map-caption">나만의 속도로 걸어보세요</span></button>
- <div className="prototype-badge">INTERACTIVE PREVIEW <span>· 가상 관객 / 음성 연결 전</span></div></main>
- <dialog ref={dialog} onCancel={()=>setPanel(null)} onClick={e=>{if(e.target===dialog.current){const r=dialog.current.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)setPanel(null)}}}>
- {panel==='welcome'&&<>{title('WELCOME TO MUSIC TOWN','음악이 머무는 작은 마을')}<p className="modal-sub">산책하다 만난 목소리가, 좋아하는 음악이 되는 곳.<br/>나만의 모습으로 공원을 만나보세요.</p><div className="rounded-2xl bg-[#e9efd9] p-5 my-5 flex items-center gap-4"><Music2 size={35} className="text-[#779460]"/><div className="text-xs leading-6">5개의 공원 채널 · 채널마다 30명<br/>누구나 뮤지션이 되는 5개의 작은 무대</div></div><button className="social" onClick={()=>notify('카카오 로그인은 OAuth 연결 후 이용할 수 있어요.')}>카카오로 시작하기 · 연결 예정</button><button className="social google" onClick={()=>notify('구글 로그인은 OAuth 연결 후 이용할 수 있어요.')}>Google로 시작하기 · 연결 예정</button><button className="primary wide flex justify-center gap-2" onClick={()=>{setDemo(true);setPanel('avatar')}}>프로토타입 체험하기 <ArrowRight size={15}/></button><p className="notice">현재는 계정 없이 UI를 확인하는 데모예요. 실제 서비스는 소셜 로그인 후 이용하며, 음성·다른 이용자와의 연결은 아직 제공하지 않아요.</p></>}
- {panel==='avatar'&&<>{title('MAKE YOURSELF AT HOME','오늘의 나는 어떤 모습?')}<p className="modal-sub">작은 취향을 담아, 나만의 산책자를 만들어 보세요.</p><div className="avatar-editor"><div className="avatar-preview grid place-items-center"><svg viewBox="0 0 100 140" width="100" height="140"><ellipse cx="50" cy="127" rx="26" ry="7" fill="#c9d5b8"/><path d="M39 104v20M61 104v20" stroke={avatar.pants} strokeWidth="14" strokeLinecap="round"/><rect x="28" y="67" width="44" height="44" rx="13" fill={avatar.shirt}/><path d="M28 77l-7 22M72 77l7 22" stroke={avatar.skin} strokeWidth="9" strokeLinecap="round"/>{avatar.hair===2&&<rect x="22" y="27" width="56" height="51" rx="18" fill="#554339"/>}<ellipse cx="50" cy="45" rx="27" ry="29" fill={avatar.skin}/><ellipse cx="50" cy="27" rx="28" ry="17" fill={avatar.hair===1?'#9b6b44':'#554339'}/><circle cx="41" cy="47" r="2" fill="#494133"/><circle cx="59" cy="47" r="2" fill="#494133"/><path d="M46 58q4 3 8 0" fill="none" stroke="#ae785b" strokeWidth="2"/></svg></div><div className="avatar-controls"><div className="field"><label htmlFor="nickname">닉네임</label><input id="nickname" value={avatar.name} maxLength={12} onChange={e=>setAvatar({...avatar,name:e.target.value})}/></div><div className="field"><label>헤어</label><div className="hair-options">{['숏컷','컬','단발'].map((v,i)=><button key={v} className={avatar.hair===i?'active':''} onClick={()=>setAvatar({...avatar,hair:i})}>{v}</button>)}</div></div>{([{key:'skin',label:'피부색',colors:['#eac09a','#f5d7b9','#b9835f','#815d48']},{key:'shirt',label:'상의',colors:['#e7a677','#87a692','#a6a4bb','#e0cf92']},{key:'pants',label:'하의',colors:['#526e77','#8b7e69','#6b7660','#a3887b']}] as const).map(row=><div className="field" key={row.key}><label>{row.label}</label><div className="swatches">{row.colors.map(color=><button key={color} aria-label={row.label+' '+color} className={'swatch '+(avatar[row.key]===color?'active':'')} style={{background:color}} onClick={()=>setAvatar({...avatar,[row.key]:color})}/>)}</div></div>)}</div></div><button className="primary wide" onClick={()=>{if(!avatar.name.trim()){notify('닉네임을 입력해 주세요.');return}setDemo(true);setPanel('channels')}}>이 모습으로 공원에 가기 →</button></>}
- {panel==='channels'&&<>{title('FIND YOUR LITTLE PARK','어느 공원으로 갈까요?')}<p className="modal-sub">같은 풍경, 서로 다른 음악. 마음이 가는 곳을 골라보세요.</p>{channels.map((n,i)=><button className={'channel-row '+(channel===i?'active':'')} key={n} disabled={populations[i]>=30} onClick={()=>changeChannel(i)}><span className="channel-number">{n}</span><span className="channel-detail">초록 공원 {channel===i&&<span className="text-[9px] text-[#8b9d78]"> · 현재 채널</span>}<small>{i===3?'다른 채널에서 새로운 음악을 만나보세요':'서우 · 윤슬 · 오후네시 공연 중'}</small></span><span className="channel-count">{populations[i]} / 30<br/><span className="text-[9px] text-[#899976]">{i===3?'가득 참':'입장 가능'}</span></span></button>)}<p className="notice">가상 인원으로 구성된 데모예요. 채널을 바꾸면 공연과 대기가 취소돼요.</p></>}
- {panel==='profile'&&<>{title('MEET THE MUSICIAN','음악 너머의 이야기')}<div className="profile-heading"><div className="profile-icon"><Music2 size={40}/></div><div><h2>{selected.artist}</h2><span className="pill">{selected.genre}</span></div></div><p className="modal-sub">{selected.bio}</p><div className="profile-stats"><div><strong>{selected.followers+(follow.includes(selected.id)?1:0)}</strong>팔로워</div><div><strong>{selected.listeners}</strong>관람 중</div><div><strong className="!text-sm mt-1">{selected.name}</strong>지금 공연하는 곳</div></div><div className="flex gap-3 text-xs text-[#8e987d]"><span>SNS · 미등록</span><span>음원 링크 · 미등록</span></div><div className="actions"><button className="primary" onClick={followArtist}>{follow.includes(selected.id)?'✓ 팔로잉':'♡ 팔로우'}</button><button className="secondary" onClick={()=>{position.current={x:selected.x,y:selected.y+90};setNear(selected);setPanel(null)}}>무대 앞에서 듣기</button></div><div className="actions"><button className="text-button flex items-center justify-center gap-1" onClick={()=>setMuted(muted.includes(selected.id)?muted.filter(id=>id!==selected.id):[...muted,selected.id])}><VolumeX size={12}/>{muted.includes(selected.id)?'음소거 해제':'나에게만 음소거'}</button><button className="text-button" onClick={()=>{setReportSent(false);setPanel('report')}}>공연 신고</button><button className="text-button" onClick={()=>setPanel('queue')}>이 자리 대기</button></div><p className="notice">소개된 뮤지션은 가상의 데모 프로필이에요. 실제 음성은 재생되지 않아요.</p></>}
- {panel==='queue'&&<>{title('YOUR VOICE, YOUR STAGE','누구나 시작할 수 있어요')}<div className="rounded-2xl bg-[#edf0df] p-5 my-4 flex gap-4 items-center"><Mic size={32}/><div><strong className="text-sm">{selected.name}</strong><p className="text-xs text-[#879376] mt-1">{selected.artist?`${selected.artist} 공연 중 · 신청하면 5분 뒤 교대`:'지금 비어 있는 자리예요'}</p></div></div><ul className="text-xs leading-7 text-[#7e8d71] list-disc pl-5"><li>대기 중에도 같은 채널에서 자유롭게 산책해요.</li><li>내 차례가 오면 자동 이동하고 공연을 시작해요.</li><li>채널을 옮기거나 접속을 종료하면 대기가 취소돼요.</li><li>공연 중 연결이 끊기면 30초 동안 복귀를 기다려요.</li></ul><div className="notice">실제 서비스에서는 신청 전 마이크 권한을 확인하고, 내 차례에 자동으로 켭니다. 이 데모는 마이크를 사용하지 않아요.</div><button className="primary wide" disabled={performing!==null} onClick={()=>join(selected)}>{performing!==null?'이미 공연 중이에요':selected.artist?'준비됐어요 · 대기 신청':'준비됐어요 · 공연 시작'}</button></>}
- {panel==='map'&&<>{title('OUR LITTLE PARK','음악 따라 걸어볼까요?')}<p className="modal-sub">공연을 선택하면 뮤지션을 알아볼 수 있어요.</p><div className="map-grid">{stages.map(s=><button key={s.id} onClick={()=>openStage(s)}><MapPin size={20} className="mx-auto mb-2"/>{s.name}<small>{s.artist||'빈 자리 · 버스킹 가능'}</small></button>)}</div><button className="secondary wide" onClick={()=>setPanel('channels')}>다른 채널 둘러보기</button></>}
- {panel==='following'&&<>{title('YOUR FAVORITE VOICES','다시 만나고 싶은 목소리')}{follow.length?follow.map(id=><button className="channel-row" key={id} onClick={()=>openStage(stages[id])}><Music2 size={25}/><span className="channel-detail">{stages[id].artist}<small>{stages[id].name} · 공연 중</small></span><ArrowRight size={16}/></button>):<div className="text-center py-9 text-[#8c9b7d]"><Heart size={36} className="mx-auto mb-4"/><p className="text-sm">아직 팔로우한 뮤지션이 없어요.</p><p className="text-xs mt-2">마음에 드는 무대에서 팔로우를 눌러보세요.</p></div>}<div className="notice">공연 시작 푸시는 아직 연결되지 않았어요. 출시 버전에서는 알림 동의 후 받을 수 있으며, iPhone은 홈 화면 추가가 필요해요.</div></>}
- {panel==='report'&&<>{title('KEEP OUR PARK KIND','공연 신고')}{reportSent?<div className="text-center py-8"><Check size={35} className="mx-auto mb-4"/><p className="text-sm">데모 신고가 기록됐어요.</p><p className="modal-sub">운영자에게 전송되지 않는 시뮬레이션이에요.</p><button className="secondary" onClick={()=>setPanel(null)}>닫기</button></div>:<><p className="modal-sub">{selected.artist}의 공연에서 어떤 문제가 있었나요?</p>{['욕설·혐오 표현','선정적인 발언','괴롭힘·불쾌한 소음','기타 부적절한 공연'].map(r=><label key={r} className="flex gap-3 p-3 text-xs"><input type="radio" name="reason" checked={report===r} onChange={()=>setReport(r)}/>{r}</label>)}<button className="primary wide" onClick={()=>{localStorage.setItem('mt-last-report',JSON.stringify({stage:selected.id,reason:report,at:Date.now()}));setReportSent(true);setMuted([...new Set([...muted,selected.id])])}}>신고 기록하고 음소거 · 데모</button></>}</>}
- </dialog><div id="toast" role="status" className={toast?'visible':''}>{toast}</div><div className="rotate-hint">↻ 가로로 돌리면 공원이 더 넓게 보여요</div></>;
+type Panel =
+  | 'role'
+  | 'registration'
+  | 'account'
+  | 'settings'
+  | 'avatar'
+  | 'channels'
+  | 'profile'
+  | 'participant'
+  | 'following'
+  | 'queue'
+  | 'report'
+  | null;
+const channels = ['01', '02', '03', '04', '05'];
+function App({ account, initial }: { account: Account; initial: SavedProfile | null }) {
+  const [entered, setEntered] = useState(false);
+  const storagePrefix = `mt-${account.id}`;
+  const [showStages, setShowStages] = useState(false);
+  const [avatar, setAvatar] = useState<Avatar>(
+    () => initial?.avatar ?? readSaved(storagePrefix + '-avatar', defaultAvatar),
+  );
+  const [memberProfile, setMemberProfile] = useState<MemberProfile>(
+    () => initial?.profile ?? readSaved(storagePrefix + '-profile', emptyProfile),
+  );
+  const [panel, setPanel] = useState<Panel>(() =>
+    initial?.profile.completed ||
+    (account.demo && readSaved<MemberProfile>(storagePrefix + '-profile', emptyProfile).completed)
+      ? 'channels'
+      : 'role',
+  );
+  const [selectedStage, setSelected] = useState<Stage>(demoStages[0]);
+  const [channel, setChannel] = useState(0);
+  const [near, setNear] = useState<Stage | null>(null);
+  const [follow, setFollow] = useState<number[]>(() => readSaved(storagePrefix + '-follow', []));
+  const [muted, setMuted] = useState<number[]>([]);
+  const [toast, setToast] = useState('');
+  const [actionError, setActionError] = useState('');
+  const [dismissedTownError, setDismissedTownError] = useState('');
+  const [queue, setQueue] = useState<number | null>(null);
+  const [performing, setPerforming] = useState<number | null>(null);
+  const [reaction, setReaction] = useState<{ symbol: string; at: number } | null>(null);
+  const [selectedPerson, setSelectedPerson] = useState<Participant | null>(null);
+  const [now, setNow] = useState(new Date());
+  const dialog = useRef<HTMLDialogElement>(null);
+  const position = useRef<Position>({ x: 650, y: 470 });
+  const motion = useRef<Position>({ x: 0, y: 0 });
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const notify = (text: string) => {
+    setToast(text);
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(''), 3500);
+  };
+  useEffect(() => {
+    if (panel) {
+      motion.current = { x: 0, y: 0 };
+      dialog.current?.showModal();
+    } else dialog.current?.close();
+  }, [panel]);
+  useEffect(() => {
+    localStorage.setItem(storagePrefix + '-avatar', JSON.stringify(avatar));
+  }, [avatar]);
+  useEffect(() => {
+    localStorage.setItem(storagePrefix + '-follow', JSON.stringify(follow));
+  }, [follow]);
+  const town = useTown(account.id, !account.demo, position);
+  const stages = account.demo ? demoStages : town.stages;
+  const populations = account.demo ? demoPopulations : town.state.channels.map((c) => c.count);
+  const selectedMusician = town.state.participants.find(
+    (p) =>
+      p.id ===
+      town.state.performances.find((performance) => performance.stage_id === selectedStage.id)
+        ?.user_id,
+  );
+  const selected = stages.find((s) => s.id === selectedStage.id) ?? selectedStage;
+  const queuePlace = town.waiting
+    ? town.state.queue
+        .filter((q) => q.stage_id === town.waiting!.stage_id)
+        .findIndex((q) => q.user_id === account.id) + 1
+    : 0;
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+  useEffect(() => {
+    if (account.demo) return;
+    const stageId = town.performance?.stage_id ?? null;
+    if (stageId !== null && stageId !== performing) {
+      const stage = town.stages.find((s) => s.id === stageId);
+      if (stage) position.current = { x: stage.x, y: stage.y };
+    }
+    setPerforming(stageId);
+    setQueue(town.waiting?.stage_id ?? null);
+    if (entered && town.state.channel === null) {
+      setEntered(false);
+      setPanel('channels');
+    }
+  }, [town.state, account.demo]);
+  const serverAction = async (action: string) => {
+    try {
+      await town.act(action);
+    } catch (error) {
+      setActionError((error as Error).message);
+    }
+  };
+  const openStage = (s: Stage) => {
+    setSelected(s);
+    setPanel(s.artist ? 'profile' : 'queue');
+  };
+  const move = (p: Position) => {
+    const s = stages.reduce<Stage | null>(
+      (a, b) => (!a || Math.hypot(b.x - p.x, b.y - p.y) < Math.hypot(a.x - p.x, a.y - p.y) ? b : a),
+      null,
+    );
+    if (!s) return;
+    setNear(Math.hypot(s.x - p.x, s.y - p.y) < 155 ? s : null);
+  };
+  const join = async (s: Stage) => {
+    if (account.demo) {
+      notify('로그인 후 이용할 수 있어요.');
+      return;
+    }
+    try {
+      await town.act('join', undefined, s.id);
+      setPanel(null);
+    } catch (error) {
+      setActionError((error as Error).message);
+    }
+  };
+  const changeChannel = async (id: number) => {
+    try {
+      if (!account.demo) await town.act('enter', id);
+      setEntered(true);
+      setChannel(id);
+      setNear(null);
+      position.current = { x: 650, y: 470 };
+      setPanel(null);
+      notify(`${channels[id]}번 공원에 도착했어요.`);
+    } catch (error) {
+      setActionError((error as Error).message);
+    }
+  };
+  const followArtist = () => {
+    const has = follow.includes(selected.id);
+    setFollow(has ? follow.filter((id) => id !== selected.id) : [...follow, selected.id]);
+    notify(has ? '팔로우를 취소했어요.' : '팔로우했어요. 공연 알림은 서비스 연결 후 제공돼요.');
+  };
+  const title = (_eyebrow: string, name: string) => (
+    <PanelHeading title={name} onClose={entered ? () => setPanel(null) : undefined} />
+  );
+  const hour = koreanHour();
+  const night = hour < 6 || hour >= 19;
+  return (
+    <>
+      <main id="app" className={entered ? '' : 'before-entry'}>
+        {entered && (
+          <>
+            <Park
+              key={`${channel}|${stages.map((s) => `${s.id}:${s.x}:${s.y}`).join('|')}`}
+              avatar={avatar}
+              liveStages={stages}
+              participants={town.state.participants.filter((p) => p.id !== account.id)}
+              demo={account.demo}
+              position={position}
+              motion={motion}
+              onMove={move}
+              onStage={openStage}
+              onParticipant={(person) => {
+                setSelectedPerson(person);
+                setPanel('participant');
+              }}
+              performing={performing}
+              reaction={reaction}
+            />
+            <header className="topbar">
+              <div className="header-center">
+                <span className="live-dot" />
+                <span>초록 공원 · CH {channels[channel]}</span>
+              </div>
+              <div className="header-right">
+                <Button
+                  className="avatar-button"
+                  onClick={() => setPanel('account')}
+                  aria-label="마이페이지"
+                >
+                  <ProfileIcon id={avatar.profileIcon} size={17} />
+                </Button>
+                <Button
+                  className="icon-button"
+                  onClick={() => setPanel('settings')}
+                  aria-label="설정"
+                >
+                  <Settings size={18} />
+                </Button>
+              </div>
+            </header>
+            <aside className="intro">
+              <span className="eyebrow">YOUR EVERYDAY MUSIC ESCAPE</span>
+              <h1>
+                오늘은 어떤 음악을
+                <br />
+                만나게 될까요?
+              </h1>
+              <p>발길이 닿는 곳에서, 새로운 목소리를 만나세요.</p>
+              <div className="weather">
+                {night ? <Moon size={16} /> : <Sun size={16} />}
+                <span>
+                  {night
+                    ? '별빛이 머무는 밤'
+                    : hour >= 17
+                      ? '노을이 물드는 저녁'
+                      : '햇살 좋은 오후'}
+                </span>
+                <i />
+                채팅 없이, 음악으로 함께
+              </div>
+            </aside>
+            <aside className="stage-list">
+              <div className="section-title">
+                <h2>
+                  공원의 소리 <span>LIVE</span>
+                </h2>
+                <span>{populations[channel]} / 30</span>
+              </div>
+              {stages.map((s) => (
+                <Button className="stage-item" key={s.id} onClick={() => openStage(s)}>
+                  <span className="stage-avatar" style={{ background: s.color + '55' }}>
+                    {s.artist ? (
+                      <Flaticon name="music" size={22} />
+                    ) : (
+                      <Flaticon name="microphone" size={20} />
+                    )}
+                  </span>
+                  <span className="stage-info">
+                    <strong>
+                      {performing === s.id ? avatar.name : s.artist || '당신의 무대'}
+                      {!s.artist && performing !== s.id && <em>비어 있어요</em>}
+                    </strong>
+                    <small>{s.name}</small>
+                  </span>
+                  {s.artist ? (
+                    <span className="equalizer">
+                      <i />
+                      <i />
+                      <i />
+                    </span>
+                  ) : (
+                    <ArrowUpRight size={13} className="text-[#9aa789]" />
+                  )}
+                </Button>
+              ))}
+              <div className="list-foot">
+                <span className="live-dot" />
+                가까운 무대의 소리가 들려요
+              </div>
+            </aside>
+            <div id="world-labels">
+              {stages.map((s) => (
+                <Button
+                  key={s.id}
+                  id={`label-${s.id}`}
+                  className={`world-label ${s.artist ? '' : 'empty'} ${near?.id === s.id ? 'selected' : ''}`}
+                  onClick={() => openStage(s)}
+                >
+                  <b>{String(s.id + 1).padStart(2, '0')}</b>
+                  {performing === s.id ? avatar.name : s.artist || '빈 버스킹 자리'}
+                  {s.artist && <span className="ml-2 opacity-60">♫</span>}
+                </Button>
+              ))}
+            </div>
+
+            <div className="movement">
+              <div
+                id="joystick"
+                role="button"
+                tabIndex={0}
+                aria-label="이동 조이스틱"
+                onPointerDown={(e) => {
+                  e.currentTarget.setPointerCapture(e.pointerId);
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  motion.current = {
+                    x: Math.max(-1, Math.min(1, (e.clientX - rect.left - rect.width / 2) / 35)),
+                    y: Math.max(-1, Math.min(1, (e.clientY - rect.top - rect.height / 2) / 35)),
+                  };
+                  const stick = e.currentTarget.querySelector<HTMLElement>('#stick')!;
+                  stick.style.transform = `translate(${motion.current.x * 22}px,${motion.current.y * 22}px)`;
+                }}
+                onPointerMove={(e) => {
+                  if (!e.currentTarget.hasPointerCapture(e.pointerId)) return;
+                  const r = e.currentTarget.getBoundingClientRect();
+                  motion.current = {
+                    x: Math.max(-1, Math.min(1, (e.clientX - r.left - r.width / 2) / 35)),
+                    y: Math.max(-1, Math.min(1, (e.clientY - r.top - r.height / 2) / 35)),
+                  };
+                  e.currentTarget.querySelector<HTMLElement>('#stick')!.style.transform =
+                    `translate(${motion.current.x * 22}px,${motion.current.y * 22}px)`;
+                }}
+                onPointerUp={(e) => {
+                  motion.current = { x: 0, y: 0 };
+                  e.currentTarget.querySelector<HTMLElement>('#stick')!.style.transform = '';
+                  e.currentTarget.releasePointerCapture(e.pointerId);
+                }}
+                onLostPointerCapture={(e) => {
+                  motion.current = { x: 0, y: 0 };
+                  e.currentTarget.querySelector<HTMLElement>('#stick')!.style.transform = '';
+                }}
+              >
+                <span className="north">⌃</span>
+                <span className="west">‹</span>
+                <span className="east">›</span>
+                <span className="south">⌄</span>
+                <div id="stick" />
+              </div>
+            </div>
+            <div className="bottom-center">
+              {queue !== null && (
+                <div id="queue-status">
+                  {stages.find((s) => s.id === queue)?.name} · 대기 {queuePlace}번
+                  <Button
+                    onClick={() => {
+                      void serverAction('cancel');
+                    }}
+                  >
+                    취소
+                  </Button>
+                </div>
+              )}
+              {performing !== null && (
+                <div id="queue-status">
+                  ♫ 무대 이용 중 ·{' '}
+                  {town.performance
+                    ? Math.max(
+                        0,
+                        Math.ceil((Date.parse(town.performance.ends_at) - now.getTime()) / 1000),
+                      )
+                    : 0}
+                  초 남음
+                  <Button
+                    onClick={async () => {
+                      try {
+                        await town.act('finish');
+                        position.current.y += 70;
+                        notify('공연을 마쳤어요. 수고했어요!');
+                      } catch (error) {
+                        setActionError((error as Error).message);
+                      }
+                    }}
+                  >
+                    공연 종료
+                  </Button>
+                </div>
+              )}
+              <div className="reaction-bar">
+                <span>마음을 보내요</span>
+                {[
+                  { s: '♡', icon: <Flaticon name="heart" size={24} />, label: '하트' },
+                  { s: '👏', icon: <Flaticon name="clap" size={23} />, label: '박수' },
+                  { s: '✦', icon: <Flaticon name="lightstick" size={23} />, label: '응원봉' },
+                ].map((r) => (
+                  <Button
+                    className="flex flex-col items-center justify-center"
+                    key={r.s}
+                    aria-label={r.label + ' 보내기'}
+                    onClick={() => setReaction({ symbol: r.s, at: Date.now() })}
+                  >
+                    {r.icon}
+                    <small>{r.label}</small>
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="map-card" role="img" aria-label="공원 지도">
+              <span>
+                OUR LITTLE PARK
+              </span>
+              <svg viewBox="0 0 180 95">
+                <rect width="180" height="95" rx="14" fill="#c4d6a5" />
+                <path
+                  d="M0 50Q45 10 90 50T180 40M85 0Q65 50 100 95"
+                  stroke="#eee3c8"
+                  strokeWidth="14"
+                  fill="none"
+                />
+                <ellipse cx="145" cy="20" rx="25" ry="13" fill="#91c6c4" />
+                <g fill="#668753">
+                  <circle cx="18" cy="19" r="8" />
+                  <circle cx="163" cy="74" r="10" />
+                  <circle cx="30" cy="80" r="11" />
+                </g>
+                <g fill="#fcf8e8" stroke="#a57c50" strokeWidth="2">
+                  {stages.map((s) => (
+                    <circle key={s.id} cx={s.x / 10} cy={s.y / 9} r="5" />
+                  ))}
+                </g>
+                <circle
+                  cx={position.current.x / 10}
+                  cy={position.current.y / 9}
+                  r="5"
+                  fill="#ef976c"
+                  stroke="white"
+                  strokeWidth="2"
+                />
+              </svg>
+              <span className="map-caption">나만의 속도로 걸어보세요</span>
+            </div>
+            <Button
+              className="stage-toggle"
+              onClick={() => {
+                setShowStages(!showStages);
+                document.body.classList.toggle('show-stages', !showStages);
+              }}
+            >
+              <Flaticon name="music" size={20} />
+              <span>공연 중인 무대</span>
+              <span className="pill">{stages.filter((s) => s.artist).length}</span>
+            </Button>
+            <HourlyClock active={entered} />
+          </>
+        )}
+      </main>
+      <DialogPanel
+        data-panel={panel}
+        ref={dialog}
+        onCancel={(e) => {
+          if (!entered) e.preventDefault();
+          else setPanel(null);
+        }}
+        onClick={(e) => {
+          if (entered && e.target === dialog.current) {
+            const r = dialog.current.getBoundingClientRect();
+            if (
+              e.clientX < r.left ||
+              e.clientX > r.right ||
+              e.clientY < r.top ||
+              e.clientY > r.bottom
+            )
+              setPanel(null);
+          }
+        }}
+      >
+        {panel === 'role' && (
+          <>
+            {title('', '어떻게 참여할까요?')}
+            <RolePicker
+              onSelect={(role) => {
+                setMemberProfile({ ...memberProfile, role });
+                setPanel(memberProfile.completed ? 'registration' : 'avatar');
+              }}
+            />
+          </>
+        )}
+        {panel === 'registration' && (
+          <>
+            {title('', memberProfile.role === 'musician' ? '뮤지션 등록' : '나를 소개해요')}
+            <Registration
+              profile={memberProfile}
+              onBack={() => setPanel('role')}
+              onSave={async (profile) => {
+                if (!account.demo) await saveProfile(account.id, profile, avatar);
+                setMemberProfile(profile);
+                localStorage.setItem(storagePrefix + '-profile', JSON.stringify(profile));
+                setPanel(entered ? 'account' : 'channels');
+              }}
+            />
+          </>
+        )}
+        {panel === 'account' && (
+          <>
+            {title('', '\uB0B4 \uD504\uB85C\uD544')}
+            <AccountPanel
+              avatar={avatar}
+              onCustomize={() => setPanel('avatar')}
+              profile={memberProfile}
+              onEditProfile={() => setPanel('registration')}
+              onChooseIcon={async (id) => {
+                const next = { ...avatar, profileIcon: id };
+                if (!account.demo) await saveProfile(account.id, memberProfile, next);
+                setAvatar(next);
+              }}
+              onSignOut={async () => {
+                if (entered && !account.demo) await town.act('leave');
+                await account.signOut();
+              }}
+            />
+          </>
+        )}
+        {panel === 'avatar' && (
+          <>
+            {title(
+              '나의 주민 카드',
+              entered ? '오늘은 어떤 모습으로?' : '나만의 모습을 만들어 봐요',
+            )}
+            <AvatarEditor
+              avatar={avatar}
+              onChange={setAvatar}
+              onContinue={async () => {
+                if (!avatar.name.trim()) return;
+                if (entered && !account.demo) {
+                  try {
+                    await saveProfile(account.id, memberProfile, avatar);
+                  } catch {
+                    notify(
+                      '\uC800\uC7A5\uD558\uC9C0 \uBABB\uD588\uC5B4\uC694. \uB2E4\uC2DC \uC2DC\uB3C4\uD574 \uC8FC\uC138\uC694.',
+                    );
+                    return;
+                  }
+                }
+                setPanel(entered ? 'account' : 'registration');
+              }}
+            />
+          </>
+        )}
+        {panel === 'channels' && (
+          <>
+            {title('', '채널 목록')}
+            <ChannelPicker
+              current={channel}
+              entered={entered}
+              onSelect={changeChannel}
+              populations={populations}
+              busy={town.busy}
+              capacities={town.state.channels.map((c) => c.capacity)}
+            />
+          </>
+        )}
+        {panel === 'settings' && (
+          <>
+            {title('', '설정')}
+            <div className="settings-menu">
+              <Button variant="ghost" onClick={() => setPanel('channels')}>
+                <Flaticon name="map-3d" size={16} />
+                채널 변경
+              </Button>
+              <Button variant="ghost" onClick={() => setPanel('following')}>
+                <Flaticon name="terms-3d" size={16} />
+                팔로우한 뮤지션
+              </Button>
+              <div className="settings-policy-links">
+                <a href="/terms/" target="_blank" rel="noopener noreferrer">
+                  <Flaticon name="document-3d" size={16} />
+                  이용약관
+                </a>
+                <a href="/privacy/" target="_blank" rel="noopener noreferrer">
+                  <Flaticon name="privacy-3d" size={16} />
+                  개인정보처리방침
+                </a>
+                <a href="/safety/" target="_blank" rel="noopener noreferrer">
+                  <Flaticon name="safety-3d" size={16} />
+                  안전 가이드
+                </a>
+                <a href="mailto:teamsda01@gmail.com">
+                  <Flaticon name="mail-3d" size={16} />
+                  문의하기
+                </a>
+              </div>
+            </div>
+          </>
+        )}
+        {panel === 'profile' && (
+          <>
+            {title('MEET THE MUSICIAN', '음악 너머의 이야기')}
+            <div className="profile-heading">
+              <div className="profile-icon">
+                <Flaticon name="music" size={40} />
+              </div>
+              <div>
+                <h2>{selected.artist}</h2>
+                <span className="pill">{selected.genre}</span>
+              </div>
+            </div>
+            <p className="modal-sub">{selected.bio}</p>
+            <div className="profile-stats">
+              <div>
+                <strong>{selected.followers + (follow.includes(selected.id) ? 1 : 0)}</strong>팔로워
+              </div>
+              <div>
+                <strong>{selected.listeners}</strong>관람 중
+              </div>
+              <div>
+                <strong className="!text-sm mt-1">{selected.name}</strong>지금 공연하는 곳
+              </div>
+            </div>
+            <div className="flex gap-3 text-xs text-[#8e987d]">
+              {selectedMusician?.instagram ? (
+                <a href={selectedMusician.instagram} target="_blank" rel="noopener noreferrer">
+                  인스타그램
+                </a>
+              ) : (
+                <span>SNS · 미등록</span>
+              )}
+              {selectedMusician?.soundcloud ? (
+                <a href={selectedMusician.soundcloud} target="_blank" rel="noopener noreferrer">
+                  사운드클라우드
+                </a>
+              ) : (
+                <span>음원 링크 · 미등록</span>
+              )}
+            </div>
+            <div className="actions">
+              <Button variant="primary" className="primary" onClick={followArtist}>
+                {follow.includes(selected.id) ? '✓ 팔로잉' : '♡ 팔로우'}
+              </Button>
+              <Button
+                variant="secondary"
+                className="secondary"
+                onClick={() => {
+                  position.current = { x: selected.x, y: selected.y + 90 };
+                  setNear(selected);
+                  setPanel(null);
+                }}
+              >
+                무대 앞에서 듣기
+              </Button>
+            </div>
+            <div className="actions">
+              <Button
+                variant="ghost"
+                className="text-button flex items-center justify-center gap-1"
+                onClick={() =>
+                  setMuted(
+                    muted.includes(selected.id)
+                      ? muted.filter((id) => id !== selected.id)
+                      : [...muted, selected.id],
+                  )
+                }
+              >
+                <VolumeX size={12} />
+                {muted.includes(selected.id) ? '음소거 해제' : '나에게만 음소거'}
+              </Button>
+              <Button
+                variant="ghost"
+                className="text-button"
+                onClick={() => {
+                  if (!selectedMusician || selectedMusician.id === account.id) return;
+                  setSelectedPerson(selectedMusician);
+                  setPanel('report');
+                }}
+              >
+                공연 신고
+              </Button>
+              <Button variant="ghost" className="text-button" onClick={() => setPanel('queue')}>
+                이 자리 대기
+              </Button>
+            </div>
+            <p className="notice">
+              현재 무대와 대기 순서는 공유돼요. 실시간 음성 송출은 아직 연결되지 않았어요.
+            </p>
+          </>
+        )}
+        {panel === 'queue' && (
+          <>
+            {title('YOUR VOICE, YOUR STAGE', '누구나 시작할 수 있어요')}
+            <BuskingBook
+              stage={selected}
+              performing={performing !== null}
+              busy={town.busy}
+              musician={memberProfile.role === 'musician'}
+              onJoin={() => join(selected)}
+            />
+          </>
+        )}
+        {panel === 'following' && (
+          <>
+            {title('YOUR FAVORITE VOICES', '다시 만나고 싶은 목소리')}
+            {follow.length ? (
+              follow.map((id) => (
+                <Button
+                  variant="choice"
+                  className="channel-row"
+                  key={id}
+                  onClick={() => openStage(stages[id])}
+                >
+                  <Flaticon name="music" size={25} />
+                  <span className="channel-detail">
+                    {stages[id].artist}
+                    <small>{stages[id].name} · 공연 중</small>
+                  </span>
+                  <ArrowRight size={16} />
+                </Button>
+              ))
+            ) : (
+              <div className="text-center py-9 text-[#8c9b7d]">
+                <Flaticon name="heart" size={36} className="mx-auto mb-4" />
+                <p className="text-sm">아직 팔로우한 뮤지션이 없어요.</p>
+                <p className="text-xs mt-2">마음에 드는 무대에서 팔로우를 눌러보세요.</p>
+              </div>
+            )}
+            <div className="notice">
+              공연 시작 푸시는 아직 연결되지 않았어요. 출시 버전에서는 알림 동의 후 받을 수 있으며,
+              iPhone은 홈 화면 추가가 필요해요.
+            </div>
+          </>
+        )}
+        {panel === 'participant' && selectedPerson && (
+          <>
+            {title('', '프로필')}
+            <ParticipantProfile person={selectedPerson} onReport={() => setPanel('report')} />
+          </>
+        )}
+        {panel === 'report' && selectedPerson && (
+          <>
+            {title('', '신고하기')}
+            <ReportForm
+              key={selectedPerson.id}
+              target={selectedPerson}
+              onClose={() => setPanel(null)}
+            />
+          </>
+        )}
+      </DialogPanel>
+      {actionError && <ErrorModal message={actionError} onClose={() => setActionError('')} />}
+      {town.error && town.error !== dismissedTownError && (
+        <ErrorModal
+          message={town.error}
+          onClose={() => setDismissedTownError(town.error)}
+          onRetry={() => {
+            setDismissedTownError('');
+            void town.request('snapshot').catch((error) => setActionError(error.message));
+          }}
+        />
+      )}
+      <div id="toast" role="status" className={toast ? 'visible' : ''}>
+        {toast}
+      </div>
+    </>
+  );
 }
-createRoot(document.getElementById('root')!).render(<React.StrictMode><App/></React.StrictMode>);
+createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <LoginGate>
+      {(account) => (
+        <ProfileLoader key={account.id} account={account}>
+          {(initial) => <App account={account} initial={initial} />}
+        </ProfileLoader>
+      )}
+    </LoginGate>
+  </React.StrictMode>,
+);
