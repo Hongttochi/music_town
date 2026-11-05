@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from './components/ui/Button';
 import { Flaticon } from './Flaticon';
+import { BRIDGE, PLAYER_RADIUS, RIVER, canCrossRiver } from './riverBoundary';
 import * as T from 'three';
 import { Avatar, Stage, stages, koreanHour } from './model';
 import { createImageCharacters } from './imageCharacter';
@@ -204,7 +205,15 @@ export function Park(props: Props) {
       [13, 18],
       [-8, 18],
     ].forEach(([x, z]) => tree(x, z));
-    const water = box(20, -0.025, 0, 8, 0.04, 95, '#78c7cd');
+    const water = box(
+      (RIVER.left + RIVER.right) / 2,
+      -0.025,
+      0,
+      RIVER.right - RIVER.left,
+      0.04,
+      95,
+      '#78c7cd',
+    );
     water.material.roughness = 0.28;
     for (let z = -35; z < 40; z += 1.6) ball(15.8, -0.06, z, 0.7, 0.25, 0.9, '#d3cf9c');
     for (let i = 0; i < 30; i++)
@@ -230,7 +239,8 @@ export function Park(props: Props) {
 
     for (let x = -20; x < 14; x += 3.4) scenery.prop(5, x, -17, 1.2);
     // A small wooden footbridge makes the river part of the walk.
-    for (let x = 15; x < 25.3; x += 0.45) box(x, 0.14, 4.5, 0.42, 0.2, 2.6, '#bd9767');
+    for (let x = 15; x < 25.3; x += 0.45)
+      box(x, 0.14, BRIDGE.centerZ, 0.42, 0.2, BRIDGE.width, '#bd9767');
     for (const z of [3.15, 5.85]) {
       for (let x = 15; x < 25.3; x += 2) cyl(x, 0.65, z, 0.075, 0.075, 1.3, '#a88054');
       box(20, 1.12, z, 10.5, 0.09, 0.09, '#c6a476');
@@ -628,8 +638,8 @@ export function Park(props: Props) {
         },
         point = world(next);
       if (
-        !(point.x > 15.5 && point.x < 24.5 && (point.z < 3.2 || point.z > 5.8)) &&
-        !obstacles.some((o) => Math.hypot(point.x - o.x, point.z - o.z) < o.r + 0.35)
+        canCrossRiver(world(p.position.current), point) &&
+        !obstacles.some((o) => Math.hypot(point.x - o.x, point.z - o.z) < o.r + PLAYER_RADIUS)
       )
         p.position.current = next;
       if ((dx || dz) && time - lastMove > 70) {
