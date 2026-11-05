@@ -323,16 +323,23 @@ dialog.town-panel:is([data-panel='profile'], [data-panel='report']) {
   border-bottom: 2px solid #fff8dc;
 }
 
-.sound-effects-setting {
+.topbar .header-right .settings-button-icon {
+  width: 18px;
+  height: 18px;
+}
+.settings-menu > .sound-effects-setting {
+  display: block;
+}
+.sound-effects-setting > .town-button {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px;
+  border-radius: 6px;
   font-size: 12px;
-}
-.settings-menu .sound-effects-setting .flaticon {
-  width: 24px;
-  height: 24px;
+  text-align: left;
 }
 .sound-effects-label {
   flex: 1;
@@ -341,33 +348,22 @@ dialog.town-panel:is([data-panel='profile'], [data-panel='report']) {
   color: #606b56;
   font-size: 11px;
 }
-.sound-effects-switch.town-button {
-  display: grid;
-  place-items: center;
-  min-width: 48px;
-  min-height: 44px;
-  padding: 0;
-  background: transparent;
-}
-.sound-effects-track {
+.sound-effects-slider {
   display: flex;
   align-items: center;
-  width: 42px;
-  height: 24px;
-  padding: 3px;
-  border-radius: 20px;
-  background: #8a9284;
+  gap: 12px;
+  padding: 0 10px 8px 36px;
 }
-.sound-effects-track > span {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #fffdf3;
-  box-shadow: 0 1px 3px #26351b30;
+.sound-effects-slider input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  accent-color: #64844f;
 }
-.sound-effects-switch[aria-checked='true'] .sound-effects-track {
-  background: #64844f;
-}
-.sound-effects-switch[aria-checked='true'] .sound-effects-track > span {
-  transform: translateX(18px);
+.sound-effects-slider output {
+  min-width: 34px;
+  color: #606b56;
+  font-size: 11px;
+  text-align: right;
 }

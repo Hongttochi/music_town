@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 const effects = [],
   handlers = new Map(),
   played = [],
+  gains = [],
   providers = [],
   preferences = new Map();
 class Element {
@@ -38,7 +39,9 @@ class AudioContext {
     return Promise.resolve(bytes);
   }
   createGain() {
-    return { gain: {}, connect() {}, disconnect() {} };
+    const node = { gain: {}, connect() {}, disconnect() {} };
+    gains.push(node);
+    return node;
   }
   createBufferSource() {
     return {
@@ -123,6 +126,14 @@ assert.equal(preferences.get('music-town-sound-effects'), 'off');
 settings.setEnabled(true);
 await check('일반 버튼', {}, 'click');
 assert.equal(preferences.get('music-town-sound-effects'), 'on');
+settings.setVolume(0.35);
+assert.equal(gains[0].gain.value, 0.35, 'master gain changes immediately');
+assert.equal(preferences.get('music-town-sound-volume'), '0.35');
+settings.setVolume(0);
+await check('일반 버튼', {}, null);
+settings.setVolume(1);
+await check('일반 버튼', {}, 'click');
+assert.equal(gains[0].gain.value, 1);
 cleanup.forEach((fn) => fn());
 assert.equal(handlers.size, 0);
 console.log(

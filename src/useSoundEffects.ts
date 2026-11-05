@@ -20,8 +20,11 @@ const sources = { clap, complete, heart, lightstick, click, ok, cancel };
 export type SoundEffect = keyof typeof sources;
 
 const preferenceKey = 'music-town-sound-effects';
+const volumeKey = 'music-town-sound-volume';
 const SoundSettingsContext = createContext({
   enabled: true,
+  volume: 1,
+  setVolume: (_volume: number) => {},
   setEnabled: (_enabled: boolean) => {},
 });
 export function useSoundSettings() {
@@ -41,10 +44,21 @@ export function SoundEffectsProvider({ children }: { children: ReactNode }) {
       return true;
     }
   });
+  const [volume, updateVolume] = useState(() => {
+    try {
+      const saved = localStorage.getItem(volumeKey);
+      const value = saved === null ? 1 : Number(saved);
+      return Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 1;
+    } catch {
+      return 1;
+    }
+  });
+  const volumeRef = useRef(volume);
   const enabledRef = useRef(enabled);
   const playbackVersion = useRef(0);
   const engine = useRef<{
     context: AudioContext;
+    master: GainNode;
     buffers: Map<SoundEffect, Promise<AudioBuffer>>;
     active: Map<SoundEffect, AudioBufferSourceNode>;
   } | null>(null);
@@ -64,10 +78,30 @@ export function SoundEffectsProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const setVolume = useCallback(
+    (value: number) => {
+      if (!Number.isFinite(value)) return;
+      const next = Math.max(0, Math.min(1, value));
+      volumeRef.current = next;
+      updateVolume(next);
+      if (engine.current) engine.current.master.gain.value = next;
+      setEnabled(next > 0);
+      try {
+        localStorage.setItem(volumeKey, String(next));
+      } catch {
+        /* Storage is optional. */
+      }
+    },
+    [setEnabled],
+  );
+
   const prepare = useCallback(() => {
     if (!engine.current) {
       const context = new AudioContext();
-      engine.current = { context, buffers: new Map(), active: new Map() };
+      const master = context.createGain();
+      master.gain.value = volumeRef.current;
+      master.connect(context.destination);
+      engine.current = { context, master, buffers: new Map(), active: new Map() };
     }
     const audio = engine.current;
     // Resume within the tap/key event so mobile browsers permit later completion sounds.
@@ -129,7 +163,7 @@ export function SoundEffectsProvider({ children }: { children: ReactNode }) {
             const gain = audio.context.createGain();
             gain.gain.value = 0.55;
             source.buffer = buffer;
-            source.connect(gain).connect(audio.context.destination);
+            source.connect(gain).connect(audio.master);
             audio.active.set(name, source);
             source.onended = () => {
               if (audio.active.get(name) === source) audio.active.delete(name);
@@ -182,7 +216,7 @@ export function SoundEffectsProvider({ children }: { children: ReactNode }) {
   }, [play]);
   return createElement(
     SoundSettingsContext.Provider,
-    { value: { enabled, setEnabled } },
+    { value: { enabled, setEnabled, volume, setVolume } },
     createElement(SoundContext.Provider, { value: play }, children),
   );
 }

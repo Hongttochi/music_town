@@ -310,7 +310,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                   onClick={() => setPanel('settings')}
                   aria-label="설정"
                 >
-                  <Flaticon name="setting" size={24} />
+                  <Flaticon name="setting" size={18} className="settings-button-icon" />
                 </Button>
               </div>
             </header>
@@ -346,9 +346,9 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                 <Button className="stage-item" key={s.id} onClick={() => openStage(s)}>
                   <span className="stage-avatar" style={{ background: s.color + '55' }}>
                     {s.artist ? (
-                      <Flaticon name="music" size={22} />
+                      <Flaticon name="musical" size={22} />
                     ) : (
-                      <Flaticon name="microphone" size={20} />
+                      <Flaticon name="mic" size={20} />
                     )}
                   </span>
                   <span className="stage-info">
@@ -614,7 +614,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                 document.body.classList.toggle('show-stages', !showStages);
               }}
             >
-              <Flaticon name="music" size={20} />
+              <Flaticon name="musical" size={20} />
               <span>공연 중인 무대</span>
               <span className="pill">{stages.filter((s) => s.artist).length}</span>
             </Button>
