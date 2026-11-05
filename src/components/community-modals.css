@@ -322,8 +322,3 @@ dialog.town-panel:is([data-panel='profile'], [data-panel='report']) {
   border-right: 2px solid #fff8dc;
   border-bottom: 2px solid #fff8dc;
 }
-.bench-action .bench-exit-icon {
-  position: absolute;
-  right: 3px;
-  top: 3px;
-}

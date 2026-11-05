@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from './components/ui/Button';
-import { LogOut } from 'lucide-react';
 import { Flaticon } from './Flaticon';
 import * as T from 'three';
 import { Avatar, Stage, stages, koreanHour } from './model';
@@ -34,7 +33,7 @@ export function Park(props: Props) {
   latest.current = props;
   const [error, setError] = useState(false);
   const benchBubble = useRef<HTMLButtonElement>(null);
-  const [benchAction, setBenchAction] = useState<'sit' | 'stand' | null>(null);
+  const [benchAction, setBenchAction] = useState<'sit' | null>(null);
   const useBench = useRef<() => void>(() => {});
   useEffect(() => {
     const el = canvas.current!;
@@ -297,7 +296,7 @@ export function Park(props: Props) {
     let nearbyBench: T.Vector3 | null = null;
     let seatedBench: T.Vector3 | null = null;
     let standingPosition: Position | null = null;
-    let shownBenchAction: 'sit' | 'stand' | null = null;
+    let shownBenchAction: 'sit' | null = null;
     const seatPosition = (bench: T.Vector3) => new T.Vector3(bench.x - 0.2, 0, bench.z + 0.25);
     const standUp = (restorePosition: boolean) => {
       if (restorePosition && standingPosition) {
@@ -310,9 +309,8 @@ export function Park(props: Props) {
     useBench.current = () => {
       const p = latest.current;
       if (document.querySelector('dialog[open]') || p.performing !== null) return;
-      if (seatedBench) {
-        standUp(true);
-      } else if (nearbyBench && world(p.position.current).distanceTo(nearbyBench) < 2.5) {
+      if (seatedBench) return;
+      if (nearbyBench && world(p.position.current).distanceTo(nearbyBench) < 2.5) {
         seatedBench = nearbyBench;
         standingPosition = { ...p.position.current };
         const seat = seatPosition(seatedBench);
@@ -642,7 +640,7 @@ export function Park(props: Props) {
         p.performing === null
           ? (benches.find((bench) => world(p.position.current).distanceTo(bench) < 2.5) ?? null)
           : null;
-      const action = seatedBench ? 'stand' : nearbyBench ? 'sit' : null;
+      const action = !seatedBench && nearbyBench ? 'sit' : null;
       if (action !== shownBenchAction) {
         shownBenchAction = action;
         setBenchAction(action);
@@ -683,7 +681,7 @@ export function Park(props: Props) {
       target.set(focus.x, focus.y + 0.3, focus.z - 3);
       camera.lookAt(target);
       camera.updateMatrixWorld();
-      const bubbleBench = seatedBench ?? nearbyBench;
+      const bubbleBench = seatedBench ? null : nearbyBench;
       if (benchBubble.current) {
         if (bubbleBench && !document.querySelector('dialog[open]')) {
           const anchor = bubbleBench.clone();
@@ -796,14 +794,11 @@ export function Park(props: Props) {
           ref={benchBubble}
           className="bench-action"
           style={{ visibility: 'hidden' }}
-          aria-label={benchAction === 'stand' ? '의자에서 일어나기' : '의자에 앉기'}
-          title={benchAction === 'stand' ? '일어나기' : '앉기'}
+          aria-label="의자에 앉기"
+          title="앉기"
           onClick={() => useBench.current()}
         >
           <Flaticon name="bench" size={32} />
-          {benchAction === 'stand' && (
-            <LogOut className="bench-exit-icon" size={13} aria-hidden="true" />
-          )}
         </Button>
       )}
       <span
