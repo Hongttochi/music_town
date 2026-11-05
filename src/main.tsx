@@ -4,6 +4,7 @@ import { ErrorModal } from './components/ui/ErrorModal';
 import { useTown, type Participant } from './useTown';
 import { useStageMicrophone } from './useStageMicrophone';
 import { useLiveAudio } from './useLiveAudio';
+import { useSoundEffects, type SoundEffect } from './useSoundEffects';
 import { ParticipantProfile } from './components/ParticipantProfile';
 import { ReportForm } from './components/ReportForm';
 import { ProfileLoader } from './components/ProfileLoader';
@@ -90,6 +91,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
   const [near, setNear] = useState<Stage | null>(null);
   const [follow, setFollow] = useState<number[]>(() => readSaved(storagePrefix + '-follow', []));
   const [muted, setMuted] = useState<number[]>([]);
+  const playSound = useSoundEffects();
   const [toast, setToast] = useState('');
   const [actionError, setActionError] = useState('');
   const [dismissedTownError, setDismissedTownError] = useState('');
@@ -137,6 +139,38 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
         !muted.includes(item.stage_id) &&
         Date.parse(item.ends_at) > now.getTime(),
     );
+  const previousAudiblePerformance = useRef<typeof audiblePerformance>(undefined);
+  useEffect(() => {
+    const previous = previousAudiblePerformance.current;
+    if (
+      previous &&
+      entered &&
+      town.state.channel === previous.channel_id &&
+      !muted.includes(previous.stage_id) &&
+      (previous.user_id === account.id || near?.id === previous.stage_id) &&
+      (Date.parse(previous.ends_at) <= now.getTime() ||
+        !town.state.performances.some(
+          (item) =>
+            item.channel_id === previous.channel_id &&
+            item.stage_id === previous.stage_id &&
+            item.user_id === previous.user_id &&
+            item.ends_at === previous.ends_at,
+        ))
+    ) {
+      playSound('complete');
+    }
+    previousAudiblePerformance.current = entered ? audiblePerformance : undefined;
+  }, [
+    audiblePerformance,
+    entered,
+    town.state.channel,
+    town.state.performances,
+    now,
+    muted,
+    near?.id,
+    account.id,
+    playSound,
+  ]);
   const voice = useLiveAudio(
     entered && !account.demo && town.state.channel !== null && audiblePerformance
       ? {
@@ -480,15 +514,33 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                 <div className="reaction-bar">
                   <span>마음을 보내요</span>
                   {[
-                    { s: '♡', icon: <Flaticon name="heart" size={24} />, label: '하트' },
-                    { s: '👏', icon: <Flaticon name="clap" size={23} />, label: '박수' },
-                    { s: '✦', icon: <Flaticon name="lightstick" size={23} />, label: '응원봉' },
+                    {
+                      s: '♡',
+                      icon: <Flaticon name="heart" size={24} />,
+                      label: '하트',
+                      sound: 'heart',
+                    },
+                    {
+                      s: '👏',
+                      icon: <Flaticon name="clap" size={23} />,
+                      label: '박수',
+                      sound: 'clap',
+                    },
+                    {
+                      s: '✦',
+                      icon: <Flaticon name="lightstick" size={23} />,
+                      label: '응원봉',
+                      sound: 'lightstick',
+                    },
                   ].map((r) => (
                     <Button
                       className="flex flex-col items-center justify-center"
                       key={r.s}
                       aria-label={r.label + ' 보내기'}
-                      onClick={() => setReaction({ symbol: r.s, at: Date.now() })}
+                      onClick={() => {
+                        setReaction({ symbol: r.s, at: Date.now() });
+                        playSound(r.sound as SoundEffect);
+                      }}
                     >
                       {r.icon}
                       <small>{r.label}</small>
