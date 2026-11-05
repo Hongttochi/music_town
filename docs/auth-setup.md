@@ -32,6 +32,11 @@ VITE_SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLIC_PUBLISHABLE_KEY
 
 ## 3. Kakao
 
+- 이메일은 사용하지 않으므로 `account_email` 동의 항목을 요청하지 않습니다. 이메일 수집을 위해 비즈 앱으로 전환할 필요는 없습니다.
+- Supabase Dashboard → Authentication → Sign In / Providers → Kakao에서 **Allow users without an email**을 켜고 저장합니다. 클라이언트의 `scopes` 설정만으로는 Supabase의 이메일 요구 설정이 해제되지 않습니다.
+- 설정 후 카카오 로그인을 다시 시작해 이메일 동의 없이 가입과 로그인이 완료되는지 확인합니다.
+- Supabase의 `options.scopes`는 기본 범위에 추가되므로 `account_email`을 제거하지 못합니다. 카카오는 `options.queryParams.scope: 'profile_nickname,profile_image'`로 실제 인가 요청 범위를 지정합니다. **Allow users without an email**은 이메일 없는 응답을 허용하는 별도 설정이므로 함께 필요합니다.
+
 - Kakao Developers에서 앱을 만들고 카카오 로그인을 활성화합니다.
 - Supabase의 Kakao Provider 화면에서 안내하는 callback URL을 카카오 Redirect URI에 그대로 등록합니다.
 - 필요한 프로필 동의 항목을 설정합니다. 현재 클라이언트가 요청하는 범위는 `profile_nickname profile_image`입니다.

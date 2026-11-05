@@ -224,7 +224,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
               }}
               performing={performing}
               performerIds={town.state.performances.map((performance) => performance.user_id)}
-              reaction={reaction}
+              reaction={performing === null ? reaction : null}
             />
             <header className="topbar">
               <div className="header-center">
@@ -373,7 +373,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
               </div>
             </div>
             <div className="bottom-center">
-              {queue !== null && (
+              {queue !== null && performing === null && (
                 <div id="queue-status">
                   {stages.find((s) => s.id === queue)?.name} · 대기 {queuePlace}번
                   <Button
@@ -410,24 +410,26 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                   </Button>
                 </div>
               )}
-              <div className="reaction-bar">
-                <span>마음을 보내요</span>
-                {[
-                  { s: '♡', icon: <Flaticon name="heart" size={24} />, label: '하트' },
-                  { s: '👏', icon: <Flaticon name="clap" size={23} />, label: '박수' },
-                  { s: '✦', icon: <Flaticon name="lightstick" size={23} />, label: '응원봉' },
-                ].map((r) => (
-                  <Button
-                    className="flex flex-col items-center justify-center"
-                    key={r.s}
-                    aria-label={r.label + ' 보내기'}
-                    onClick={() => setReaction({ symbol: r.s, at: Date.now() })}
-                  >
-                    {r.icon}
-                    <small>{r.label}</small>
-                  </Button>
-                ))}
-              </div>
+              {performing === null && (
+                <div className="reaction-bar">
+                  <span>마음을 보내요</span>
+                  {[
+                    { s: '♡', icon: <Flaticon name="heart" size={24} />, label: '하트' },
+                    { s: '👏', icon: <Flaticon name="clap" size={23} />, label: '박수' },
+                    { s: '✦', icon: <Flaticon name="lightstick" size={23} />, label: '응원봉' },
+                  ].map((r) => (
+                    <Button
+                      className="flex flex-col items-center justify-center"
+                      key={r.s}
+                      aria-label={r.label + ' 보내기'}
+                      onClick={() => setReaction({ symbol: r.s, at: Date.now() })}
+                    >
+                      {r.icon}
+                      <small>{r.label}</small>
+                    </Button>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="map-card" role="img" aria-label="공원 지도">
               <span>

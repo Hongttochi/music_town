@@ -22,7 +22,10 @@ export async function signIn(provider: 'google' | 'kakao') {
     provider,
     options: {
       redirectTo: window.location.origin + '/',
-      scopes: provider === 'kakao' ? 'profile_nickname profile_image' : undefined,
+      // `scopes` adds to Supabase's defaults, including account_email.
+      // Override the outgoing Kakao scope; also enable "Allow users without an email".
+      queryParams:
+        provider === 'kakao' ? { scope: 'profile_nickname,profile_image' } : undefined,
     },
   });
   if (error) throw error;

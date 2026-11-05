@@ -324,6 +324,9 @@ dialog.town-panel[data-panel='avatar'] {
 .reaction-bar {
   padding: 6px;
   gap: 5px;
+  border-radius: 999px;
+  width: max-content;
+  margin-inline: auto;
 }
 .reaction-bar .town-button {
   min-width: 38px;
