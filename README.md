@@ -1,6 +1,77 @@
-# MUSIC TOWN
+<p align="center">
+  <img src="public/art/music-town-brand-v3.png" width="240" alt="MUSIC TOWN" />
+</p>
 
-모바일 가로 화면을 중심으로 만든 공원 버스킹 웹앱 프로토타입.
+# 산책하다 만나는, 새로운 음악. MUSIC TOWN
+
+나만의 캐릭터로 공원을 걷고, 작은 무대 앞에서 하트와 박수로 응원을 보내 보세요.
+
+모바일 **가로 화면**을 위한 공원 버스킹 웹앱을 만들고 있습니다.
+
+| Type | Link |
+| --- | --- |
+| 소스 코드 | [Hongttochi/music_town](https://github.com/Hongttochi/music_town) |
+| 문의 | [teamsda01@gmail.com](mailto:teamsda01@gmail.com) |
+| 로그인 연결 | [Google · Kakao 설정 안내](docs/auth-setup.md) |
+
+<br />
+
+## Screenshots
+
+모바일 가로 화면에서 촬영한 개발용 데모입니다. 화면의 인원과 뮤지션은 예시 데이터이며, 로그인 화면은 OAuth 미설정 상태입니다.
+
+### 공원 산책
+
+<img src="docs/screenshots/park.png" width="100%" alt="캐릭터와 작은 무대, 터치 조이스틱과 응원 버튼이 있는 공원" />
+
+| 로그인 | 캐릭터 꾸미기 |
+| :---: | :---: |
+| <img src="docs/screenshots/login.png" width="460" alt="MUSIC TOWN 로그인 화면" /> | <img src="docs/screenshots/avatar.png" width="460" alt="머리와 피부, 옷과 액세서리를 고르는 캐릭터 편집 화면" /> |
+
+| 채널 선택 | 내 프로필 |
+| :---: | :---: |
+| <img src="docs/screenshots/channels.png" width="460" alt="나무 표지판 형태의 공원 채널 목록" /> | <img src="docs/screenshots/profile.png" width="460" alt="프로필 배지와 자기소개, 음악 링크" /> |
+
+| 설정 | 이용약관 |
+| :---: | :---: |
+| <img src="docs/screenshots/settings.png" width="460" alt="채널 변경과 정책 문서를 모은 설정 메뉴" /> | <img src="docs/screenshots/terms.png" width="460" alt="공통 로고 헤더와 캐릭터가 있는 이용약관 문서" /> |
+
+<br />
+
+## Features
+
+| 기능 | 설명 |
+| --- | --- |
+| 공원 산책 | 터치 조이스틱으로 이동하는 3D 공원과 캐릭터 추적 카메라 |
+| 캐릭터 꾸미기 | 머리·눈·피부색, 의상, 액세서리와 악기 선택 |
+| 프로필 | 배지, 자기소개, 인스타그램·사운드클라우드 링크 |
+| 채널과 무대 | 5개 채널, 6개 버스킹 자리, 공연 신청과 대기 UI |
+| 응원 | 하트·박수·응원봉 리액션 애니메이션 |
+| 이용자 보호 | 다른 이용자 프로필에서 신고 접수, 정책 문서와 안전 가이드 |
+
+채널·프로필 저장·신고 접수는 Supabase 설정이 필요합니다. 실제 마이크 음성 전송은 아직 구현되지 않았습니다.
+
+<br />
+
+## Architecture
+
+```mermaid
+flowchart LR
+    User[모바일 브라우저] --> App[React · TypeScript]
+    App --> World[Three.js 공원 · 2D 캐릭터]
+    App --> Local[localStorage 초안 · 팔로우]
+    App --> Auth[Supabase Auth]
+    Auth --> OAuth[Google · Kakao]
+    App --> Profiles[프로필 저장 API]
+    App --> Town[채널 · 공연 · 신고 RPC]
+    Profiles -. DB 설정 필요 .-> DB[(Supabase PostgreSQL)]
+    Town -. DB 설정 필요 .-> DB
+    App --> Policies[정적 정책 문서]
+```
+
+클라이언트 코드의 연결 구조입니다. 운영 DB 구성과 원격 기능 검증은 배포 전 확인 항목을 참고하세요.
+
+<br />
 
 ## 실행
 
@@ -72,3 +143,9 @@ TypeScript 검사 후 `dist/`에 배포 파일을 생성합니다.
 ## 검증
 
 `npm run build`로 TypeScript와 Vite 빌드를 확인합니다. `node scripts/check-avatar.mjs`와 `node scripts/check-clothing.mjs`로 캐릭터 합성 이미지를 생성할 수 있습니다. 전체 브라우저/터치 기기 시각 검증과 운영 DB 검증은 미완료입니다. 과거 UI 점검 기록은 [design-qa.md](design-qa.md)를 참고하세요.
+
+## Credits
+
+- 아이콘: [Flaticon 원작자 및 출처](public/icons/ATTRIBUTION.md)
+- 문서 폰트: Pretendard · [OFL 라이선스](public/fonts/OFL.txt)
+- 스크린샷: 현재 앱의 로컬 데모를 Chromium 모바일 에뮬레이션으로 캡처했습니다. 실제 휴대폰 촬영이나 성능 검증을 뜻하지 않습니다.
