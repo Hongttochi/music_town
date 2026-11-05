@@ -69,8 +69,9 @@ export function ReportForm({ target, onClose }: { target: Participant; onClose: 
         }
       }}
     >
-      <p>
-        <strong>{target.avatar.name}</strong> 님을 신고합니다.
+      <p className="report-target">
+        <span>신고 대상</span>
+        <strong>{target.avatar.name}</strong>
       </p>
       <fieldset disabled={busy}>
         <legend>신고 사유</legend>
@@ -99,7 +100,7 @@ export function ReportForm({ target, onClose }: { target: Participant; onClose: 
         onChange={(e) => setDetails(e.target.value)}
         placeholder="발생 시각과 구체적인 상황을 10자 이상 적어 주세요."
       />
-      <small>{details.length}/1000 · 비밀번호·인증번호는 적지 마세요.</small>
+      <small className="report-counter">{details.length} / 1000</small>
       <p className="report-disclosure">
         신고 대상·사유·설명·채널과 신고자 계정이 운영자 검토를 위해 저장됩니다. 다른 이용자는 신고
         내용을 볼 수 없어요.
@@ -109,9 +110,12 @@ export function ReportForm({ target, onClose }: { target: Participant; onClose: 
           {error}
         </p>
       )}
+      <div className="report-actions">
+      <Button variant="secondary" onClick={onClose} disabled={busy}>취소</Button>
       <Button type="submit" variant="primary" disabled={busy || details.trim().length < 10}>
         {busy ? '접수 중…' : '신고 접수하기'}
       </Button>
+      </div>
     </form>
   );
 }

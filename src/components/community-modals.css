@@ -1,0 +1,122 @@
+dialog.town-panel:is([data-panel='profile'], [data-panel='report']) {
+  width: 500px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 32px);
+  padding: 24px;
+  border: 1px solid #dce0c8;
+  border-top: 5px solid #9cae78;
+  border-radius: 24px;
+  box-shadow: 0 18px 64px #26351b38;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #b5bea1 transparent;
+}
+.town-panel:is([data-panel='profile'], [data-panel='report']) .panel-heading {
+  position: sticky;
+  top: -24px;
+  z-index: 2;
+  background: #fff9e9;
+  padding-block: 12px;
+  margin-top: -12px;
+  border-bottom: 1px solid #e3e5d4;
+}
+.town-panel[data-panel='profile'] .profile-heading {
+  gap: 16px;
+  margin: 20px 0 14px;
+}
+.town-panel[data-panel='profile'] .profile-icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  background: #e8edda;
+  border-radius: 22px;
+}
+.town-panel[data-panel='profile'] .profile-heading h2 {
+  font-size: 22px;
+  overflow-wrap: anywhere;
+}
+.town-panel[data-panel='profile'] .profile-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr;
+  gap: 12px;
+  padding: 16px;
+  margin-block: 18px;
+  background: #edf0df;
+  border: 0;
+  border-radius: 16px;
+  font-size: 11px;
+}
+.musician-social:empty { display: none; }
+.musician-social { margin-block: 12px; font-size: 12px; }
+.town-panel[data-panel='profile'] .actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+.musician-primary-actions { grid-template-columns: 1fr 1fr; }
+.musician-secondary-actions { grid-template-columns: repeat(3, 1fr); }
+.town-panel[data-panel='profile'] .actions .town-button {
+  min-height: 44px;
+  border-radius: 13px;
+  margin: 0;
+  padding: 10px 8px;
+}
+.town-panel[data-panel='profile'] .notice {
+  margin-bottom: 0;
+  border-radius: 12px;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.report-form { gap: 14px; }
+.report-target {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #edf0df;
+  border-radius: 14px;
+  overflow-wrap: anywhere;
+}
+.report-target span { font-size: 11px; color: #737c69; flex-shrink: 0; }
+.report-form fieldset { grid-template-columns: 1fr 1fr; gap: 8px; margin: 0; min-width: 0; }
+.report-form fieldset label {
+  padding: 11px 10px;
+  border: 1px solid #e0e3d2;
+  border-radius: 12px;
+  background: #fffdf5;
+  font-size: 12px;
+  cursor: pointer;
+}
+.report-form fieldset label:has(input:checked) {
+  border-color: #869b64;
+  background: #eaf0dc;
+  color: #445c34;
+}
+.report-form input[type='radio'] { accent-color: #708b55; margin: 0; }
+.report-form textarea {
+  width: 100%;
+  min-height: 110px;
+  border-radius: 14px;
+  background: #fffdf5;
+  line-height: 1.6;
+  font-size: 16px;
+}
+.report-form textarea:focus { outline: 2px solid #9cae78; outline-offset: 2px; }
+.report-form .report-counter { text-align: right; margin-top: -8px; }
+.report-form .report-disclosure { line-height: 1.65; }
+.report-actions { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
+.report-actions .town-button { min-height: 44px; border-radius: 12px; }
+@media (max-height: 500px) {
+  dialog.town-panel:is([data-panel='profile'], [data-panel='report']) {
+    max-height: calc(100dvh - 16px);
+    padding: 16px 20px;
+  }
+  .town-panel:is([data-panel='profile'], [data-panel='report']) .panel-heading { top: -16px; }
+  .report-form textarea { min-height: 90px; }
+}
+@media (max-width: 380px) {
+  .report-form fieldset { grid-template-columns: 1fr; }
+  .musician-secondary-actions { grid-template-columns: 1fr; }
+}

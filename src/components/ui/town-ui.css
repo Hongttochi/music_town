@@ -789,6 +789,9 @@ body:has(#app.before-entry) .town-panel::backdrop {
 .town-button.world-label {
   border-radius: 14px;
 }
+.town-button.world-label:not(:disabled):active {
+  transform: none;
+}
 .player-reaction {
   transform: translate(-50%, -50%);
 }

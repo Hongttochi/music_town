@@ -51,6 +51,7 @@ import {
 import './style.css';
 import './components/ui/town-ui.css';
 import './mobile.css';
+import './components/community-modals.css';
 
 type Panel =
   | 'role'
@@ -108,6 +109,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
     if (panel) {
       motion.current = { x: 0, y: 0 };
       dialog.current?.showModal();
+      if (dialog.current) dialog.current.scrollTop = 0;
     } else dialog.current?.close();
   }, [panel]);
   useEffect(() => {
@@ -620,7 +622,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
         )}
         {panel === 'profile' && (
           <>
-            {title('MEET THE MUSICIAN', '음악 너머의 이야기')}
+            {title('LIVE BUSKING', '지금 노래하는 사람')}
             <div className="profile-heading">
               <div className="profile-icon">
                 <Flaticon name="music" size={40} />
@@ -630,7 +632,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                 <span className="pill">{selected.genre}</span>
               </div>
             </div>
-            <p className="modal-sub">{selected.bio}</p>
+            {selected.bio && <p className="modal-sub">{selected.bio}</p>}
             <div className="profile-stats">
               <div>
                 <strong>{selected.followers + (follow.includes(selected.id) ? 1 : 0)}</strong>팔로워
@@ -642,23 +644,14 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                 <strong className="!text-sm mt-1">{selected.name}</strong>지금 공연하는 곳
               </div>
             </div>
-            <div className="flex gap-3 text-xs text-[#8e987d]">
+            <div className="musician-social">
               {selectedMusician?.instagram ? (
                 <a href={selectedMusician.instagram} target="_blank" rel="noopener noreferrer">
                   인스타그램
                 </a>
-              ) : (
-                <span>SNS · 미등록</span>
-              )}
-              {selectedMusician?.soundcloud ? (
-                <a href={selectedMusician.soundcloud} target="_blank" rel="noopener noreferrer">
-                  사운드클라우드
-                </a>
-              ) : (
-                <span>음원 링크 · 미등록</span>
-              )}
+              ) : null}
             </div>
-            <div className="actions">
+            <div className="actions musician-primary-actions">
               <Button variant="primary" className="primary" onClick={followArtist}>
                 {follow.includes(selected.id) ? '✓ 팔로잉' : '♡ 팔로우'}
               </Button>
@@ -674,7 +667,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                 무대 앞에서 듣기
               </Button>
             </div>
-            <div className="actions">
+            <div className="actions musician-secondary-actions">
               <Button
                 variant="ghost"
                 className="text-button flex items-center justify-center gap-1"
