@@ -4,7 +4,9 @@ import ts from 'typescript';
 import assert from 'node:assert/strict';
 const effects = [],
   handlers = new Map(),
-  played = [];
+  played = [],
+  providers = [],
+  preferences = new Map();
 class Element {
   constructor(label, { modal = false, disabled = false, type, aria } = {}) {
     this.textContent = label;
@@ -61,6 +63,10 @@ const scope = {
   Element,
   HTMLDialogElement,
   AudioContext,
+  localStorage: {
+    getItem: (key) => preferences.get(key),
+    setItem: (key, value) => preferences.set(key, value),
+  },
   document: {
     hidden: false,
     addEventListener: (name, fn) => handlers.set(name, fn),
@@ -72,7 +78,10 @@ const scope = {
     name === 'react'
       ? {
           createContext: () => ({ Provider: {} }),
-          createElement() {},
+          createElement(_type, props) {
+            providers.push(props.value);
+          },
+          useState: (initial) => [initial(), () => {}],
           useRef: (value) => ({ current: value }),
           useCallback: (fn) => fn,
           useEffect: (fn) => effects.push(fn),
@@ -99,6 +108,21 @@ await check('확인', { modal: true, disabled: true }, null);
 handlers.get('cancel')({ target: new HTMLDialogElement('') });
 await new Promise(setImmediate);
 assert.equal(played.at(-1), './sounds/cancel.mp3');
+const settings = providers.find((value) => typeof value === 'object' && 'setEnabled' in value);
+const play = providers.find((value) => typeof value === 'function');
+play('clap');
+settings.setEnabled(false);
+const beforeMuted = played.length;
+await new Promise(setImmediate);
+assert.equal(played.length, beforeMuted, 'pending effect is cancelled when muted');
+await check('확인', { modal: true }, null);
+play('complete');
+await new Promise(setImmediate);
+assert.equal(played.length, beforeMuted, 'completion is muted too');
+assert.equal(preferences.get('music-town-sound-effects'), 'off');
+settings.setEnabled(true);
+await check('일반 버튼', {}, 'click');
+assert.equal(preferences.get('music-town-sound-effects'), 'on');
 cleanup.forEach((fn) => fn());
 assert.equal(handlers.size, 0);
 console.log(

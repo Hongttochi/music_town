@@ -4,6 +4,7 @@ import { ErrorModal } from './components/ui/ErrorModal';
 import { useTown, type Participant } from './useTown';
 import { useStageMicrophone } from './useStageMicrophone';
 import { useLiveAudio } from './useLiveAudio';
+import { SoundEffectsSetting } from './components/SoundEffectsSetting';
 import { SoundEffectsProvider, useSoundEffects, type SoundEffect } from './useSoundEffects';
 import { ParticipantProfile } from './components/ParticipantProfile';
 import { ReportForm } from './components/ReportForm';
@@ -28,7 +29,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   Bell,
-  Settings,
   Music2,
   Heart,
   ArrowUpRight,
@@ -310,7 +310,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                   onClick={() => setPanel('settings')}
                   aria-label="설정"
                 >
-                  <Settings size={18} />
+                  <Flaticon name="setting" size={24} />
                 </Button>
               </div>
             </header>
@@ -731,6 +731,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
           <>
             {title('', '설정')}
             <div className="settings-menu">
+              <SoundEffectsSetting />
               <Button variant="ghost" onClick={() => setPanel('channels')}>
                 <Flaticon name="map-3d" size={16} />
                 채널 변경

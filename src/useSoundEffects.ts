@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useRef,
+  useState,
   type ReactNode,
 } from 'react';
 import clap from './sounds/clap.mp3';
@@ -18,17 +19,50 @@ import cancel from './sounds/cancel.mp3';
 const sources = { clap, complete, heart, lightstick, click, ok, cancel };
 export type SoundEffect = keyof typeof sources;
 
+const preferenceKey = 'music-town-sound-effects';
+const SoundSettingsContext = createContext({
+  enabled: true,
+  setEnabled: (_enabled: boolean) => {},
+});
+export function useSoundSettings() {
+  return useContext(SoundSettingsContext);
+}
+
 const SoundContext = createContext<(name: SoundEffect) => void>(() => {});
 export function useSoundEffects() {
   return useContext(SoundContext);
 }
 
 export function SoundEffectsProvider({ children }: { children: ReactNode }) {
+  const [enabled, updateEnabled] = useState(() => {
+    try {
+      return localStorage.getItem(preferenceKey) !== 'off';
+    } catch {
+      return true;
+    }
+  });
+  const enabledRef = useRef(enabled);
+  const playbackVersion = useRef(0);
   const engine = useRef<{
     context: AudioContext;
     buffers: Map<SoundEffect, Promise<AudioBuffer>>;
     active: Map<SoundEffect, AudioBufferSourceNode>;
   } | null>(null);
+
+  const setEnabled = useCallback((next: boolean) => {
+    enabledRef.current = next;
+    playbackVersion.current += 1;
+    updateEnabled(next);
+    if (!next) {
+      engine.current?.active.forEach((source) => source.stop());
+      engine.current?.active.clear();
+    }
+    try {
+      localStorage.setItem(preferenceKey, next ? 'on' : 'off');
+    } catch {
+      /* Keep the switch usable when browser storage is unavailable. */
+    }
+  }, []);
 
   const prepare = useCallback(() => {
     if (!engine.current) {
@@ -54,6 +88,7 @@ export function SoundEffectsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const unlock = () => {
+      if (!enabledRef.current) return;
       try {
         prepare();
       } catch {
@@ -73,12 +108,20 @@ export function SoundEffectsProvider({ children }: { children: ReactNode }) {
 
   const play = useCallback(
     (name: SoundEffect) => {
+      if (!enabledRef.current) return;
+      const version = playbackVersion.current;
       try {
         const audio = prepare();
         void audio.buffers
           .get(name)!
           .then((buffer) => {
-            if (engine.current !== audio || audio.context.state !== 'running' || document.hidden)
+            if (
+              !enabledRef.current ||
+              version !== playbackVersion.current ||
+              engine.current !== audio ||
+              audio.context.state !== 'running' ||
+              document.hidden
+            )
               return;
             // Repeated taps restart the same effect instead of stacking loud copies.
             audio.active.get(name)?.stop();
@@ -137,5 +180,9 @@ export function SoundEffectsProvider({ children }: { children: ReactNode }) {
       document.removeEventListener('cancel', cancelDialog, true);
     };
   }, [play]);
-  return createElement(SoundContext.Provider, { value: play }, children);
+  return createElement(
+    SoundSettingsContext.Provider,
+    { value: { enabled, setEnabled } },
+    createElement(SoundContext.Provider, { value: play }, children),
+  );
 }

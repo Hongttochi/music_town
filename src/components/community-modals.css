@@ -322,3 +322,52 @@ dialog.town-panel:is([data-panel='profile'], [data-panel='report']) {
   border-right: 2px solid #fff8dc;
   border-bottom: 2px solid #fff8dc;
 }
+
+.sound-effects-setting {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.settings-menu .sound-effects-setting .flaticon {
+  width: 24px;
+  height: 24px;
+}
+.sound-effects-label {
+  flex: 1;
+}
+.sound-effects-state {
+  color: #606b56;
+  font-size: 11px;
+}
+.sound-effects-switch.town-button {
+  display: grid;
+  place-items: center;
+  min-width: 48px;
+  min-height: 44px;
+  padding: 0;
+  background: transparent;
+}
+.sound-effects-track {
+  display: flex;
+  align-items: center;
+  width: 42px;
+  height: 24px;
+  padding: 3px;
+  border-radius: 20px;
+  background: #8a9284;
+}
+.sound-effects-track > span {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fffdf3;
+  box-shadow: 0 1px 3px #26351b30;
+}
+.sound-effects-switch[aria-checked='true'] .sound-effects-track {
+  background: #64844f;
+}
+.sound-effects-switch[aria-checked='true'] .sound-effects-track > span {
+  transform: translateX(18px);
+}
