@@ -9,11 +9,28 @@
   html,
   body {
     overscroll-behavior: none;
+    width: 100%;
+    margin: 0;
+    padding: 0;
   }
+  #root { position: fixed; inset: 0; width: 100%; max-width: none; }
+  .device-content { width: 100%; height: 100%; }
   #app {
     min-height: 0;
     height: 100dvh;
+    width: 100vw;
+    width: 100dvw;
+    max-width: none;
+    margin: 0;
   }
+  .town-panel[data-panel='avatar'] .appearance-swatches .town-button {
+    width: 44px; height: 44px; min-width: 44px; min-height: 44px;
+    flex: 0 0 44px; aspect-ratio: 1; padding: 0;
+  }
+  .town-panel[data-panel='avatar'] .appearance-swatches { flex-wrap: wrap; gap: 10px; }
+  .hourly-clock { left: var(--safe-left); bottom: var(--safe-bottom); pointer-events: none; }
+  .hourly-clock > span { font-size: 20px; line-height: 1.1; padding-bottom: 3px; border-bottom-width: 1px; }
+  .hourly-clock > small { font-size: 9px; margin-top: 3px; }
   #joystick {
     touch-action: none;
     user-select: none;
