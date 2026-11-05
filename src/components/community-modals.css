@@ -49,6 +49,18 @@ dialog.town-panel:is([data-panel='profile'], [data-panel='report']) {
   font-size: 11px;
 }
 .musician-social:empty { display: none; }
+.town-panel[data-panel='registration'] .town-button {
+  border-radius: 16px;
+}
+.town-panel[data-panel='registration'] .registration-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.town-panel[data-panel='registration'] .registration-actions .town-button {
+  min-height: 44px;
+  padding: 10px 14px;
+}
 .stage-microphone {
   max-width: min(340px, 80vw);
   margin: 10px auto;

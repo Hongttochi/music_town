@@ -172,12 +172,8 @@ export function Registration({
           onClose={() => setError('')}
         />
       )}
-      <p className="registration-privacy-note">
-        자기소개와 SNS 링크는 선택사항이며, 같은 채널 이용자에게 공개돼요.
-      </p>
-      <LegalLinks />
       <div className="registration-actions">
-        <Button type="button" variant="ghost" disabled={saving} onClick={onBack}>
+        <Button type="button" variant="secondary" disabled={saving} onClick={onBack}>
           역할 다시 선택
         </Button>
         <Button type="submit" variant="primary" disabled={saving}>
@@ -187,4 +183,3 @@ export function Registration({
     </form>
   );
 }
-import { LegalLinks } from './LegalLinks';
