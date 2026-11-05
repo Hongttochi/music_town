@@ -1,5 +1,6 @@
 export type IconName =
   | 'music'
+  | 'bench'
   | 'leaf'
   | 'microphone'
   | 'heart'

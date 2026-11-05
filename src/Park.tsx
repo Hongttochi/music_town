@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from './components/ui/Button';
-import { Armchair, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
+import { Flaticon } from './Flaticon';
 import * as T from 'three';
 import { Avatar, Stage, stages, koreanHour } from './model';
 import { createImageCharacters } from './imageCharacter';
@@ -799,7 +800,7 @@ export function Park(props: Props) {
           title={benchAction === 'stand' ? '일어나기' : '앉기'}
           onClick={() => useBench.current()}
         >
-          <Armchair size={25} aria-hidden="true" />
+          <Flaticon name="bench" size={32} />
           {benchAction === 'stand' && (
             <LogOut className="bench-exit-icon" size={13} aria-hidden="true" />
           )}
