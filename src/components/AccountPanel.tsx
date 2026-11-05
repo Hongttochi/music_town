@@ -10,34 +10,21 @@ import './account-panel.css';
 export function AccountPanel({
   avatar,
   onCustomize,
-  onSignOut,
   profile,
   onEditProfile,
   onChooseIcon,
 }: {
   avatar: Avatar;
   onCustomize: () => void;
-  onSignOut: () => Promise<void>;
   profile: MemberProfile;
   onEditProfile: () => void;
   onChooseIcon: (id: string) => Promise<void>;
 }) {
-  const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
   const [savingIcon, setSavingIcon] = useState(false);
   const [choosingBadge, setChoosingBadge] = useState(false);
   const badgePickerId = useId();
   const badgeButton = useRef<HTMLButtonElement>(null);
-  async function logout() {
-    setPending(true);
-    setError('');
-    try {
-      await onSignOut();
-    } catch {
-      setError('로그아웃하지 못했어요. 다시 시도해 주세요.');
-      setPending(false);
-    }
-  }
   return (
     <div className="account-panel">
       <div className="account-identity">
@@ -48,7 +35,7 @@ export function AccountPanel({
           aria-label="프로필 뱃지 바꾸기"
           aria-expanded={choosingBadge}
           aria-controls={badgePickerId}
-          disabled={pending || savingIcon}
+          disabled={savingIcon}
           onClick={() => setChoosingBadge((open) => !open)}
         >
           <ProfileIcon id={avatar.profileIcon} size={40} />
@@ -71,7 +58,7 @@ export function AccountPanel({
               variant="choice"
               aria-label={item.label}
               aria-pressed={(avatar.profileIcon || 'leaf') === item.id}
-              disabled={pending || savingIcon}
+              disabled={savingIcon}
               onClick={async () => {
                 setSavingIcon(true);
                 try {
@@ -135,16 +122,13 @@ export function AccountPanel({
         </section>
       )}
       <div className="account-edit-actions">
-        <Button variant="secondary" onClick={onEditProfile} disabled={pending}>
+        <Button variant="secondary" onClick={onEditProfile}>
           <img src="/icons/pencil.png" width={18} height={18} alt="" /> 소개 수정
         </Button>
-        <Button variant="secondary" onClick={onCustomize} disabled={pending}>
+        <Button variant="secondary" onClick={onCustomize}>
           <img src="/icons/tshirt.png" width={19} height={19} alt="" /> 캐릭터 꾸미기
         </Button>
       </div>
-      <Button variant="ghost" className="logout-action" onClick={logout} disabled={pending}>
-        {pending ? '로그아웃 중…' : '로그아웃'}
-      </Button>
       {error && (
         <ErrorModal title="요청을 완료하지 못했어요" message={error} onClose={() => setError('')} />
       )}

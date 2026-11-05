@@ -195,6 +195,10 @@ button {
   margin-bottom: 14px;
 }
 .section-title h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
   font-size: 13px;
   margin: 0;
 }
@@ -204,8 +208,10 @@ button {
   background: #e8eedc;
   color: #7d925b;
   padding: 3px 5px;
-  border-radius: 4px;
-  margin-left: 5px;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  border-radius: 999px;
 }
 .section-title > span {
   font-size: 10px;
@@ -2202,7 +2208,6 @@ dialog .rounded-2xl {
   padding: 15px;
 }
 .section-title h2 span {
-  border-radius: 0;
   background: #dfe8bb;
 }
 @media (max-height: 650px) and (min-width: 650px) {

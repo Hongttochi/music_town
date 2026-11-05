@@ -4,6 +4,7 @@ export type IconName =
   | 'setting'
   | 'alarm'
   | 'delete'
+  | 'logout'
   | 'mic'
   | 'musical'
   | 'leaf'

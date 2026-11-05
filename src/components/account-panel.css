@@ -245,12 +245,6 @@ dialog.town-panel[data-panel='account'] {
   padding: 8px;
   box-shadow: none;
 }
-.account-panel .logout-action {
-  align-self: center;
-  font-size: 11px;
-  padding: 4px 12px;
-  min-height: 28px;
-}
 .topbar .header-right {
   gap: 4px;
   padding: 4px;
@@ -302,10 +296,6 @@ dialog.town-panel[data-panel='account'] {
   }
   .account-panel .account-edit-actions {
     grid-column: 1 / -1;
-  }
-  .account-panel .logout-action {
-    grid-column: 2;
-    justify-self: end;
   }
   .account-panel .account-identity {
     padding-bottom: 12px;

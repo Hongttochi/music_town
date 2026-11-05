@@ -97,6 +97,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
   const [toast, setToast] = useState('');
   const [actionError, setActionError] = useState('');
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const [dismissedTownError, setDismissedTownError] = useState('');
   const [queue, setQueue] = useState<number | null>(null);
   const [performing, setPerforming] = useState<number | null>(null);
@@ -693,10 +694,6 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                 if (!account.demo) await saveProfile(account.id, memberProfile, next);
                 setAvatar(next);
               }}
-              onSignOut={async () => {
-                if (entered && !account.demo) await town.act('leave');
-                await account.signOut();
-              }}
             />
           </>
         )}
@@ -770,6 +767,25 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                   문의하기
                 </a>
               </div>
+              <Button
+                variant="ghost"
+                disabled={signingOut}
+                onClick={async () => {
+                  if (signingOut) return;
+                  setSigningOut(true);
+                  try {
+                    if (entered && !account.demo) await town.act('leave');
+                    await account.signOut();
+                  } catch {
+                    setActionError('로그아웃하지 못했어요. 다시 시도해 주세요.');
+                  } finally {
+                    setSigningOut(false);
+                  }
+                }}
+              >
+                <Flaticon name="logout" size={16} />
+                {signingOut ? '로그아웃 중…' : '로그아웃'}
+              </Button>
               <Button
                 variant="ghost"
                 className="delete-account-menu"

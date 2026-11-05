@@ -721,13 +721,6 @@ dialog.town-panel[data-panel='avatar'] {
 }
 
 /* Avatar category tabs intentionally use a pill silhouette. */
-.account-panel .town-button.logout-action {
-  color: #b8463f;
-}
-.account-panel .town-button.logout-action:hover {
-  color: #a23832;
-  background: #f8e9e3;
-}
 .account-panel .icon-credits {
   position: static;
   max-width: 100%;
