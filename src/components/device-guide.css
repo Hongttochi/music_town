@@ -1,0 +1,13 @@
+.device-content-blocked { pointer-events: none; }
+/* Native dialogs occupy the top layer; hide them while the device guide is shown. */
+.device-content-blocked dialog { visibility: hidden; }
+.device-content-blocked dialog::backdrop { background: transparent; backdrop-filter: none; }
+.device-guide { position: fixed; inset: 0; z-index: 2147483647; display: grid; place-items: center; padding: 24px; background: rgb(19 26 22 / 82%); backdrop-filter: blur(5px); color: #fff9e9; text-align: center; animation: device-guide-in 180ms ease-out; }
+.device-guide-message { max-width: 420px; }
+.device-guide-icon { position: relative; display: flex; justify-content: center; margin-bottom: 26px; color: #d7e3b4; }
+.device-guide-rotate > svg:first-child { transform: rotate(90deg); }
+.device-guide-rotate > svg:last-child { position: absolute; left: calc(50% + 36px); top: -12px; }
+.device-guide h1 { margin: 0 0 12px; font-size: clamp(19px, 4.5vw, 25px); font-weight: 600; line-height: 1.5; letter-spacing: -.035em; outline: none; word-break: keep-all; }
+.device-guide p { margin: 0; font-size: 14px; line-height: 1.7; color: #dedfd5; word-break: keep-all; }
+@keyframes device-guide-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .device-guide { animation: none; } }

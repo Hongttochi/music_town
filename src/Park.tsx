@@ -38,7 +38,8 @@ export function Park(props: Props) {
       setError(true);
       return;
     }
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.7));
+    const touchDevice = matchMedia('(pointer: coarse)').matches;
+    renderer.setPixelRatio(Math.min(devicePixelRatio, touchDevice ? 1.3 : 1.7));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = T.PCFShadowMap;
     renderer.toneMapping = T.ACESFilmicToneMapping;
@@ -52,7 +53,8 @@ export function Park(props: Props) {
     const sun = new T.DirectionalLight('#fff3d3', 3.2);
     sun.position.set(-18, 30, 18);
     sun.castShadow = true;
-    sun.shadow.mapSize.set(2048, 2048);
+    const shadowSize = touchDevice ? 1024 : 2048;
+    sun.shadow.mapSize.set(shadowSize, shadowSize);
     Object.assign(sun.shadow.camera, {
       left: -40,
       right: 40,
@@ -355,7 +357,10 @@ export function Park(props: Props) {
     window.addEventListener('keydown', down);
     window.addEventListener('keyup', up);
     window.addEventListener('blur', clear);
+    window.addEventListener('orientationchange', clear);
+    document.addEventListener('visibilitychange', clear);
     const resize = () => {
+      if (!el.clientWidth || !el.clientHeight) return;
       renderer.setSize(el.clientWidth, el.clientHeight, false);
       camera.aspect = el.clientWidth / el.clientHeight;
       camera.updateProjectionMatrix();
@@ -422,6 +427,12 @@ export function Park(props: Props) {
     entranceRing.position.y = 0.04;
     scene.add(entranceRing);
     function animate(time: number) {
+      if (document.hidden || document.documentElement.dataset.deviceBlocked === 'true') {
+        clear();
+        last = time;
+        frame = requestAnimationFrame(animate);
+        return;
+      }
       const dt = Math.min((time - last) / 1000, 0.04);
       last = time;
       const p = latest.current,
@@ -574,6 +585,8 @@ export function Park(props: Props) {
       window.removeEventListener('keydown', down);
       window.removeEventListener('keyup', up);
       window.removeEventListener('blur', clear);
+      window.removeEventListener('orientationchange', clear);
+      document.removeEventListener('visibilitychange', clear);
       el.removeEventListener('click', click);
       scene.traverse((o) => {
         if (o instanceof T.Mesh) o.geometry.dispose();

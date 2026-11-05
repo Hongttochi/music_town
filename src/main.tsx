@@ -1,4 +1,5 @@
 import { ProfileIcon } from './components/ProfileIcon';
+import { DeviceGuide } from './components/DeviceGuide';
 import { ErrorModal } from './components/ui/ErrorModal';
 import { useTown, type Participant } from './useTown';
 import { ParticipantProfile } from './components/ParticipantProfile';
@@ -49,6 +50,7 @@ import {
 } from './model';
 import './style.css';
 import './components/ui/town-ui.css';
+import './mobile.css';
 
 type Panel =
   | 'role'
@@ -327,6 +329,8 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                 tabIndex={0}
                 aria-label="이동 조이스틱"
                 onPointerDown={(e) => {
+                  if (!e.isPrimary) return;
+                  e.preventDefault();
                   e.currentTarget.setPointerCapture(e.pointerId);
                   const rect = e.currentTarget.getBoundingClientRect();
                   motion.current = {
@@ -350,6 +354,10 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                   motion.current = { x: 0, y: 0 };
                   e.currentTarget.querySelector<HTMLElement>('#stick')!.style.transform = '';
                   e.currentTarget.releasePointerCapture(e.pointerId);
+                }}
+                onPointerCancel={(e) => {
+                  motion.current = { x: 0, y: 0 };
+                  e.currentTarget.querySelector<HTMLElement>('#stick')!.style.transform = '';
                 }}
                 onLostPointerCapture={(e) => {
                   motion.current = { x: 0, y: 0 };
@@ -778,6 +786,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
 }
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
+    <DeviceGuide>
     <LoginGate>
       {(account) => (
         <ProfileLoader key={account.id} account={account}>
@@ -785,5 +794,6 @@ createRoot(document.getElementById('root')!).render(
         </ProfileLoader>
       )}
     </LoginGate>
+    </DeviceGuide>
   </React.StrictMode>,
 );

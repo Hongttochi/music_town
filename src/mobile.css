@@ -1,0 +1,163 @@
+/* Keep touch layouts independent of desktop-width breakpoints. */
+@media (pointer: coarse) {
+  :root {
+    --safe-left: max(12px, env(safe-area-inset-left));
+    --safe-right: max(12px, env(safe-area-inset-right));
+    --safe-bottom: max(10px, env(safe-area-inset-bottom));
+    --safe-top: max(8px, env(safe-area-inset-top));
+  }
+  html,
+  body {
+    overscroll-behavior: none;
+  }
+  #app {
+    min-height: 0;
+    height: 100dvh;
+  }
+  #joystick {
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    transform: none;
+  }
+  .topbar {
+    left: var(--safe-left);
+    right: var(--safe-right);
+    top: var(--safe-top);
+    height: 48px;
+  }
+  .header-right {
+    gap: 8px;
+  }
+  .header-right button,
+  .town-panel .town-button--icon {
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+  }
+  .reaction-bar button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .reaction-bar button:hover {
+    transform: none;
+  }
+  .movement {
+    left: var(--safe-left);
+    bottom: calc(var(--safe-bottom) + 38px);
+  }
+  .movement > span {
+    display: none;
+  }
+  .bottom-center {
+    bottom: var(--safe-bottom);
+  }
+  .map-card {
+    right: var(--safe-right);
+    bottom: var(--safe-bottom);
+    width: 112px;
+  }
+  .map-caption {
+    display: none;
+  }
+  .village-clock {
+    left: var(--safe-left);
+    bottom: var(--safe-bottom);
+  }
+  .village-clock > span {
+    font-size: 20px;
+  }
+  .location-pill {
+    bottom: calc(var(--safe-bottom) + 68px);
+    max-width: calc(100vw - 280px);
+  }
+  .stage-toggle {
+    right: var(--safe-right);
+    top: calc(var(--safe-top) + 54px);
+    min-height: 44px;
+  }
+  .stage-list {
+    right: var(--safe-right);
+    top: calc(var(--safe-top) + 102px);
+    max-height: calc(100dvh - 140px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  dialog.town-panel,
+  dialog.town-panel[data-panel] {
+    position: fixed;
+    top: calc(var(--visible-top, 0px) + var(--safe-top));
+    bottom: auto;
+    margin: 0 auto;
+    max-width: calc(100vw - var(--safe-left) - var(--safe-right));
+    max-height: calc(var(--visible-height, 100dvh) - var(--safe-top) - var(--safe-bottom));
+    padding: 14px 18px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-block: 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .town-panel .panel-heading {
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .town-panel .modal-title {
+    font-size: 20px;
+  }
+  .town-panel input,
+  .town-panel textarea,
+  .town-panel select,
+  .login-page input,
+  .login-page textarea {
+    font-size: 16px;
+  }
+  .town-panel input,
+  .town-panel select {
+    min-height: 44px;
+  }
+  .town-panel .town-button:not(.town-button--icon),
+  .settings-policy-links a,
+  .part-tabs button,
+  .channel-row {
+    min-height: 44px;
+  }
+  .login-page.login-simple {
+    padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+    min-height: 0;
+    height: var(--visible-height, 100dvh);
+    align-items: safe center;
+  }
+  .device-guide {
+    padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  }
+}
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 500px) {
+  .intro,
+  .prototype-badge {
+    display: none;
+  }
+  .reaction-bar {
+    padding: 4px 10px;
+    gap: 6px;
+  }
+  .town-panel[data-panel='avatar'] .character-workshop {
+    grid-template-columns: minmax(120px, 26%) minmax(0, 1fr);
+    gap: 14px;
+  }
+  .town-panel[data-panel='avatar'] .workshop-mirror {
+    width: auto;
+    padding: 8px;
+    align-self: start;
+  }
+  .town-panel[data-panel='avatar'] .workshop-mirror .avatar-turntable-wrap {
+    max-width: 150px;
+  }
+  .town-panel[data-panel='avatar'] .workshop-mirror > p {
+    font-size: 12px;
+  }
+  .town-panel[data-panel='avatar'] .part-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+}
