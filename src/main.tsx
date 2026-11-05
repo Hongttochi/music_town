@@ -404,7 +404,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                 <div id="stick" />
               </div>
             </div>
-            <div className="bottom-center">
+            <div className={`bottom-center${performing !== null ? ' performing-controls' : ''}`}>
               {queue !== null && performing === null && (
                 <div id="queue-status">
                   {stages.find((s) => s.id === queue)?.name} · 대기 {queuePlace}번
@@ -418,36 +418,40 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                 </div>
               )}
               {performing !== null && (
-                <div id="queue-status">
-                  ♫ 무대 이용 중 ·{' '}
-                  {town.performance
-                    ? Math.max(
-                        0,
-                        Math.ceil((Date.parse(town.performance.ends_at) - now.getTime()) / 1000),
-                      )
-                    : 0}
-                  초 남음
-                  <div className="stage-microphone" role="status">
-                    <span>
-                      {microphone.state === 'on'
-                        ? '● 마이크 켜짐'
-                        : microphone.state === 'requesting'
-                          ? '마이크 권한 확인 중…'
-                          : '마이크 꺼짐'}
-                    </span>
-                    <Button
-                      disabled={microphone.state === 'requesting'}
-                      onClick={microphone.state === 'on' ? microphone.turnOff : microphone.turnOn}
-                    >
-                      {microphone.state === 'on' ? '마이크 끄기' : '마이크 켜기'}
-                    </Button>
-                    {microphone.error && <p>{microphone.error}</p>}
-                    <small>
+                <div className="performance-toolbar">
+                  <div className="performance-summary" role="status">
+                    <strong>
                       {voice.status === 'live'
-                        ? '관객에게 실시간 송출 중'
-                        : '음성 송출 연결을 확인해 주세요.'}
-                    </small>
+                        ? '● LIVE · 송출 중'
+                        : voice.status === 'connecting' || voice.status === 'reconnecting'
+                          ? '음성 연결 중…'
+                          : voice.status === 'error'
+                            ? '음성 연결 필요'
+                            : '마이크 송출 대기'}
+                    </strong>
+                    <span>
+                      {town.performance
+                        ? Math.max(
+                            0,
+                            Math.ceil(
+                              (Date.parse(town.performance.ends_at) - now.getTime()) / 1000,
+                            ),
+                          )
+                        : 0}
+                      초 남음
+                    </span>
                   </div>
+                  <Button
+                    disabled={microphone.state === 'requesting'}
+                    aria-pressed={microphone.state === 'on'}
+                    onClick={microphone.state === 'on' ? microphone.turnOff : microphone.turnOn}
+                  >
+                    {microphone.state === 'on'
+                      ? '마이크 끄기'
+                      : microphone.state === 'requesting'
+                        ? '권한 확인 중…'
+                        : '마이크 켜기'}
+                  </Button>
                   <Button
                     onClick={async () => {
                       try {
@@ -461,6 +465,15 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                   >
                     공연 종료
                   </Button>
+                  {voice.status === 'error' && <Button onClick={voice.retry}>다시 연결</Button>}
+                  {voice.blocked && (
+                    <Button onClick={() => void voice.startAudio()}>소리 켜기</Button>
+                  )}
+                  {(microphone.error || voice.error) && (
+                    <p className="performance-error" role="alert">
+                      {microphone.error || voice.error}
+                    </p>
+                  )}
                 </div>
               )}
               {performing === null && (
@@ -516,7 +529,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
               </svg>
               <span className="map-caption">나만의 속도로 걸어보세요</span>
             </div>
-            {audiblePerformance && (
+            {audiblePerformance && performing === null && (
               <div className="live-audio-status" role="status">
                 <span>
                   {voice.status === 'live'
