@@ -628,7 +628,21 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                 <Flaticon name="music" size={40} />
               </div>
               <div>
-                <h2>{selected.artist}</h2>
+                <h2>
+                  {selectedMusician ? (
+                    <Button
+                      className="musician-profile-link"
+                      aria-label={`${selected.artist} 프로필 보기`}
+                      onClick={() => {
+                        setSelectedPerson(selectedMusician);
+                        setPanel('participant');
+                      }}
+                    >
+                      {selected.artist}
+                      <span>프로필 보기 <ArrowUpRight size={14} /></span>
+                    </Button>
+                  ) : selected.artist}
+                </h2>
                 <span className="pill">{selected.genre}</span>
               </div>
             </div>

@@ -49,6 +49,30 @@ dialog.town-panel:is([data-panel='profile'], [data-panel='report']) {
   font-size: 11px;
 }
 .musician-social:empty { display: none; }
+.musician-profile-link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 4px 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.musician-profile-link span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #e8edda;
+  color: #526d40;
+  font-size: 11px;
+  font-weight: 500;
+}
+.musician-profile-link:hover span { background: #dce6c8; }
+.musician-profile-link:focus-visible { outline: 2px solid #869b64; outline-offset: 4px; }
 .musician-social { margin-block: 12px; font-size: 12px; }
 .town-panel[data-panel='profile'] .actions {
   display: grid;
