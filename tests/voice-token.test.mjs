@@ -147,6 +147,25 @@ test('HTTP endpoint validates identity and issues signed least-privilege tokens'
     assert.equal((await invoke(undefined)).code, 401);
     assert.equal((await invoke('Bearer invalid')).code, 401);
   });
+  await t.test(
+    'pasted environment whitespace does not change token signing credentials',
+    async () => {
+      const paddedEnv = Object.fromEntries(
+        Object.entries(env).map(([key, value]) => [key, ` \t${value}\r\n`]),
+      );
+      const result = await invoke(
+        'Bearer performer-token',
+        undefined,
+        'POST',
+        createVoiceHandler(paddedEnv),
+      );
+      assert.equal(result.code, 200);
+      assert.equal(result.body.url, env.LIVEKIT_URL);
+      const claims = await verifier.verify(result.body.token);
+      assert.equal(claims.iss, env.LIVEKIT_API_KEY);
+      assert.equal(claims.sub, performer);
+    },
+  );
   await t.test('malformed input and wrong method are rejected', async () => {
     assert.equal((await invoke('Bearer listener-token', '{')).code, 400);
     assert.equal(

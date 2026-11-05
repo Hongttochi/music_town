@@ -36,14 +36,22 @@ export function createVoiceHandler(env = process.env, request = fetch) {
       res.setHeader('Allow', 'POST');
       return fail(405, 'POST 요청이 필요해요.');
     }
-    const { LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET } = env;
-    const supabaseUrl = env.SUPABASE_URL || env.VITE_SUPABASE_URL;
-    const publicKey = env.SUPABASE_PUBLISHABLE_KEY || env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    const clean = (value) => (typeof value === 'string' ? value.trim() : '');
+    const LIVEKIT_URL = clean(env.LIVEKIT_URL);
+    const LIVEKIT_API_KEY = clean(env.LIVEKIT_API_KEY);
+    const LIVEKIT_API_SECRET = clean(env.LIVEKIT_API_SECRET);
+    const supabaseUrl = clean(env.SUPABASE_URL) || clean(env.VITE_SUPABASE_URL);
+    const publicKey =
+      clean(env.SUPABASE_PUBLISHABLE_KEY) || clean(env.VITE_SUPABASE_PUBLISHABLE_KEY);
     const missing = Object.entries({
-      LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET,
+      LIVEKIT_URL,
+      LIVEKIT_API_KEY,
+      LIVEKIT_API_SECRET,
       'SUPABASE_URL 또는 VITE_SUPABASE_URL': supabaseUrl,
       'SUPABASE_PUBLISHABLE_KEY 또는 VITE_SUPABASE_PUBLISHABLE_KEY': publicKey,
-    }).filter(([, value]) => typeof value !== 'string' || !value.trim()).map(([name]) => name);
+    })
+      .filter(([, value]) => typeof value !== 'string' || !value.trim())
+      .map(([name]) => name);
     if (missing.length) {
       return fail(503, `음성 서버 환경 변수 누락: ${missing.join(', ')}`);
     }
