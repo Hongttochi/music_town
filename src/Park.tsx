@@ -139,6 +139,7 @@ export function Park(props: Props) {
       seed = (seed * 16807) % 2147483647;
       return (seed - 1) / 2147483646;
     };
+    const walkways: { x: number; z: number; width: number }[] = [];
     function path(points: T.Vector3[], width: number) {
       const curve = new T.CatmullRomCurve3(points),
         g = new T.BufferGeometry(),
@@ -147,6 +148,7 @@ export function Park(props: Props) {
       for (let i = 0; i <= 100; i++) {
         const p = curve.getPoint(i / 100),
           t = curve.getTangent(i / 100);
+        walkways.push({ x: p.x, z: p.z, width });
         v.push(
           p.x - t.z * width,
           0.015,
@@ -168,27 +170,34 @@ export function Park(props: Props) {
       m.receiveShadow = true;
       scene.add(m);
     }
+    // Continuous loops stay inside the walkable banks; only the bridge crosses water.
     path(
       [
-        new T.Vector3(-40, 0, 6),
-        new T.Vector3(-15, 0, 5),
-        new T.Vector3(0, 0, 3),
-        new T.Vector3(17, 0, 12),
-        new T.Vector3(40, 0, 13),
-      ],
-      1.1,
+        [-14, 4],
+        [-14, -8],
+        [0, -10.5],
+        [10, -7],
+        [12, 1],
+        [12, 8],
+        [2, 11],
+        [-10, 10],
+        [-14, 4],
+      ].map(([x, z]) => new T.Vector3(x, 0, z)),
+      1,
     );
     path(
       [
-        new T.Vector3(0, 0, 35),
-        new T.Vector3(-2, 0, 12),
-        new T.Vector3(0, 0, 0),
-        new T.Vector3(-1, 0, -30),
-      ],
+        [0, -10.5],
+        [0, -3],
+        [0, 3],
+        [7, 4.5],
+        [15, BRIDGE.centerZ],
+      ].map(([x, z]) => new T.Vector3(x, 0, z)),
       1,
     );
     const obstacles: { x: number; z: number; r: number }[] = [];
     function tree(x: number, z: number, s = 1) {
+      if (walkways.some((p) => Math.hypot(x - p.x, z - p.z) < p.width + s)) return;
       // Keep trunks and their broad sprite canopies clear of the river.
       if (x > RIVER.left - 2.4 * s && x < RIVER.right + 2.4 * s) return;
       scenery.prop(Math.round(x + z) % 3 === 0 ? 0 : 2, x, z, 5.1 * s);
@@ -250,6 +259,14 @@ export function Park(props: Props) {
     water.castShadow = false;
     // Raised irregular boulders catch light on top and cast shadows onto the shallows.
     function riverStone(x: number, z: number) {
+      // Include the largest rock's full footprint, not just its center.
+      if (Math.abs(z - BRIDGE.centerZ) < BRIDGE.width / 2 + 1.1) return;
+      if (
+        stages.some(
+          (stage) => Math.hypot(x - world(stage).x, z - world(stage).z) < STAGE_RADIUS + 1.1,
+        )
+      )
+        return;
       const stone = mesh(
         new T.IcosahedronGeometry(1, 1),
         ['#b3b6a2', '#c6c6b2', '#a5ad9e'][Math.floor(random() * 3)],
@@ -284,18 +301,26 @@ export function Park(props: Props) {
       box(20, 1.12, z, 10.5, 0.09, 0.09, '#c6a476');
     }
 
-    // Connect the east bank to a walkable riverside clearing.
-    path([new T.Vector3(12, 0, 4.5), new T.Vector3(15, 0, 4.5)], 1.1);
+    // A closed east-bank walk connects directly to the bridge landing.
     path(
       [
-        new T.Vector3(24.5, 0, 4.5),
-        new T.Vector3(29, 0, 4.5),
-        new T.Vector3(33, 0, 8),
-        new T.Vector3(37, 0, 9),
-      ],
-      1.1,
+        [24.5, BRIDGE.centerZ],
+        [29, BRIDGE.centerZ],
+      ].map(([x, z]) => new T.Vector3(x, 0, z)),
+      1,
     );
-    path([new T.Vector3(30, 0, -10), new T.Vector3(29, 0, 3), new T.Vector3(31, 0, 15)], 0.8);
+    path(
+      [
+        [29, 4.5],
+        [28, -6],
+        [34, -8],
+        [36, 0],
+        [35, 10],
+        [29, 10],
+        [29, 4.5],
+      ].map(([x, z]) => new T.Vector3(x, 0, z)),
+      0.9,
+    );
     [
       [28, -12],
       [34, -11],
@@ -309,7 +334,6 @@ export function Park(props: Props) {
       [31, -7],
     ].forEach(([x, z]) => scenery.prop(3, x, z, 1.1));
 
-    path([new T.Vector3(32, 0, 4.5), new T.Vector3(32, 0, 2)], 0.8);
     const stageMeshes: T.Object3D[] = [];
     const stageCenters = latest.current.liveStages.map(world);
     // Leave room for the full bench, the stage edge, and the audience walkway.
@@ -328,6 +352,7 @@ export function Park(props: Props) {
           const z = preferredZ + Math.sin(angle) * radius;
           if (x < -17 || x > 37 || z < -10 || z > 12) continue;
           if (x > 14 && x < 26) continue;
+          if (walkways.some((p) => Math.hypot(x - p.x, z - p.z) < p.width + 1.4)) continue;
           if (stageCenters.some((center) => Math.hypot(x - center.x, z - center.z) < 5)) continue;
           if (obstacles.some((o) => Math.hypot(x - o.x, z - o.z) < o.r + 2)) continue;
           if (benches.some((bench) => Math.hypot(x - bench.x, z - bench.z) < 4)) continue;
