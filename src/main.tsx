@@ -98,6 +98,15 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
   const [actionError, setActionError] = useState('');
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  useEffect(() => {
+    const theme = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    if (!theme) return;
+    const previous = theme.content;
+    theme.content = entered ? '#d6e3bd' : '#e5e4dd';
+    return () => {
+      theme.content = previous;
+    };
+  }, [entered]);
   const [dismissedTownError, setDismissedTownError] = useState('');
   const [queue, setQueue] = useState<number | null>(null);
   const [performing, setPerforming] = useState<number | null>(null);

@@ -926,3 +926,8 @@ dialog.town-panel[data-panel='settings'] {
     animation: none;
   }
 }
+
+html:has(#app.before-entry),
+body:has(#app.before-entry) {
+  background: var(--town-entry-background);
+}

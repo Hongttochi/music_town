@@ -178,3 +178,15 @@
     overflow-x: auto;
   }
 }
+
+/* Center the channel directory inside Safari's currently visible viewport. */
+@media (pointer: coarse) {
+  dialog.town-panel[data-panel='channels'] {
+    top: calc(var(--visible-top, 0px) + var(--safe-top));
+    bottom: max(
+      var(--safe-bottom),
+      calc(100dvh - var(--visible-top, 0px) - var(--visible-height, 100dvh) + var(--safe-bottom))
+    );
+    margin-block: auto;
+  }
+}
