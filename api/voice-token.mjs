@@ -39,8 +39,13 @@ export function createVoiceHandler(env = process.env, request = fetch) {
     const { LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET } = env;
     const supabaseUrl = env.SUPABASE_URL || env.VITE_SUPABASE_URL;
     const publicKey = env.SUPABASE_PUBLISHABLE_KEY || env.VITE_SUPABASE_PUBLISHABLE_KEY;
-    if (!LIVEKIT_URL || !LIVEKIT_API_KEY || !LIVEKIT_API_SECRET || !supabaseUrl || !publicKey) {
-      return fail(503, '음성 서버 연결 설정이 아직 완료되지 않았어요.');
+    const missing = Object.entries({
+      LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET,
+      'SUPABASE_URL 또는 VITE_SUPABASE_URL': supabaseUrl,
+      'SUPABASE_PUBLISHABLE_KEY 또는 VITE_SUPABASE_PUBLISHABLE_KEY': publicKey,
+    }).filter(([, value]) => typeof value !== 'string' || !value.trim()).map(([name]) => name);
+    if (missing.length) {
+      return fail(503, `음성 서버 환경 변수 누락: ${missing.join(', ')}`);
     }
     const authorization = req.headers.authorization;
     if (typeof authorization !== 'string' || !/^Bearer \S+$/.test(authorization)) {
