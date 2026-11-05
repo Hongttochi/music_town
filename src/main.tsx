@@ -223,6 +223,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                 setPanel('participant');
               }}
               performing={performing}
+              performerIds={town.state.performances.map((performance) => performance.user_id)}
               reaction={reaction}
             />
             <header className="topbar">

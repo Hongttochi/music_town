@@ -19,6 +19,7 @@ type Props = {
   onStage: (s: Stage) => void;
   onParticipant: (person: Participant) => void;
   performing: number | null;
+  performerIds: string[];
   reaction: { symbol: string; at: number } | null;
 };
 const world = (p: Position) => new T.Vector3((p.x - 700) / 25, 0, (p.y - 450) / 25);
@@ -458,7 +459,9 @@ export function Park(props: Props) {
         }
         const destination = world(person),
           delta = destination.clone().sub(visitor.group.position);
-        if (delta.length() > 0.02) visitor.group.rotation.y = Math.atan2(delta.x, delta.z);
+        if (p.performerIds.includes(person.id)) visitor.group.rotation.y = 0;
+        else if (Math.hypot(delta.x, delta.z) > 0.02)
+          visitor.group.rotation.y = Math.atan2(delta.x, delta.z);
         visitor.group.position.lerp(destination, 1 - Math.exp(-dt * 6));
         visitor.group.position.y = surfaceHeight(visitor.group.position);
       }
@@ -504,7 +507,9 @@ export function Park(props: Props) {
       }
       player.position.copy(world(p.position.current));
       player.position.y = surfaceHeight(player.position);
-      if (dx || dz) player.rotation.y = Math.atan2(dx, dz);
+      // Stage performers face the audience, regardless of their approach direction.
+      if (p.performing !== null) player.rotation.y = 0;
+      else if (dx || dz) player.rotation.y = Math.atan2(dx, dz);
       const walking = !!(dx || dz);
       (player.userData.limbs as T.Object3D[]).forEach((l, i) => {
         l.rotation.x = walking ? Math.sin(time / 130 + (i < 2 ? 0 : Math.PI)) * 0.42 : 0;
