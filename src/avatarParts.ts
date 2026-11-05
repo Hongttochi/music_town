@@ -9,6 +9,11 @@ export const hairNames = [
   '긴 웨이브',
   '포니테일',
   '양갈래 번',
+  '빡빡이',
+  '포마드',
+  '드레드',
+  '스포츠머리',
+  '모히칸',
 ];
 export const eyeNames = ['동그란 눈', '웃는 눈', '느긋한 눈', '아몬드 눈', '콩알 눈', '순한 눈'];
 export const noseNames = [

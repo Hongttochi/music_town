@@ -1,3 +1,4 @@
+import { drawExtraHair } from './avatarExtraHair';
 import { drawOutfit } from './avatarOutfit';
 import { drawEquipment } from './avatarEquipment';
 import type { Avatar } from './model';
@@ -159,17 +160,20 @@ export function composeAvatar(layers: Layers, avatar: Partial<Avatar>) {
       bw = (bh * base.width) / base.height;
     ctx.drawImage(base, 256 - bw / 2, 58, bw, bh);
     drawOutfit(ctx, avatar, direction);
-    const hair = tinted(
-      piece(
-        p.hair < 3 ? layers.hair : layers.hairExtra,
-        p.hair < 3 ? 3 : 6,
-        4,
-        p.hair < 3 ? p.hair : p.hair - 3,
-        direction,
-      ),
-      p.hairColor,
-      'hair',
-    );
+    const hair =
+      p.hair < 9
+        ? tinted(
+            piece(
+              p.hair < 3 ? layers.hair : layers.hairExtra,
+              p.hair < 3 ? 3 : 6,
+              4,
+              p.hair < 3 ? p.hair : p.hair - 3,
+              direction,
+            ),
+            p.hairColor,
+            'hair',
+          )
+        : null;
     const side = direction === 1 || direction === 3;
     // Tie/bun volume sits above the crown; it must not shrink the scalp coverage.
     const tied = p.hair === 7 || p.hair === 8;
@@ -200,7 +204,8 @@ export function composeAvatar(layers: Layers, avatar: Partial<Avatar>) {
       ctx.rect(0, brim + 45, 512, 512);
       ctx.clip();
     }
-    ctx.drawImage(hair, 256 - hairWidth / 2, hairY, hairWidth, hairHeight);
+    if (hair) ctx.drawImage(hair, 256 - hairWidth / 2, hairY, hairWidth, hairHeight);
+    else drawExtraHair(ctx, p.hair, p.hairColor, direction);
     ctx.restore();
     if (direction !== 2) {
       const eyes = tinted(

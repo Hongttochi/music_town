@@ -138,11 +138,11 @@ console.log('Accessories: nine items render distinctly in all four directions.')
 
 // Inspect every hair/hat combination and instrument/bag combination in all four views.
 const hats = ['beanie', 'snapback', 'bucket'];
-const hatSheet = createCanvas(1024, 9 * hats.length * 256);
+const hatSheet = createCanvas(1024, 14 * hats.length * 256);
 const hatCtx = hatSheet.getContext('2d');
 hatCtx.fillStyle = '#e9eddb';
 hatCtx.fillRect(0, 0, hatSheet.width, hatSheet.height);
-for (let hair = 0; hair < 9; hair++)
+for (let hair = 0; hair < 14; hair++)
   for (let h = 0; h < hats.length; h++) {
     const row = hair * hats.length + h;
     const sprite = composeAvatar(layers, { hair, headwear: hats[h] });
@@ -171,5 +171,23 @@ bagInstruments.forEach((instrument, row) => {
 });
 writeFileSync('tmp/qa/avatar-bag-fit.png', bagSheet.toBuffer('image/png'));
 console.log(
-  'Fit sheets: 27 hair/hat combinations and six crossbody/instrument combinations, four directions each.',
+  'Fit sheets: 42 hair/hat combinations and six crossbody/instrument combinations, four directions each.',
 );
+
+const extraHairSheet = createCanvas(1024, 5 * 256);
+const extraHairCtx = extraHairSheet.getContext('2d');
+extraHairCtx.fillStyle = '#e9eddb';
+extraHairCtx.fillRect(0, 0, 1024, 5 * 256);
+for (let hair = 9; hair < 14; hair++) {
+  const sprite = composeAvatar(layers, { hair, hairColor: '#67402a' });
+  assert.notDeepEqual(sprite.toBuffer('image/png'), plain.toBuffer('image/png'));
+  extraHairCtx.drawImage(sprite, 0, (hair - 9) * 256, 1024, 256);
+  extraHairCtx.fillStyle = '#263d35';
+  extraHairCtx.font = '14px sans-serif';
+  extraHairCtx.fillText(
+    ['bald', 'pomade', 'dreads', 'buzz cut', 'mohawk'][hair - 9],
+    8,
+    (hair - 9) * 256 + 18,
+  );
+}
+writeFileSync('tmp/qa/avatar-extra-hair.png', extraHairSheet.toBuffer('image/png'));
