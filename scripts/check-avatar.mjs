@@ -50,11 +50,9 @@ console.log(
 );
 const equipped = composeAvatar(layers, {
   hair: 1,
-  earrings: true,
-  necklace: true,
   instrument: 'microphone',
 });
-const guitar = composeAvatar(layers, { hair: 0, earrings: true, instrument: 'guitar' });
+const guitar = composeAvatar(layers, { hair: 0, instrument: 'guitar' });
 assert.notDeepEqual(equipped.toBuffer('image/png'), a.toBuffer('image/png'));
 ctx.clearRect(0, 0, 2048, 1024);
 ctx.fillStyle = '#f5f4e9';
@@ -85,8 +83,6 @@ for (let row = 0; row < 2; row++) {
       noseShape: 1,
       hairColor: '#d87593',
       skinTone: '#865638',
-      earrings: true,
-      necklace: true,
       instrument: 'guitar',
     }),
     0,

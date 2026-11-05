@@ -4,7 +4,17 @@ export type Avatar = {
   skin: string;
   shirt: string;
   pants: string;
-  clothingStyle?: 'plain' | 'stripe' | 'pocket';
+  clothingStyle?:
+    | 'plain'
+    | 'stripe'
+    | 'pocket'
+    | 'suit'
+    | 'street'
+    | 'puffer'
+    | 'shirt'
+    | 'dress'
+    | 'monk'
+    | 'tank';
   hair: number;
   sprite?: number;
   skinTone?: string;
@@ -16,8 +26,6 @@ export type Avatar = {
   earwear?: 'none' | 'headset' | 'airpods';
   eyewear?: 'none' | 'sunglasses' | 'glasses';
   bag?: 'none' | 'backpack' | 'crossbody';
-  earrings?: boolean;
-  necklace?: boolean;
   instrument?: 'none' | 'guitar' | 'microphone' | 'electric' | 'ukulele' | 'tambourine';
 };
 export type Stage = {

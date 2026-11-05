@@ -1,3 +1,4 @@
+import { drawOutfit } from './avatarOutfit';
 import { drawEquipment } from './avatarEquipment';
 import type { Avatar } from './model';
 import { resolveParts } from './avatarParts';
@@ -133,8 +134,6 @@ export function composeAvatar(layers: Layers, avatar: Partial<Avatar>) {
       avatar.earwear,
       avatar.eyewear,
       avatar.bag,
-      !!avatar.earrings,
-      !!avatar.necklace,
       avatar.instrument || 'none',
       avatar.clothingStyle,
       avatar.shirt,
@@ -159,6 +158,7 @@ export function composeAvatar(layers: Layers, avatar: Partial<Avatar>) {
     const bh = 418,
       bw = (bh * base.width) / base.height;
     ctx.drawImage(base, 256 - bw / 2, 58, bw, bh);
+    drawOutfit(ctx, avatar, direction);
     const hair = tinted(
       piece(
         p.hair < 3 ? layers.hair : layers.hairExtra,

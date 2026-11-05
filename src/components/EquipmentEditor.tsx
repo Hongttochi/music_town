@@ -1,4 +1,3 @@
-import { Flaticon } from '../Flaticon';
 import { Button } from './ui/Button';
 import { ModularPortrait } from '../ModularPortrait';
 import type { Avatar } from '../model';
@@ -12,25 +11,6 @@ export function EquipmentEditor({
 }) {
   return (
     <div className="equipment-editor">
-      <h3 className="editor-field-title">액세서리</h3>
-      <div className="equipment-accessories">
-        {(
-          [
-            { key: 'earrings', label: '귀걸이' },
-            { key: 'necklace', label: '목걸이' },
-          ] as const
-        ).map((item) => (
-          <Button
-            key={item.key}
-            variant="choice"
-            aria-pressed={!!avatar[item.key]}
-            onClick={() => onChange({ ...avatar, [item.key]: !avatar[item.key] })}
-          >
-            <Flaticon name={item.key} size={22} />
-            {item.label}
-          </Button>
-        ))}
-      </div>
       {accessoryGroups.map((group) => (
         <section key={group.key}>
           <h3 className="editor-field-title">{group.label}</h3>

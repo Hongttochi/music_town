@@ -2,6 +2,13 @@ import type { Avatar } from './model';
 import { hexRgb } from './appearance';
 
 export const outfits = [
+  { label: '정장', clothingStyle: 'suit', shirt: '#465368', pants: '#465368' },
+  { label: '힙한 옷', clothingStyle: 'street', shirt: '#6b638b', pants: '#536b83' },
+  { label: '패딩', clothingStyle: 'puffer', shirt: '#758d82', pants: '#565761' },
+  { label: '셔츠', clothingStyle: 'shirt', shirt: '#c5dbe0', pants: '#736958' },
+  { label: '드레스', clothingStyle: 'dress', shirt: '#c98ba4', pants: '#c98ba4' },
+  { label: '스님 옷', clothingStyle: 'monk', shirt: '#a6aaa3', pants: '#858d85' },
+  { label: '메리야스', clothingStyle: 'tank', shirt: '#f5f0df', pants: '#647f99' },
   { label: '크림 티셔츠', clothingStyle: 'plain', shirt: '#eee3ca', pants: '#459e96' },
   { label: '마린 스트라이프', clothingStyle: 'stripe', shirt: '#526b8b', pants: '#d1ba91' },
   { label: '코랄 포켓 티', clothingStyle: 'pocket', shirt: '#db8c7a', pants: '#536b83' },

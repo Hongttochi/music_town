@@ -13,34 +13,6 @@ export function drawEquipment(
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   drawAccessories(ctx, avatar, direction);
-  if (avatar.earrings) {
-    const ears = side ? [direction === 1 ? 210 : 302] : [133, 379];
-    ctx.strokeStyle = '#d9b65c';
-    ctx.lineWidth = 5;
-    for (const x of ears) {
-      ctx.beginPath();
-      ctx.ellipse(x, 230, 8, 12, 0, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-  }
-  if (avatar.necklace && !back) {
-    ctx.strokeStyle = '#c7a44c';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    if (side) {
-      const x = direction === 1 ? 285 : 227;
-      ctx.moveTo(x, 275);
-      ctx.quadraticCurveTo(x + 8, 299, x, 315);
-    } else {
-      ctx.moveTo(223, 275);
-      ctx.quadraticCurveTo(256, 325, 289, 275);
-    }
-    ctx.stroke();
-    ctx.fillStyle = '#75a998';
-    ctx.beginPath();
-    ctx.arc(side ? (direction === 1 ? 285 : 227) : 256, side ? 315 : 302, 6, 0, Math.PI * 2);
-    ctx.fill();
-  }
   if (['guitar', 'electric', 'ukulele'].includes(avatar.instrument || '')) {
     const electric = avatar.instrument === 'electric',
       small = avatar.instrument === 'ukulele';
