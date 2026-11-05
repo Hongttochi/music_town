@@ -22,6 +22,7 @@ type Props = {
   onStage: (s: Stage) => void;
   onParticipant: (person: Participant) => void;
   performing: number | null;
+  watching?: number | null;
   performerIds: string[];
   reaction: { symbol: string; at: number } | null;
 };
@@ -602,7 +603,8 @@ export function Park(props: Props) {
       last = 0,
       lastMove = 0;
     const focus = world(latest.current.position.current),
-      target = new T.Vector3();
+      target = new T.Vector3(),
+      cameraFocusGoal = new T.Vector3();
     const visitors = new Map<string, { group: T.Group; appearance: string }>();
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let entranceReady = false,
@@ -755,21 +757,51 @@ export function Park(props: Props) {
       entranceRing.visible = arrival > 0 && arrival < 1;
       entranceRing.scale.setScalar(0.6 + arrival * 2.4);
       entranceMaterial.opacity = Math.sin(arrival * Math.PI) * 0.5;
-      focus.lerp(player.position, 1 - Math.exp(-dt * 5));
+      const performanceStage = p.liveStages.find((stage) => stage.id === p.performing);
+      const watchedStage = !performanceStage
+        ? p.liveStages.find((stage) => stage.id === p.watching && stage.artist)
+        : undefined;
+      let stageZoom: number | null = null;
+      if (performanceStage) {
+        const center = world(performanceStage);
+        // Include the stage and nearby audience, rather than cropping tightly to the performer.
+        let left = center.x - 2.8,
+          right = center.x + 2.8;
+        let far = center.z + 4.8;
+        for (const person of p.participants) {
+          const audience = world(person);
+          if (audience.distanceTo(center) < 9 && audience.z > center.z + 0.8) {
+            left = Math.min(left, audience.x - 1);
+            right = Math.max(right, audience.x + 1);
+            far = Math.max(far, audience.z + 1);
+          }
+        }
+        cameraFocusGoal.set((left + right) / 2, 0, (center.z + far) / 2);
+        stageZoom = Math.max(1, Math.min(1.25, 10 / Math.max(right - left, far - center.z)));
+      } else if (watchedStage) {
+        cameraFocusGoal.copy(world(watchedStage));
+        stageZoom = 1.85;
+      } else cameraFocusGoal.copy(player.position);
+      const smoothing = reducedMotion ? 1 : 1 - Math.exp(-dt * 4.5);
+      focus.lerp(cameraFocusGoal, smoothing);
       const portrait = camera.aspect < 1;
       camera.position.set(focus.x, focus.y + (portrait ? 17 : 14), focus.z + (portrait ? 23 : 19));
       const desiredSeatZoom = seatedBench ? 1 : 0;
-      seatZoom = reducedMotion
-        ? desiredSeatZoom
-        : seatZoom + (desiredSeatZoom - seatZoom) * (1 - Math.exp(-dt * 4.5));
+      seatZoom += (desiredSeatZoom - seatZoom) * smoothing;
       if (Math.abs(desiredSeatZoom - seatZoom) < 0.001) seatZoom = desiredSeatZoom;
-      const zoom = 1 + seatZoom * 0.6;
+      const desiredZoom = stageZoom ?? 1 + seatZoom * 0.6;
+      let zoom = camera.zoom + (desiredZoom - camera.zoom) * smoothing;
+      if (Math.abs(desiredZoom - zoom) < 0.001) zoom = desiredZoom;
       if (camera.zoom !== zoom) {
         camera.zoom = zoom;
         camera.updateProjectionMatrix();
       }
-      // Center the seated upper body as the surrounding park moves out of frame.
-      target.set(focus.x, focus.y + 0.3 + seatZoom * 0.7, focus.z - 3 * (1 - seatZoom));
+      // Audience views center the performer; performer views center the whole gathering.
+      target.set(
+        focus.x,
+        focus.y + (stageZoom !== null ? 1 : 0.3 + seatZoom * 0.7),
+        focus.z - (stageZoom !== null ? 0 : 3 * (1 - seatZoom)),
+      );
       camera.lookAt(target);
       camera.updateMatrixWorld();
       const bubbleBench = seatedBench ? null : nearbyBench;

@@ -293,6 +293,14 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                 setPanel('participant');
               }}
               performing={performing}
+              watching={
+                performing === null &&
+                near &&
+                !muted.includes(near.id) &&
+                stages.find((stage) => stage.id === near.id)?.artist
+                  ? near.id
+                  : null
+              }
               performerIds={town.state.performances.map((performance) => performance.user_id)}
               reaction={performing === null ? reaction : null}
             />
