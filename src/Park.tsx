@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from './components/ui/Button';
+import { Armchair, LogOut } from 'lucide-react';
 import * as T from 'three';
 import { Avatar, Stage, stages, koreanHour } from './model';
 import { createImageCharacters } from './imageCharacter';
@@ -31,6 +32,7 @@ export function Park(props: Props) {
     latest = useRef(props);
   latest.current = props;
   const [error, setError] = useState(false);
+  const benchBubble = useRef<HTMLButtonElement>(null);
   const [benchAction, setBenchAction] = useState<'sit' | 'stand' | null>(null);
   const useBench = useRef<() => void>(() => {});
   useEffect(() => {
@@ -679,6 +681,29 @@ export function Park(props: Props) {
       camera.position.set(focus.x, focus.y + (portrait ? 17 : 14), focus.z + (portrait ? 23 : 19));
       target.set(focus.x, focus.y + 0.3, focus.z - 3);
       camera.lookAt(target);
+      camera.updateMatrixWorld();
+      const bubbleBench = seatedBench ?? nearbyBench;
+      if (benchBubble.current) {
+        if (bubbleBench && !document.querySelector('dialog[open]')) {
+          const anchor = bubbleBench.clone();
+          anchor.x += 1.5;
+          anchor.y = 1.9;
+          anchor.project(camera);
+          const x = (anchor.x * 0.5 + 0.5) * el.clientWidth;
+          const y = (-anchor.y * 0.5 + 0.5) * el.clientHeight;
+          benchBubble.current.style.left = `${x}px`;
+          benchBubble.current.style.top = `${y}px`;
+          benchBubble.current.style.visibility =
+            anchor.z > -1 &&
+            anchor.z < 1 &&
+            x > 30 &&
+            x < el.clientWidth - 30 &&
+            y > 65 &&
+            y < el.clientHeight - 20
+              ? 'visible'
+              : 'hidden';
+        } else benchBubble.current.style.visibility = 'hidden';
+      }
       const night = koreanHour() < 6 || koreanHour() >= 19;
       hemi.intensity = night ? 0.85 : 2.5;
       hemi.color.set(night ? '#8eabed' : '#fff4db');
@@ -766,8 +791,18 @@ export function Park(props: Props) {
         aria-label="3D 음악 공원. 조이스틱 또는 방향키로 산책하세요."
       />
       {benchAction && !error && props.performing === null && (
-        <Button className="bench-action" onClick={() => useBench.current()}>
-          {benchAction === 'stand' ? '일어나기' : '의자 앉기'}
+        <Button
+          ref={benchBubble}
+          className="bench-action"
+          style={{ visibility: 'hidden' }}
+          aria-label={benchAction === 'stand' ? '의자에서 일어나기' : '의자에 앉기'}
+          title={benchAction === 'stand' ? '일어나기' : '앉기'}
+          onClick={() => useBench.current()}
+        >
+          <Armchair size={25} aria-hidden="true" />
+          {benchAction === 'stand' && (
+            <LogOut className="bench-exit-icon" size={13} aria-hidden="true" />
+          )}
         </Button>
       )}
       <span

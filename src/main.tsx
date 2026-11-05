@@ -4,7 +4,7 @@ import { ErrorModal } from './components/ui/ErrorModal';
 import { useTown, type Participant } from './useTown';
 import { useStageMicrophone } from './useStageMicrophone';
 import { useLiveAudio } from './useLiveAudio';
-import { useSoundEffects, type SoundEffect } from './useSoundEffects';
+import { SoundEffectsProvider, useSoundEffects, type SoundEffect } from './useSoundEffects';
 import { ParticipantProfile } from './components/ParticipantProfile';
 import { ReportForm } from './components/ReportForm';
 import { ProfileLoader } from './components/ProfileLoader';
@@ -940,14 +940,16 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
 }
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <DeviceGuide>
-      <LoginGate>
-        {(account) => (
-          <ProfileLoader key={account.id} account={account}>
-            {(initial) => <App account={account} initial={initial} />}
-          </ProfileLoader>
-        )}
-      </LoginGate>
-    </DeviceGuide>
+    <SoundEffectsProvider>
+      <DeviceGuide>
+        <LoginGate>
+          {(account) => (
+            <ProfileLoader key={account.id} account={account}>
+              {(initial) => <App account={account} initial={initial} />}
+            </ProfileLoader>
+          )}
+        </LoginGate>
+      </DeviceGuide>
+    </SoundEffectsProvider>
   </React.StrictMode>,
 );
