@@ -1,0 +1,345 @@
+dialog.town-panel[data-panel='role'] {
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  padding: 22px;
+}
+.role-picker,
+.registration-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.role-picker {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.role-picker > p {
+  grid-column: 1 / -1;
+}
+.role-picker > p,
+.registration-form > p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #858779;
+  margin: 0 0 6px;
+}
+.role-picker .town-button {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 18px 12px;
+  text-align: center;
+  white-space: normal;
+  border: 1px solid #dce1d1;
+  border-radius: 22px;
+  background: #f0f1e6;
+  box-shadow: none;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+.role-picker .town-button:nth-of-type(2) {
+  background: #f6ebde;
+  border-color: #e6d8c8;
+}
+.role-picker .town-button svg {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+}
+.role-picker .town-button:hover {
+  background: #e6ebd9;
+}
+.role-picker .town-button:nth-of-type(2):hover {
+  background: #f0dfcc;
+}
+.role-picker .town-button:focus,
+.role-picker .town-button:focus-visible {
+  outline: none;
+  box-shadow: none;
+  text-decoration: none;
+}
+.town-panel[data-panel='role'] .panel-heading {
+  margin-bottom: 16px;
+}
+.town-panel[data-panel='role'] .modal-title {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: -0.03em;
+  color: #41483e;
+}
+.role-picker .town-button:active {
+  transform: scale(0.97);
+}
+.role-picker small {
+  line-height: 1.6;
+  word-break: keep-all;
+}
+@media (max-width: 380px) {
+  .role-picker {
+    gap: 10px;
+  }
+  .role-picker .town-button {
+    padding: 12px 8px;
+    gap: 10px;
+    border-radius: 18px;
+  }
+  .role-picker small {
+    font-size: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .role-picker .town-button {
+    transition: none;
+  }
+  .role-picker .town-button:active {
+    transform: none;
+  }
+}
+.role-picker strong {
+  display: block;
+  font-size: 14px;
+  color: #53634b;
+}
+.role-picker small {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  margin-top: 6px;
+  color: #878a7b;
+}
+.registration-form label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: #58634e;
+  margin-top: 6px;
+}
+.registration-form label span {
+  font-size: 10px;
+  font-weight: 400;
+  color: #999d90;
+}
+.registration-form input,
+.registration-form textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.7;
+  padding: 10px 12px;
+  border: 1px solid #dce0cf;
+  border-radius: 8px;
+  background: #fffef8;
+  color: #4e5947;
+}
+.registration-form textarea {
+  resize: vertical;
+  min-height: 100px;
+  max-height: 220px;
+}
+.registration-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+.registration-form .registration-error {
+  color: #a64e43;
+}
+.account-bio {
+  font-size: 12px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.account-links {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  text-decoration: underline;
+}
+
+.registration-form input:focus,
+.registration-form input:focus-visible,
+.registration-form textarea:focus,
+.registration-form textarea:focus-visible {
+  outline: none;
+  box-shadow: none;
+  border-color: #9ba98b;
+}
+.registration-form label .registration-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+}
+.registration-label svg {
+  flex-shrink: 0;
+}
+.registration-label .instagram-icon {
+  color: #bc6485;
+}
+.registration-label .soundcloud-icon {
+  color: #dd874d;
+}
+
+/* Compact registration sheet, with one outline per field. */
+dialog.town-panel[data-panel='registration'] {
+  width: 620px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 32px);
+  padding: 24px;
+  border: 1px solid #e3e5db;
+  border-radius: 18px;
+  background: #fafaf5;
+  box-shadow: 0 18px 60px #26332324;
+}
+.town-panel[data-panel='registration'] .panel-heading {
+  margin: 0 0 6px;
+}
+.town-panel[data-panel='registration'] .modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #414a3d;
+  letter-spacing: -0.03em;
+}
+.town-panel[data-panel='registration'] .registration-form {
+  gap: 20px;
+}
+.town-panel[data-panel='registration'] .registration-form > p {
+  margin: 0;
+  font-size: 11px;
+  color: #92968b;
+}
+.registration-fields {
+  display: grid;
+  gap: 20px;
+}
+.registration-bio,
+.registration-social {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+}
+.registration-fields label {
+  margin: 0;
+  color: #656d5e;
+  font-size: 11px;
+}
+.registration-social label:not(:first-child) {
+  margin-top: 9px;
+}
+.registration-fields input,
+.registration-fields textarea {
+  background: #fff;
+  border-color: #e1e5da;
+  border-radius: 10px;
+  font-size: 12px;
+  padding: 10px 12px;
+}
+.registration-fields input {
+  height: 40px;
+}
+.registration-fields textarea {
+  flex: 1;
+  min-height: 130px;
+  resize: vertical;
+}
+.registration-fields input::placeholder,
+.registration-fields textarea::placeholder {
+  color: #a6aa9f;
+  font-size: 11px;
+}
+.town-panel[data-panel='registration'] .registration-actions {
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid #e9ebe2;
+  align-items: center;
+}
+.registration-actions .town-button {
+  min-height: 36px;
+  font-size: 12px;
+  border-radius: 9px;
+  box-shadow: none;
+}
+.registration-actions .town-button--primary {
+  padding: 9px 18px;
+}
+@media (min-width: 560px) {
+  .registration-fields.has-social {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 559px) {
+  dialog.town-panel[data-panel='registration'] {
+    width: 420px;
+    padding: 20px;
+  }
+  .town-panel[data-panel='registration'] .registration-form {
+    gap: 16px;
+  }
+}
+@media (max-height: 500px) and (min-width: 560px) {
+  dialog.town-panel[data-panel='registration'] {
+    padding: 18px 22px;
+  }
+  .town-panel[data-panel='registration'] .registration-form {
+    gap: 14px;
+  }
+  .registration-fields textarea {
+    min-height: 110px;
+  }
+}
+
+.role-art {
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  border-radius: 28px;
+  background: #e7edf2;
+  transform: rotate(-5deg);
+}
+.role-art-musician {
+  background: #f8e3c8;
+  transform: rotate(5deg);
+}
+.role-picker .role-art svg {
+  width: 64px;
+  height: 64px;
+  transform: rotate(5deg);
+}
+.role-picker .role-art-musician svg {
+  transform: rotate(-5deg);
+}
+.role-picker .town-button {
+  gap: 12px;
+}
+@media (max-width: 380px) {
+  .role-art {
+    width: 64px;
+    height: 64px;
+    border-radius: 22px;
+  }
+  .role-picker .role-art svg {
+    width: 52px;
+    height: 52px;
+  }
+}
+
+.registration-fields .registration-bio textarea {
+  background: repeating-linear-gradient(transparent 0 27px, #dcd5bd35 27px 28px), #faf6eb;
+  background-position: 0 10px;
+  border-color: #e5deca;
+  line-height: 28px;
+}

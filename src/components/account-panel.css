@@ -1,0 +1,318 @@
+dialog.town-panel[data-panel='account'] {
+  width: 520px;
+  max-width: calc(100vw - 32px);
+  padding: 22px;
+  background: #fcfcf8;
+  border: 1px solid #e3e6db;
+  border-radius: 8px;
+}
+.town-panel[data-panel='account'] .modal-title {
+  font-size: 17px;
+}
+.account-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.account-panel .account-identity {
+  padding: 0 0 16px;
+  margin: 0;
+  gap: 16px;
+}
+.account-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  flex: none;
+  width: 76px;
+  height: 76px;
+  padding: 4px;
+  border: 0;
+  background: #f0f2e9;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #767d6e;
+  font: inherit;
+  transition:
+    background-color 180ms ease,
+    transform 160ms ease;
+}
+.account-badge:active {
+  transform: scale(0.94);
+}
+.account-badge-picker:not([hidden]) {
+  animation: badge-picker-reveal 200ms ease-out both;
+}
+.account-panel .profile-icon-options .town-button:active {
+  transform: scale(0.92);
+}
+@keyframes badge-picker-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .account-badge,
+  .account-panel .profile-icon-options .town-button {
+    transition: none;
+    transform: none !important;
+  }
+  .account-badge-picker:not([hidden]) {
+    animation: none;
+  }
+}
+.account-badge:hover,
+.account-badge:focus-visible {
+  background: #e6ebdc;
+  outline: none;
+}
+.account-badge-picker[hidden] {
+  display: none;
+}
+.account-name {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.account-name strong {
+  font-size: 19px;
+  font-weight: 600;
+  color: #48513f;
+}
+.account-role {
+  font-size: 10px;
+  color: #8a8c7d;
+}
+.account-section h3 {
+  font-size: 11px;
+  font-weight: 600;
+  color: #8c9184;
+  margin: 0 0 9px;
+}
+.account-section .account-bio {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #596250;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.account-section .account-bio.is-empty {
+  color: #a0a495;
+  font-size: 12px;
+}
+.account-socials {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.account-panel .account-socials > a,
+.account-panel .account-socials > .account-social-empty {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 8px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #eceee5;
+  border-radius: 6px;
+  text-decoration: none;
+  text-align: left;
+  color: #616957;
+  min-width: 0;
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+.account-panel .account-socials > a > svg {
+  transition: transform 180ms ease;
+}
+.account-panel .account-socials > a:focus-visible {
+  outline: none;
+  background: #f1f0e9;
+}
+@media (hover: hover) {
+  .account-panel .account-socials > a:hover {
+    background: #f1f0e9;
+    transform: translateY(-1px);
+  }
+  .account-panel .account-socials > a:hover > svg {
+    transform: translateX(2px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .account-panel .account-socials > a,
+  .account-panel .account-socials > a > svg {
+    transition: none;
+    transform: none !important;
+  }
+}
+.account-socials img {
+  flex-shrink: 0;
+}
+.account-socials span {
+  flex: 1;
+  min-width: 0;
+}
+.account-socials strong {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+}
+.account-socials small {
+  display: block;
+  font-size: 10px;
+  color: #969b8e;
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.profile-icon-art {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+.profile-icon-options {
+  display: grid;
+  grid-template-columns: repeat(6, 40px);
+  gap: 7px;
+}
+.account-panel .profile-icon-options .town-button {
+  aspect-ratio: 1;
+  padding: 3px;
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
+  min-width: 0;
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid #e1e6d8;
+  box-shadow: none;
+}
+.account-panel .account-section .account-bio {
+  padding: 14px 16px;
+  background: #f3f2eb;
+  border: 0;
+  border-radius: 4px;
+  line-height: 1.8;
+  min-height: 70px;
+}
+.account-panel .account-section h3 {
+  padding-bottom: 0;
+  border: 0;
+  margin-bottom: 10px;
+  color: #767d6e;
+}
+@media (max-width: 430px) {
+  .profile-icon-options {
+    grid-template-columns: repeat(6, 36px);
+  }
+  .account-panel .profile-icon-options .town-button {
+    width: 36px;
+    height: 36px;
+    min-height: 36px;
+  }
+}
+.profile-icon-options .town-button[aria-pressed='true'] {
+  border-color: #8da276;
+  box-shadow: none;
+  background: #e7eddc;
+}
+.account-edit-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.account-edit-actions .town-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 11px;
+  min-height: 36px;
+  padding: 8px;
+  box-shadow: none;
+}
+.account-panel .logout-action {
+  align-self: center;
+  font-size: 11px;
+  padding: 4px 12px;
+  min-height: 28px;
+}
+.topbar .header-right {
+  gap: 4px;
+  padding: 4px;
+  height: 38px;
+}
+.topbar .header-right .town-button {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  font-size: 11px;
+}
+.topbar .header-right .flaticon {
+  width: 18px;
+  height: 18px;
+}
+.topbar .header-right .avatar-button {
+  background: transparent;
+  box-shadow: none;
+}
+
+.account-panel .account-edit-actions .town-button {
+  white-space: nowrap;
+  padding: 8px 10px;
+  font-size: 11px;
+  gap: 5px;
+  border-radius: 6px;
+  background: #f2f4ec;
+  border: 1px solid #e1e5d9;
+}
+.account-panel .profile-icon-options .town-button[aria-pressed='true'] {
+  border-color: #8da276;
+  background: #edf1e5;
+  box-shadow: none;
+}
+@media (min-width: 650px) {
+  dialog.town-panel[data-panel='account'] {
+    width: 580px;
+    padding: 24px;
+  }
+  .account-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 24px;
+  }
+  .account-panel .account-identity,
+  .account-panel .account-section:has(.profile-icon-options) {
+    grid-column: 1 / -1;
+  }
+  .account-panel .account-edit-actions {
+    grid-column: 1 / -1;
+  }
+  .account-panel .logout-action {
+    grid-column: 2;
+    justify-self: end;
+  }
+  .account-panel .account-identity {
+    padding-bottom: 12px;
+  }
+  .account-panel .profile-icon-options .town-button {
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+  }
+}
