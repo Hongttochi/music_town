@@ -45,3 +45,15 @@ SQL Editor에서 아래 파일을 순서대로 실행합니다. 첫 파일을 �
 실시간 음성 송출은 LiveKit 연결 설정 후 사용할 수 있습니다. 설정 방법과 검증 범위는 [실시간 음성 설정](live-audio-setup.md)을 참고하세요. 공유 응원 반응 및 실제 팔로우 서버 처리는 별도 기능입니다. 이동은 1.5초 단위이므로 빠른 게임 수준의 이동 동기화는 아니며, 최대 인원 부하 시험도 별도로 필요합니다.
 
 참고: https://supabase.com/docs/guides/realtime/postgres-changes
+
+## 설정에서 계정 탈퇴
+
+설정의 ‘탈퇴하기’에서 삭제 확인 후 `/api/delete-account`를 호출합니다. 서버가 Supabase Auth로 로그인 토큰을 검증한 뒤, 확인된 본인 ID만 Admin API로 삭제합니다. 브라우저가 전달한 다른 사용자 ID는 사용하지 않습니다. 실제 계정 삭제 성공 후 이 기기의 로그인 세션과 해당 계정의 로컬 프로필·캐릭터·팔로우 캐시를 정리합니다. Google·Kakao 계정 자체를 삭제하는 기능은 아닙니다.
+
+Vercel 서버 환경에 `SUPABASE_SECRET_KEY`를 설정하고 재배포해야 합니다. 기존 `SUPABASE_SERVICE_ROLE_KEY`도 지원합니다. 이 값에 `VITE_` 접두사를 붙이면 안 됩니다. URL과 공개 키는 기존 `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`를 사용합니다. 서버 키가 없으면 API는 503으로 실패하며 계정을 삭제하지 않습니다.
+
+운영 적용 전 테스트 계정으로 `auth.users` 삭제가 프로필·공원 세션·공연·대기열의 외래키 정리와 연결되는지 확인하세요. 이 체크아웃에는 기존 문서가 참조하는 DB 마이그레이션이 없어 원격 삭제 연쇄를 검증하지 못했습니다. Storage 소유 객체나 삭제 제한 외래키가 있으면 Admin API 삭제가 실패할 수 있습니다. 실패 시 앱은 탈퇴 완료로 표시하지 않습니다. 삭제된 사용자의 기존 JWT는 만료 전까지 일부 API에서 허용될 수 있으므로 민감한 서버 작업은 Auth 사용자 존재 여부도 확인해야 합니다.
+
+검증: `node --test tests/delete-account.test.mjs`는 본인 인증, 위조 대상 ID 무시, 확인 누락, 만료 세션, 서버 설정 누락, 서버 오류를 검사합니다. 실제 운영 계정 삭제는 실행하지 않습니다.
+
+참고: https://supabase.com/docs/reference/javascript/auth-admin-deleteuser · https://supabase.com/docs/guides/auth/managing-user-data

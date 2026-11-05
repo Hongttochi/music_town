@@ -71,14 +71,6 @@ export function BuskingBook({
           내 차례가 되면 마이크 권한을 요청해요. 허용하면 가까운 관객에게 목소리가 전달돼요. 이어폰
           사용을 권장해요.
         </p>
-        <a
-          className="book-conduct-link"
-          href="/terms/#conduct"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          성적 괴롭힘·욕설·공연 방해 금지 · 이용 규칙
-        </a>
         <Button
           variant="primary"
           className="book-join"

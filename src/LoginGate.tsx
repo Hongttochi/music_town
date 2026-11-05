@@ -8,7 +8,12 @@ import { authConfigured, signIn, supabase } from './auth';
 import './login.css';
 import { LegalLinks } from './components/LegalLinks';
 
-export type Account = { id: string; demo: boolean; signOut: () => Promise<void> };
+export type Account = {
+  id: string;
+  demo: boolean;
+  signOut: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
+};
 export function LoginGate({ children }: { children: (account: Account) => ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [checking, setChecking] = useState(authConfigured);
@@ -97,6 +102,38 @@ export function LoginGate({ children }: { children: (account: Account) => ReactN
     setSession(null);
     setDemo(false);
   };
+  const deleteAccount = async () => {
+    if (demo || !session || !supabase) throw new Error('로그인 후 이용해 주세요.');
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) throw new Error('다시 로그인한 뒤 탈퇴해 주세요.');
+    const response = await fetch('/api/delete-account', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${data.session.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ confirmation: 'delete-my-account' }),
+    });
+    const result = await response.json();
+    if (!response.ok || result.deleted !== true)
+      throw new Error(result.error || '계정을 삭제하지 못했어요. 다시 시도해 주세요.');
+    for (const suffix of ['avatar', 'profile', 'follow']) {
+      try {
+        localStorage.removeItem(`mt-${session.user.id}-${suffix}`);
+      } catch {
+        /* Storage is optional. */
+      }
+    }
+    // The account no longer exists; clear this device's session even if revocation fails.
+    try {
+      await supabase.auth.signOut({ scope: 'local' });
+    } catch {
+      // Account deletion already succeeded; do not report a second deletion failure.
+    } finally {
+      setSession(null);
+      setDemo(false);
+    }
+  };
   if (checking || (session && !introReady))
     return (
       <main className="login-page login-simple login-arrival">
@@ -118,7 +155,8 @@ export function LoginGate({ children }: { children: (account: Account) => ReactN
         </section>
       </main>
     );
-  if (session || demo) return children({ id: session?.user.id ?? 'local-preview', demo, signOut });
+  if (session || demo)
+    return children({ id: session?.user.id ?? 'local-preview', demo, signOut, deleteAccount });
   return (
     <main className="login-page login-simple">
       <section className="login-simple-content" aria-label="MUSIC TOWN 로그인">

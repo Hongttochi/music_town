@@ -104,3 +104,38 @@ instrumentCtx.fillRect(0, 0, 1536, 512);
   instrumentCtx.drawImage(sprite, 0, 0, 512, 512, i * 512, 0, 512, 512);
 });
 writeFileSync('tmp/qa/avatar-instruments.png', instruments.toBuffer('image/png'));
+
+const accessories = [
+  ['headwear', 'snapback'],
+  ['headwear', 'beanie'],
+  ['headwear', 'bucket'],
+  ['earwear', 'headset'],
+  ['earwear', 'airpods'],
+  ['eyewear', 'sunglasses'],
+  ['eyewear', 'glasses'],
+  ['bag', 'backpack'],
+  ['bag', 'crossbody'],
+];
+const accessorySheet = createCanvas(1024, accessories.length * 256);
+const accessoryCtx = accessorySheet.getContext('2d');
+accessoryCtx.fillStyle = '#e9eddb';
+accessoryCtx.fillRect(0, 0, 1024, accessories.length * 256);
+const plain = composeAvatar(layers, { hair: 0 });
+accessories.forEach(([key, value], row) => {
+  const sprite = composeAvatar(layers, { hair: 0, [key]: value });
+  for (let direction = 0; direction < 4; direction++) {
+    const crop = (image) => {
+      const out = createCanvas(512, 512);
+      out.getContext('2d').drawImage(image, direction * 512, 0, 512, 512, 0, 0, 512, 512);
+      return out.toBuffer('image/png');
+    };
+    // A backpack exposes its straps in front; a crossbody exposes its strap behind.
+    assert.notDeepEqual(crop(sprite), crop(plain), `${value} direction ${direction}`);
+  }
+  accessoryCtx.drawImage(sprite, 0, row * 256, 1024, 256);
+  accessoryCtx.fillStyle = '#263d35';
+  accessoryCtx.font = '16px sans-serif';
+  accessoryCtx.fillText(value, 8, row * 256 + 22);
+});
+writeFileSync('tmp/qa/avatar-accessories.png', accessorySheet.toBuffer('image/png'));
+console.log('Accessories: nine items render distinctly in all four directions.');

@@ -1,3 +1,4 @@
+import { drawAccessories } from './avatarAccessories';
 import type { Avatar } from './model';
 
 /** Equipment is drawn into the same four-view texture used by preview and world. */
@@ -11,6 +12,7 @@ export function drawEquipment(
   ctx.save();
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
+  drawAccessories(ctx, avatar, direction);
   if (avatar.earrings) {
     const ears = side ? [direction === 1 ? 210 : 302] : [133, 379];
     ctx.strokeStyle = '#d9b65c';

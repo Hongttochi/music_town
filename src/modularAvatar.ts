@@ -129,6 +129,10 @@ export function composeAvatar(layers: Layers, avatar: Partial<Avatar>) {
   const p = resolveParts(avatar),
     key = JSON.stringify([
       p,
+      avatar.headwear,
+      avatar.earwear,
+      avatar.eyewear,
+      avatar.bag,
       !!avatar.earrings,
       !!avatar.necklace,
       avatar.instrument || 'none',

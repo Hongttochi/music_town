@@ -367,3 +367,38 @@ dialog.town-panel:is([data-panel='profile'], [data-panel='report']) {
   font-size: 11px;
   text-align: right;
 }
+
+.settings-menu > .delete-account-menu {
+  color: #b8463f;
+  margin-top: 8px;
+  border-top: 1px solid #e1e4d9;
+}
+dialog.delete-account-dialog {
+  width: 340px;
+  max-width: calc(100vw - 32px);
+  border: 1px solid #a6b780;
+}
+.delete-account-dialog h2 {
+  font-size: 20px;
+  margin: 12px 0;
+}
+.delete-account-dialog p {
+  font-size: 13px;
+  line-height: 1.7;
+}
+.delete-account-dialog .delete-account-error {
+  color: #b8463f;
+}
+.delete-account-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.delete-account-actions .town-button {
+  flex: 1;
+  min-height: 44px;
+}
+.delete-account-confirm.town-button {
+  background: #b8463f;
+  color: #fffdf3;
+}

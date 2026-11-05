@@ -5,6 +5,7 @@ import { useTown, type Participant } from './useTown';
 import { useStageMicrophone } from './useStageMicrophone';
 import { useLiveAudio } from './useLiveAudio';
 import { SoundEffectsSetting } from './components/SoundEffectsSetting';
+import { DeleteAccountDialog } from './components/DeleteAccountDialog';
 import { SoundEffectsProvider, useSoundEffects, type SoundEffect } from './useSoundEffects';
 import { ParticipantProfile } from './components/ParticipantProfile';
 import { ReportForm } from './components/ReportForm';
@@ -94,6 +95,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
   const playSound = useSoundEffects();
   const [toast, setToast] = useState('');
   const [actionError, setActionError] = useState('');
+  const [deletingAccount, setDeletingAccount] = useState(false);
   const [dismissedTownError, setDismissedTownError] = useState('');
   const [queue, setQueue] = useState<number | null>(null);
   const [performing, setPerforming] = useState<number | null>(null);
@@ -758,6 +760,14 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                   문의하기
                 </a>
               </div>
+              <Button
+                variant="ghost"
+                className="delete-account-menu"
+                onClick={() => setDeletingAccount(true)}
+              >
+                <Flaticon name="delete" size={16} />
+                탈퇴하기
+              </Button>
             </div>
           </>
         )}
@@ -922,6 +932,13 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
           </>
         )}
       </DialogPanel>
+      {deletingAccount && (
+        <DeleteAccountDialog
+          demo={account.demo}
+          onClose={() => setDeletingAccount(false)}
+          onDelete={account.deleteAccount}
+        />
+      )}
       {actionError && <ErrorModal message={actionError} onClose={() => setActionError('')} />}
       {town.error && town.error !== dismissedTownError && (
         <ErrorModal

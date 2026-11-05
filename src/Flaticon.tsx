@@ -3,6 +3,7 @@ export type IconName =
   | 'bench'
   | 'setting'
   | 'alarm'
+  | 'delete'
   | 'mic'
   | 'musical'
   | 'leaf'

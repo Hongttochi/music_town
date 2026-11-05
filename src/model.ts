@@ -12,6 +12,10 @@ export type Avatar = {
   eyeShape?: number;
   noseShape?: number;
   hairColor?: string;
+  headwear?: 'none' | 'snapback' | 'beanie' | 'bucket';
+  earwear?: 'none' | 'headset' | 'airpods';
+  eyewear?: 'none' | 'sunglasses' | 'glasses';
+  bag?: 'none' | 'backpack' | 'crossbody';
   earrings?: boolean;
   necklace?: boolean;
   instrument?: 'none' | 'guitar' | 'microphone' | 'electric' | 'ukulele' | 'tambourine';
