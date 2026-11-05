@@ -857,6 +857,7 @@ body:has(#app.before-entry) .town-panel::backdrop {
   }
 }
 dialog.town-panel[data-panel='settings'] {
+  border: 1px solid #a6b780;
   width: 340px;
   max-width: calc(100vw - 32px);
 }
