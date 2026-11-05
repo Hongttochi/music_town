@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Button } from './components/ui/Button';
 import * as T from 'three';
 import { Avatar, Stage, stages, koreanHour } from './model';
 import { createImageCharacters } from './imageCharacter';
@@ -30,6 +31,8 @@ export function Park(props: Props) {
     latest = useRef(props);
   latest.current = props;
   const [error, setError] = useState(false);
+  const [benchAction, setBenchAction] = useState<'sit' | 'stand' | null>(null);
+  const useBench = useRef<() => void>(() => {});
   useEffect(() => {
     const el = canvas.current!;
     let renderer: T.WebGLRenderer;
@@ -222,11 +225,7 @@ export function Park(props: Props) {
       [10, -11],
       [-8, 12],
     ].forEach(([x, z]) => scenery.prop(3, x, z, 1.1));
-    [
-      [4, 9],
-      [-12, 10],
-      [12, -8],
-    ].forEach(([x, z]) => scenery.prop(4, x, z, 1.3));
+
     for (let x = -20; x < 14; x += 3.4) scenery.prop(5, x, -17, 1.2);
     // A small wooden footbridge makes the river part of the walk.
     for (let x = 15; x < 25.3; x += 0.45) box(x, 0.14, 4.5, 0.42, 0.2, 2.6, '#bd9767');
@@ -260,10 +259,65 @@ export function Park(props: Props) {
       [35, 12],
       [31, -7],
     ].forEach(([x, z]) => scenery.prop(3, x, z, 1.1));
-    scenery.prop(4, 34, 5, 1.3);
+
     path([new T.Vector3(32, 0, 4.5), new T.Vector3(32, 0, 2)], 0.8);
     const stageMeshes: T.Object3D[] = [];
     const stageCenters = latest.current.liveStages.map(world);
+    // Leave room for the full bench, the stage edge, and the audience walkway.
+    const benches: T.Vector3[] = [];
+    for (const [preferredX, preferredZ] of [
+      [-15, 6],
+      [2, 10],
+      [11, -5],
+      [36, 4],
+    ]) {
+      let chosen: T.Vector3 | null = null;
+      for (let radius = 0; radius <= 8 && !chosen; radius += 1) {
+        for (let step = 0; step < (radius ? 16 : 1); step++) {
+          const angle = (step * Math.PI) / 8;
+          const x = preferredX + Math.cos(angle) * radius;
+          const z = preferredZ + Math.sin(angle) * radius;
+          if (x < -17 || x > 37 || z < -10 || z > 12) continue;
+          if (x > 14 && x < 26) continue;
+          if (stageCenters.some((center) => Math.hypot(x - center.x, z - center.z) < 5)) continue;
+          if (obstacles.some((o) => Math.hypot(x - o.x, z - o.z) < o.r + 2)) continue;
+          if (benches.some((bench) => Math.hypot(x - bench.x, z - bench.z) < 4)) continue;
+          chosen = new T.Vector3(x, 0, z);
+          break;
+        }
+      }
+      if (chosen) {
+        scenery.prop(4, chosen.x, chosen.z, 1.8);
+        benches.push(chosen);
+      }
+    }
+    let nearbyBench: T.Vector3 | null = null;
+    let seatedBench: T.Vector3 | null = null;
+    let standingPosition: Position | null = null;
+    let shownBenchAction: 'sit' | 'stand' | null = null;
+    const seatPosition = (bench: T.Vector3) => new T.Vector3(bench.x - 0.2, 0, bench.z + 0.25);
+    const standUp = (restorePosition: boolean) => {
+      if (restorePosition && standingPosition) {
+        latest.current.position.current = { ...standingPosition };
+        latest.current.onMove({ ...standingPosition });
+      }
+      seatedBench = null;
+      standingPosition = null;
+    };
+    useBench.current = () => {
+      const p = latest.current;
+      if (document.querySelector('dialog[open]') || p.performing !== null) return;
+      if (seatedBench) {
+        standUp(true);
+      } else if (nearbyBench && world(p.position.current).distanceTo(nearbyBench) < 2.5) {
+        seatedBench = nearbyBench;
+        standingPosition = { ...p.position.current };
+        const seat = seatPosition(seatedBench);
+        p.position.current = { x: seat.x * 25 + 700, y: seat.z * 25 + 450 };
+        p.motion.current = { x: 0, y: 0 };
+        p.onMove({ ...p.position.current });
+      }
+    };
     const surfaceHeight = (position: T.Vector3) =>
       stageCenters.some(
         (center) => Math.hypot(position.x - center.x, position.z - center.z) <= STAGE_RADIUS,
@@ -527,6 +581,10 @@ export function Park(props: Props) {
           visitor.group.rotation.y = Math.atan2(delta.x, delta.z);
         visitor.group.position.lerp(destination, 1 - Math.exp(-dt * 6));
         visitor.group.position.y = surfaceHeight(visitor.group.position);
+        visitor.group.userData.seated =
+          !p.performerIds.includes(person.id) &&
+          benches.some((bench) => destination.distanceTo(seatPosition(bench)) < 0.1);
+        if (visitor.group.userData.seated) visitor.group.rotation.y = 0;
       }
       if (key !== avatarKey) {
         scene.remove(player);
@@ -549,6 +607,15 @@ export function Park(props: Props) {
         dx = 0;
         dz = 0;
       }
+      if (seatedBench) {
+        // A new performance or server relocation takes precedence over sitting.
+        if (
+          p.performing !== null ||
+          world(p.position.current).distanceTo(seatPosition(seatedBench)) > 0.5
+        )
+          standUp(false);
+        else if (dx || dz) standUp(true);
+      }
       const len = Math.hypot(dx, dz);
       if (len > 1) {
         dx /= len;
@@ -568,10 +635,20 @@ export function Park(props: Props) {
         p.onMove({ ...p.position.current });
         lastMove = time;
       }
+      nearbyBench =
+        p.performing === null
+          ? (benches.find((bench) => world(p.position.current).distanceTo(bench) < 2.5) ?? null)
+          : null;
+      const action = seatedBench ? 'stand' : nearbyBench ? 'sit' : null;
+      if (action !== shownBenchAction) {
+        shownBenchAction = action;
+        setBenchAction(action);
+      }
+      player.userData.seated = seatedBench !== null;
       player.position.copy(world(p.position.current));
       player.position.y = surfaceHeight(player.position);
       // Stage performers face the audience, regardless of their approach direction.
-      if (p.performing !== null) player.rotation.y = 0;
+      if (p.performing !== null || seatedBench) player.rotation.y = 0;
       else if (dx || dz) player.rotation.y = Math.atan2(dx, dz);
       const walking = !!(dx || dz);
       (player.userData.limbs as T.Object3D[]).forEach((l, i) => {
@@ -654,6 +731,7 @@ export function Park(props: Props) {
     }
     frame = requestAnimationFrame(animate);
     return () => {
+      useBench.current = () => {};
       scenery.dispose();
       glowTexture.dispose();
       lanternMaterial.dispose();
@@ -685,6 +763,11 @@ export function Park(props: Props) {
         id="park"
         aria-label="3D 음악 공원. 조이스틱 또는 방향키로 산책하세요."
       />
+      {benchAction && !error && props.performing === null && (
+        <Button className="bench-action" onClick={() => useBench.current()}>
+          {benchAction === 'stand' ? '일어나기' : '의자 앉기'}
+        </Button>
+      )}
       <span
         id="player-reaction"
         className="player-reaction pointer-events-none absolute z-10"

@@ -11,6 +11,9 @@ export function createImageCharacters() {
     sprite: THREE.Sprite;
     texture: THREE.Texture;
     avatar: Partial<Avatar>;
+    standingImage?: HTMLCanvasElement;
+    seatedImage?: HTMLCanvasElement;
+    seated?: boolean;
   }>();
   let source: Awaited<ReturnType<typeof loadAvatarLayers>> | null = null;
   loadAvatarLayers()
@@ -19,13 +22,16 @@ export function createImageCharacters() {
       source = image;
       ready = true;
       actors.forEach((actor) => {
-        actor.texture.image = composeAvatar(image, actor.avatar);
+        actor.standingImage = composeAvatar(image, actor.avatar);
+        actor.texture.image = actor.standingImage;
+        actor.seated = false;
         actor.texture.needsUpdate = true;
       });
     })
     .catch((error) => console.error('Character image failed to load', error));
   function create(avatar: Partial<Avatar>) {
-    const texture = new THREE.Texture(source ? composeAvatar(source, avatar) : undefined);
+    const standingImage = source ? composeAvatar(source, avatar) : undefined;
+    const texture = new THREE.Texture(standingImage);
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.repeat.set(0.25, 1);
     texture.offset.set(0, 0);
@@ -46,7 +52,7 @@ export function createImageCharacters() {
     const group = new THREE.Group();
     group.add(sprite);
     group.userData.limbs = [];
-    actors.add({ group, sprite, texture, avatar });
+    actors.add({ group, sprite, texture, avatar, standingImage });
     return group;
   }
   function update(player: THREE.Group, moving: boolean, time: number) {
@@ -58,6 +64,35 @@ export function createImageCharacters() {
         continue;
       }
       actor.sprite.visible = ready;
+      const seated = actor.group.userData.seated === true;
+      if (actor.standingImage && actor.seated !== seated) {
+        if (seated && !actor.seatedImage) {
+          // Keep the head and torso intact; fold the lower body toward the seat.
+          const image = actor.standingImage;
+          const folded = document.createElement('canvas');
+          folded.width = image.width;
+          folded.height = image.height;
+          const context = folded.getContext('2d')!;
+          const torso = Math.round(image.height * 0.68);
+          const drop = Math.round(image.height * 0.12);
+          context.drawImage(image, 0, 0, image.width, torso, 0, drop, image.width, torso);
+          context.drawImage(
+            image,
+            0,
+            torso,
+            image.width,
+            image.height - torso,
+            0,
+            torso + drop,
+            image.width,
+            image.height - torso - drop,
+          );
+          actor.seatedImage = folded;
+        }
+        actor.texture.image = seated ? actor.seatedImage! : actor.standingImage;
+        actor.texture.needsUpdate = true;
+        actor.seated = seated;
+      }
       const angle = Math.atan2(Math.sin(actor.group.rotation.y), Math.cos(actor.group.rotation.y));
       const cell =
         Math.abs(angle) < Math.PI / 4
