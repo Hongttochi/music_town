@@ -160,6 +160,19 @@ export function composeAvatar(layers: Layers, avatar: Partial<Avatar>) {
       bw = (bh * base.width) / base.height;
     ctx.drawImage(base, 256 - bw / 2, 58, bw, bh);
     drawOutfit(ctx, avatar, direction);
+    if (
+      (direction === 1 || direction === 3) &&
+      avatar.clothingStyle &&
+      !['plain', 'stripe', 'pocket', 'dress', 'tank'].includes(avatar.clothingStyle)
+    ) {
+      // The near hand hangs in front of the wider trouser hip in profile.
+      ctx.save();
+      ctx.beginPath();
+      ctx.ellipse(direction === 1 ? 262 : 250, 382, 14, 21, 0, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(base, 256 - bw / 2, 58, bw, bh);
+      ctx.restore();
+    }
     const hair =
       p.hair < 9
         ? tinted(

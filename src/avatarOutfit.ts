@@ -38,10 +38,56 @@ export function drawOutfit(
     ctx.fill();
   };
   if (!['dress', 'tank'].includes(style)) {
-    if (side) panel(direction === 1 ? 243 : 238, 381, 35, 65, pants, 7);
-    else {
-      panel(225, 381, 26, 65, pants, 7);
-      panel(263, 381, 26, 65, pants, 7);
+    // Cover the whole original shorts silhouette before extending each leg to the shoes.
+    // A shared hip section prevents exposed short hems beside narrow trouser legs.
+    if (side) {
+      const hipX = direction === 1 ? 235 : 231;
+      panel(hipX, 362, 51, 40, pants, 8);
+      panel(hipX + 2, 389, 47, 60, pants, 5);
+      line(
+        [
+          [hipX + 42, 397],
+          [hipX + 42, 440],
+        ],
+        '#00000018',
+        2,
+      );
+      line(
+        [
+          [hipX + 6, 444],
+          [hipX + 44, 444],
+        ],
+        '#ffffff24',
+        2,
+      );
+    } else {
+      panel(211, 362, 90, 38, pants, 9);
+      panel(216, 387, 38, 62, pants, 5);
+      panel(258, 387, 38, 62, pants, 5);
+      line(
+        [
+          [254, 392],
+          [254, 442],
+        ],
+        '#00000020',
+        2,
+      );
+      line(
+        [
+          [219, 444],
+          [250, 444],
+        ],
+        '#ffffff24',
+        2,
+      );
+      line(
+        [
+          [262, 444],
+          [293, 444],
+        ],
+        '#ffffff24',
+        2,
+      );
     }
   }
   if (style === 'tank') {
