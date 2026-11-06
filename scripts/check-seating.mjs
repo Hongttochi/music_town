@@ -15,8 +15,8 @@ async function bundle(path) {
     'data:text/javascript;base64,' + Buffer.from(result.outputFiles[0].text).toString('base64')
   );
 }
-const { composeAvatar } = await bundle('src/modularAvatar.ts');
-const { composeSeatedAvatar } = await bundle('src/seatedAvatar.ts');
+const { composeAvatar } = await bundle('src/scene/avatar/modularAvatar.ts');
+const { composeSeatedAvatar } = await bundle('src/scene/avatar/seatedAvatar.ts');
 const layers = {};
 for (const [key, file] of Object.entries({
   base: 'base',

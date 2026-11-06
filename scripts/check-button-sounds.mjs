@@ -1,6 +1,6 @@
-import fs from 'node:fs';
 import vm from 'node:vm';
-import ts from 'typescript';
+import { build } from 'esbuild';
+import { basename } from 'node:path';
 import assert from 'node:assert/strict';
 const effects = [],
   handlers = new Map(),
@@ -58,11 +58,30 @@ class AudioContext {
     };
   }
 }
-const code = ts.transpileModule(fs.readFileSync('src/useSoundEffects.ts', 'utf8'), {
-  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
-}).outputText;
+const bundled = await build({
+  entryPoints: ['src/providers/SoundEffectsProvider.tsx'],
+  bundle: true,
+  write: false,
+  format: 'cjs',
+  platform: 'node',
+  external: ['react'],
+  plugins: [
+    {
+      name: 'mock-sound-urls',
+      setup(build) {
+        build.onLoad({ filter: /\.mp3$/ }, (args) => ({
+          contents: `export default ${JSON.stringify('./sounds/' + basename(args.path))}`,
+          loader: 'js',
+        }));
+      },
+    },
+  ],
+});
+const code = bundled.outputFiles[0].text;
+const output = {};
 const scope = {
-  exports: {},
+  exports: output,
+  module: { exports: output },
   Element,
   HTMLDialogElement,
   AudioContext,
@@ -92,7 +111,7 @@ const scope = {
       : { default: name },
 };
 vm.runInNewContext(code, scope);
-scope.exports.SoundEffectsProvider({ children: null });
+scope.module.exports.SoundEffectsProvider({ children: null });
 const cleanup = effects.map((fn) => fn());
 async function check(label, options, expected) {
   const before = played.length;

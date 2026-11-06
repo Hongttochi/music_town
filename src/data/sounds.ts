@@ -1,0 +1,27 @@
+import clap from '../sounds/clap.mp3';
+import complete from '../sounds/complete.mp3';
+import heart from '../sounds/heart.mp3';
+import lightstick from '../sounds/Lightstick.mp3';
+import click from '../sounds/click.mp3';
+import ok from '../sounds/ok.mp3';
+import cancel from '../sounds/cancel.mp3';
+
+import coffeemachine from '../sounds/coffeemachine.mp3';
+import coffeemachineEnd from '../sounds/coffeemachine_end.mp3';
+import drink from '../sounds/drink.mp3';
+import sitdown from '../sounds/sitdown.mp3';
+
+export const sources = {
+  clap,
+  complete,
+  heart,
+  lightstick,
+  click,
+  ok,
+  cancel,
+  coffeemachine,
+  coffeemachineEnd,
+  drink,
+  sitdown,
+};
+export type SoundEffect = keyof typeof sources;

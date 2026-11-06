@@ -9,7 +9,7 @@ globalThis.document = {
   },
 };
 const bundled = await build({
-  entryPoints: ['src/modularAvatar.ts'],
+  entryPoints: ['src/scene/avatar/modularAvatar.ts'],
   bundle: true,
   write: false,
   platform: 'node',

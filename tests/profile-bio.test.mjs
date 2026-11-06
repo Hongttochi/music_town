@@ -7,7 +7,7 @@ import ts from 'typescript';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 const require = createRequire(import.meta.url);
-const source = readFileSync(new URL('../src/components/ProfileBio.tsx', import.meta.url), 'utf8');
+const source = readFileSync(new URL('../src/components/profile/ProfileBio.tsx', import.meta.url), 'utf8');
 const compiled = ts.transpileModule(source, {
   compilerOptions: {
     module: ts.ModuleKind.CommonJS,

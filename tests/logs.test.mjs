@@ -138,7 +138,7 @@ test('upstream failures are contained and instance budget recovers next minute',
   assert.equal(failed.statusCode, 502);
 });
 test('browser batches, deduplicates, limits noise and never sends raw errors', async () => {
-  const source = readFileSync(new URL('../src/telemetry.ts', import.meta.url), 'utf8').replace(
+  const source = readFileSync(new URL('../src/services/telemetry.ts', import.meta.url), 'utf8').replace(
     'import.meta.env.VITE_LOGGING_ENABLED',
     "'true'",
   );

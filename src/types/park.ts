@@ -1,0 +1,19 @@
+import type { Avatar, Stage } from '../data/model';
+import type { Participant } from '../hooks/useTown';
+export type Position = { x: number; y: number };
+export type ParkProps = {
+  mapPositions?: React.MutableRefObject<Map<string, Position>>;
+  liveStages: Stage[];
+  participants: Participant[];
+  demo: boolean;
+  avatar: Avatar;
+  position: React.MutableRefObject<Position>;
+  motion: React.MutableRefObject<Position>;
+  onMove: (p: Position) => void;
+  onStage: (s: Stage) => void;
+  onParticipant: (person: Participant) => void;
+  performing: number | null;
+  watching?: number | null;
+  performerIds: string[];
+  reaction: { symbol: string; at: number } | null;
+};

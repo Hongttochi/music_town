@@ -139,24 +139,47 @@ TypeScript 검사 후 `dist/`에 배포 파일을 생성합니다.
 
 ## 파일 구성
 
-- `src/main.tsx`: React UI 및 프로토타입 상태
-- `src/Park.tsx`: Three.js 3D 공원, 카메라, 캐릭터, 입력 처리
-- `src/imageCharacter.ts`: AI 이미지 4방향 아틀라스 로딩 및 방향 전환
-- `public/art/`: AI 생성 기본 몸체·머리·눈·코 부품, 마을 소품·잔디 텍스처·MUSIC TOWN 로고
-- `src/modularAvatar.ts`, `src/avatarParts.ts`: 부품별 캐릭터 조합과 4방향 합성
-- `src/ModularPortrait.tsx`, `src/PartOptions.tsx`: 부품 선택 및 공통 미리보기
-- `src/villageProps.ts`: 마을 이미지 소품, 잔디 텍스처 로딩
-- `public/icons/ATTRIBUTION.md`: 실제 Flaticon 아이콘 원작자·출처. 앱 화면에서도 확인 가능
-- `src/AvatarEditor.tsx`: 로그인 후 캐릭터 설정
-- `src/LoginGate.tsx`, `src/auth.ts`: 세션 기반 입장 흐름과 Supabase OAuth
-- `src/appearance.ts`, `src/characterTexture.ts`: 피부/눈동자 색상 변경과 공통 렌더링
-- `src/model.ts`: 타입, 가상 데이터, 공통 계산
-- `src/style.css`: Tailwind 진입점, 공원 HUD 스타일, 반응형 레이아웃
-- `public/`: 앱 아이콘과 manifest
+```text
+src/
+  main.tsx             # React 실행, 전역 스타일과 로그 수집 초기화
+  app/App.tsx          # 로그인·프로필 로딩·Provider 조합
+  pages/               # LoginPage, TownPage: 화면 흐름과 기능 연결
+  components/
+    ui/                # 공통 Button, Panel, ErrorModal, Flaticon
+    layout/            # TownHeader, DeviceGuide, HourlyClock
+    park/              # 공원 뷰, 조이스틱, 무대 목록·라벨·공연 제어, 미니맵
+    profile/           # 내/상대방 프로필, 활동 기록, 소셜 링크
+    settings/          # 설정 메뉴, 효과음 설정, 계정 탈퇴
+    avatar/            # 캐릭터 편집과 미리보기
+    auth/              # 가입과 프로필 로딩
+    legal/             # 약관 링크와 신고 화면
+  hooks/               # 공원 상태, 음성, 마이크, 효과음, 장면 생명주기
+  providers/           # 효과음 엔진과 설정 상태 제공
+  contexts/            # 공유 상태 계약
+  services/            # 인증, 프로필 저장, 로그 전송
+  scene/
+    park/              # Three.js 장면 생성, 지형·다리·카페·게시판·모닥불
+    avatar/            # 캐릭터 합성, 옷·장비, 앉기·마시기 렌더링
+  data/                # 기본 데이터, 캐릭터 부품, 커피 메뉴, 공지, 사운드 목록
+  types/               # 공원 좌표와 화면/장면 간 타입 계약
+  utils/               # 저장소 읽기, 시간, 오디오 재개, 원격 이동 계산
+  styles/              # 전역 스타일, 모바일 레이아웃, 공용 모달 스타일
+  assets/, sounds/     # 빌드에 포함되는 이미지와 음원
+```
+
+페이지는 사용자 동작과 화면 전환을 연결하고, 컴포넌트는 props와 콜백으로 UI를 구성합니다.
+`Park`는 캔버스와 상호작용 UI를 표시하고, `useParkScene`은 생성·정리 생명주기를,
+`scene/park/createParkScene.ts`는 Three.js 렌더링을 담당합니다.
+새 공통 버튼·제목·모달은 `components/ui`를 사용하고, 기능 전용 스타일은 해당 컴포넌트 옆에 둡니다.
+외부 API 코드는 `services`, DOM과 무관한 계산은 `utils`에 둡니다.
+
+- `public/art/`: 캐릭터 부품과 마을 소품 등 원본 이미지
+- `public/icons/ATTRIBUTION.md`: 아이콘 원작자·출처
+- `tests/`, `scripts/check-*.mjs`: 자동 검증과 렌더링 점검
 
 ## 검증
 
-`npm run build`로 TypeScript와 Vite 빌드를 확인합니다. `node scripts/check-avatar.mjs`와 `node scripts/check-clothing.mjs`로 캐릭터 합성 이미지를 생성할 수 있습니다. 전체 브라우저/터치 기기 시각 검증과 운영 DB 검증은 미완료입니다. 과거 UI 점검 기록은 [design-qa.md](design-qa.md)를 참고하세요.
+`npm run build`로 TypeScript와 Vite 빌드, `node --test tests/*.test.mjs`로 API·프로필·이동 회귀 테스트를 실행합니다. `node scripts/check-button-sounds.mjs`, `node scripts/check-river-boundary.mjs`, `node scripts/check-seating.mjs`는 효과음·다리 충돌·착석 렌더링을 검증합니다. 캐릭터 합성 이미지는 `node scripts/check-avatar.mjs`와 `node scripts/check-clothing.mjs`로 확인할 수 있습니다. 로컬 데모의 브라우저 검증과 실제 운영 DB·기기 검증은 별개입니다. 과거 UI 점검 기록은 [design-qa.md](design-qa.md)를 참고하세요.
 
 ## Credits
 

@@ -3,7 +3,7 @@ import { createCanvas, loadImage } from '@napi-rs/canvas';
 import { writeFileSync } from 'node:fs';
 globalThis.document = { createElement: () => createCanvas(1, 1) };
 const bundle = await build({
-  entryPoints: ['src/modularAvatar.ts'],
+  entryPoints: ['src/scene/avatar/modularAvatar.ts'],
   bundle: true,
   write: false,
   platform: 'node',

@@ -1,7 +1,7 @@
 import { build } from 'esbuild';
 import assert from 'node:assert/strict';
 const result = await build({
-  entryPoints: ['src/riverBoundary.ts'],
+  entryPoints: ['src/scene/park/riverBoundary.ts'],
   bundle: true,
   write: false,
   format: 'esm',
