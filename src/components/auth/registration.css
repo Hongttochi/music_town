@@ -386,3 +386,9 @@ dialog.town-panel[data-panel='registration'] .registration-actions > .town-butto
   line-height: 1.4;
   box-shadow: none;
 }
+
+dialog.town-panel[open][data-panel='registration'] > .panel-heading {
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #d7dfc6;
+}

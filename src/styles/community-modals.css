@@ -483,3 +483,12 @@ dialog.delete-account-dialog {
   flex: none;
   object-fit: contain;
 }
+
+.stage-list .section-title h2 {
+  font-size: 11px;
+  line-height: 1.4;
+  font-weight: 500;
+}
+.stage-list .section-title > span {
+  font-size: 9px;
+}

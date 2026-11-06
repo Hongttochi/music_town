@@ -352,20 +352,6 @@ dialog.town-panel[data-panel='following'] {
   word-break: keep-all;
   margin: 0 0 12px;
 }
-.following-empty-guide {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border-top: 1px solid #e2e7d6;
-  margin-top: 12px;
-  padding-top: 10px;
-  color: #8c957e;
-  font-size: 9px;
-}
-.following-empty-guide [aria-hidden] {
-  color: #b3bba3;
-}
 .following-status {
   min-height: 150px;
   display: grid;
@@ -418,10 +404,6 @@ dialog.town-panel[data-panel='following'] {
   }
   .following-empty p {
     margin-bottom: 8px;
-  }
-  .following-empty-guide {
-    margin-top: 8px;
-    padding-top: 8px;
   }
 }
 
@@ -489,4 +471,18 @@ dialog.town-panel[open] .fan-profile .activity-stats .activity-metrics > .town-b
   font-size: 9px;
   line-height: 1.5;
   margin: 8px 0 0;
+}
+
+/* Keep date highlights close to the label instead of filling the chart column. */
+dialog.town-panel[open] .fan-profile .activity-dates > button.town-button {
+  justify-self: center;
+  width: auto;
+  max-width: 100%;
+  height: 24px;
+  min-height: 24px;
+  min-width: 0;
+  padding: 3px 5px;
+  font-size: 10px;
+  line-height: 18px;
+  border-radius: 6px;
 }

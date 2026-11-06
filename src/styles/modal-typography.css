@@ -11,7 +11,10 @@ dialog.town-panel[open] .delete-account-title {
   line-height: 1.4;
 }
 dialog.town-panel[open] .panel-heading {
-  margin-bottom: 14px;
+  align-items: center;
+  margin: 0 0 12px;
+  padding: 0 0 10px;
+  border-bottom: 1px solid #d7dfc6;
 }
 dialog.town-panel[open] :is(.modal-sub, .book-summary, .notice-paper p, .report-form p) {
   font-size: var(--modal-body-size);
@@ -53,8 +56,12 @@ dialog.town-panel[open] .fan-profile .activity-chart-heading {
 dialog.town-panel[open] .fan-profile .activity-detail strong {
   font-size: 12px;
 }
-dialog.town-panel[open] .settings-menu :is(.town-button, .sound-effects-label) {
+dialog.town-panel[open]
+  .settings-menu
+  :is(.town-button, .sound-effects-label, .settings-policy-links a) {
   font-size: var(--modal-body-size);
+  font-weight: 500;
+  line-height: 1.5;
 }
 dialog.town-panel[open] .busking-book :is(h2, h3) {
   font-size: 12px;
@@ -88,4 +95,15 @@ dialog.error-modal[open] p {
 dialog.town-panel[open] .registration-fields .registration-bio textarea {
   font-size: 13px;
   line-height: 1.65;
+}
+
+/* Align shared modal headings near the top edge, regardless of content layout. */
+dialog.town-panel[open]:not(.profile-dialog):not(.park-guide-dialog):not(.notice-board-dialog) {
+  padding-top: 12px;
+}
+dialog.town-panel.profile-dialog[open] > .profile-sheet {
+  padding-top: 12px;
+}
+dialog.town-panel[open] .panel-heading h2.modal-title {
+  margin: 0;
 }

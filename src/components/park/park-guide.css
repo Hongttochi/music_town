@@ -91,3 +91,7 @@ dialog.town-panel.park-guide-dialog .panel-heading > .town-button {
   width: 24px;
   padding: 2px;
 }
+dialog.town-panel.park-guide-dialog[open] .panel-heading {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
