@@ -22,9 +22,12 @@ export function ParticipantProfile({
           <h3>{person.avatar.name}</h3>
         </div>
       </div>
-      <p className="participant-bio">
-        <ProfileBio text={person.bio || '아직 자기소개가 없어요.'} />
-      </p>
+      <section className="participant-about" aria-label="자기소개">
+        <h4>자기소개</h4>
+        <div className="participant-bio">
+          <ProfileBio text={person.bio || '아직 자기소개가 없어요.'} />
+        </div>
+      </section>
       {fanStats}
       {person.role === 'musician' && (person.instagram || person.soundcloud) && (
         <div className="participant-socials">
