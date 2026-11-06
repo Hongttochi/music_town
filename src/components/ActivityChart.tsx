@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import type { FanStats } from '../useFanStats';
 import { Button } from './ui/Button';
@@ -13,6 +13,8 @@ export function formatActivity(seconds: number) {
         : '0분';
 }
 export function ActivityChart({ stats }: { stats: FanStats | null }) {
+  const [expanded, setExpanded] = useState(false);
+  const contentId = useId();
   const [chosen, setChosen] = useState<string | null>(null);
   const [metric, setMetric] = useState<'onlineSeconds' | 'stageSeconds'>('onlineSeconds');
   const days = stats?.days ?? [];
@@ -24,8 +26,13 @@ export function ActivityChart({ stats }: { stats: FanStats | null }) {
     day,
   }));
   return (
-    <details className="activity-stats">
-      <summary>
+    <section className="activity-stats" data-expanded={expanded}>
+      <Button
+        className="activity-toggle"
+        aria-expanded={expanded}
+        aria-controls={contentId}
+        onClick={() => setExpanded((value) => !value)}
+      >
         <span>활동 기록</span>
         <span className="activity-summary-time">
           {stats
@@ -33,84 +40,92 @@ export function ActivityChart({ stats }: { stats: FanStats | null }) {
             : '—'}
         </span>
         <ChevronDown size={15} aria-hidden="true" />
-      </summary>
-      <div className="activity-expanded">
-        <div className="activity-chart-heading">
-          <span>최근 7일</span>
-          <div className="activity-metrics" role="group" aria-label="그래프 항목">
-            <Button
-              variant="plain"
-              aria-pressed={metric === 'onlineSeconds'}
-              onClick={() => setMetric('onlineSeconds')}
-            >
-              접속
-            </Button>
-            <Button
-              variant="plain"
-              aria-pressed={metric === 'stageSeconds'}
-              onClick={() => setMetric('stageSeconds')}
-            >
-              무대
-            </Button>
+      </Button>
+      <div className="activity-reveal" id={contentId} aria-hidden={!expanded} inert={!expanded}>
+        <div className="activity-reveal-inner">
+          <div className="activity-expanded">
+            <div className="activity-chart-heading">
+              <span>최근 7일</span>
+              <div className="activity-metrics" role="group" aria-label="그래프 항목">
+                <Button
+                  variant="plain"
+                  aria-pressed={metric === 'onlineSeconds'}
+                  onClick={() => setMetric('onlineSeconds')}
+                >
+                  접속
+                </Button>
+                <Button
+                  variant="plain"
+                  aria-pressed={metric === 'stageSeconds'}
+                  onClick={() => setMetric('stageSeconds')}
+                >
+                  무대
+                </Button>
+              </div>
+            </div>
+            {stats && days.length ? (
+              <>
+                <p className="activity-detail" aria-live="polite">
+                  <span>{selected?.date.replaceAll('-', '.')}</span>
+                  <strong>{selected ? formatActivity(selected[metric]) : '—'}</strong>
+                </p>
+                <svg
+                  className="activity-plot"
+                  viewBox="0 0 332 120"
+                  role="img"
+                  aria-label={`최근 7일 ${metric === 'onlineSeconds' ? '접속' : '무대'} 시간. 날짜별 값은 아래 버튼에서 확인할 수 있어요.`}
+                >
+                  <text x="0" y="15">
+                    {formatActivity(max)}
+                  </text>
+                  <path d="M24 28H308 M24 64H308 M24 100H308" className="activity-grid" />
+                  <polyline
+                    points={points.map((p) => `${p.x},${p.y}`).join(' ')}
+                    className="activity-line"
+                  />
+                  {points.map((p) => (
+                    <circle
+                      key={p.day.date}
+                      cx={p.x}
+                      cy={p.y}
+                      r={p.day.date === selected?.date ? 4 : 2.5}
+                      className={
+                        p.day.date === selected?.date
+                          ? 'activity-point is-selected'
+                          : 'activity-point'
+                      }
+                    />
+                  ))}
+                  <text x="0" y="104">
+                    0
+                  </text>
+                </svg>
+                <div className="activity-dates" role="group" aria-label="날짜별 활동">
+                  {days.map((day) => (
+                    <Button
+                      key={day.date}
+                      variant="plain"
+                      aria-pressed={selected?.date === day.date}
+                      aria-label={`${day.date}, 접속 ${formatActivity(day.onlineSeconds)}, 무대 ${formatActivity(day.stageSeconds)}`}
+                      onClick={() => setChosen(day.date)}
+                    >
+                      {Number(day.date.slice(5, 7))}/{Number(day.date.slice(8))}
+                    </Button>
+                  ))}
+                </div>
+                {!days.some((day) => day[metric] > 0) && (
+                  <p className="activity-empty">최근 7일 기록이 없어요.</p>
+                )}
+              </>
+            ) : (
+              <p className="activity-empty">아직 표시할 기록이 없어요.</p>
+            )}
+            <p className="activity-footnote">
+              한국 시간 기준 · 무대 시간은 접속 시간에 포함됩니다.
+            </p>
           </div>
         </div>
-        {stats && days.length ? (
-          <>
-            <p className="activity-detail" aria-live="polite">
-              <span>{selected?.date.replaceAll('-', '.')}</span>
-              <strong>{selected ? formatActivity(selected[metric]) : '—'}</strong>
-            </p>
-            <svg
-              className="activity-plot"
-              viewBox="0 0 332 120"
-              role="img"
-              aria-label={`최근 7일 ${metric === 'onlineSeconds' ? '접속' : '무대'} 시간. 날짜별 값은 아래 버튼에서 확인할 수 있어요.`}
-            >
-              <text x="0" y="15">
-                {formatActivity(max)}
-              </text>
-              <path d="M24 28H308 M24 64H308 M24 100H308" className="activity-grid" />
-              <polyline
-                points={points.map((p) => `${p.x},${p.y}`).join(' ')}
-                className="activity-line"
-              />
-              {points.map((p) => (
-                <circle
-                  key={p.day.date}
-                  cx={p.x}
-                  cy={p.y}
-                  r={p.day.date === selected?.date ? 4 : 2.5}
-                  className={
-                    p.day.date === selected?.date ? 'activity-point is-selected' : 'activity-point'
-                  }
-                />
-              ))}
-              <text x="0" y="104">
-                0
-              </text>
-            </svg>
-            <div className="activity-dates" role="group" aria-label="날짜별 활동">
-              {days.map((day) => (
-                <Button
-                  key={day.date}
-                  variant="plain"
-                  aria-pressed={selected?.date === day.date}
-                  aria-label={`${day.date}, 접속 ${formatActivity(day.onlineSeconds)}, 무대 ${formatActivity(day.stageSeconds)}`}
-                  onClick={() => setChosen(day.date)}
-                >
-                  {Number(day.date.slice(5, 7))}/{Number(day.date.slice(8))}
-                </Button>
-              ))}
-            </div>
-            {!days.some((day) => day[metric] > 0) && (
-              <p className="activity-empty">최근 7일 기록이 없어요.</p>
-            )}
-          </>
-        ) : (
-          <p className="activity-empty">아직 표시할 기록이 없어요.</p>
-        )}
-        <p className="activity-footnote">한국 시간 기준 · 무대 시간은 접속 시간에 포함됩니다.</p>
       </div>
-    </details>
+    </section>
   );
 }

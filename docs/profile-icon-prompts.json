@@ -1,0 +1,12 @@
+{
+  "tool": "Built-in image_gen",
+  "transparent_background": true,
+  "assets": {
+    "followers": "public/icons/profile-followers.png",
+    "received-heart": "public/icons/profile-received-heart.png"
+  },
+  "prompts": {
+    "followers": "Use case: stylized-concept. Asset: small profile statistic icon for a cozy Korean 3D village park game, matching soft rounded coffee inventory icons. Single isolated object, centered square composition, occupies 80 percent of frame. Chunky softly rounded matte toy-clay 3D illustration, warm cream and muted sage palette, gentle upper-left lighting, slight three-quarter view, readable at 24 pixels. True transparent background, no text, no letters, no border, no tile, no ground plane, no cast shadow outside object, no extra decorations. Two friendly simplified rounded human bust silhouettes grouped together, one larger sage-green figure in front and a smaller warm cream figure behind, round heads, soft shoulders, no faces or clothing details.",
+    "received-heart": "Use case: stylized-concept. Asset: small profile statistic icon for a cozy Korean 3D village park game, matching soft rounded coffee inventory icons. Single isolated object, centered square composition, occupies 80 percent of frame. Chunky softly rounded matte toy-clay 3D illustration, warm cream and muted sage palette, gentle upper-left lighting, slight three-quarter view, readable at 24 pixels. True transparent background, no text, no letters, no border, no tile, no ground plane, no cast shadow outside object, no extra decorations. One plump rounded heart, warm muted peach-coral pink, soft creamy highlights, gentle volume, no glitter or other objects."
+  }
+}

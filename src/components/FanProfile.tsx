@@ -21,11 +21,17 @@ export function FanProfile({
       <dl className="fan-counts">
         <div>
           <dt>팔로워</dt>
-          <dd>{stats ? stats.followers.toLocaleString('ko-KR') : '—'}</dd>
+          <dd>
+            <img src="/icons/profile-followers.png" width={26} height={26} alt="" />
+            <span>{stats ? stats.followers.toLocaleString('ko-KR') : '—'}</span>
+          </dd>
         </div>
         <div>
           <dt>받은 하트</dt>
-          <dd>{stats ? stats.hearts.toLocaleString('ko-KR') : '—'}</dd>
+          <dd>
+            <img src="/icons/profile-received-heart.png" width={26} height={26} alt="" />
+            <span>{stats ? stats.hearts.toLocaleString('ko-KR') : '—'}</span>
+          </dd>
         </div>
       </dl>
       {!own && !demo && userId && (
@@ -45,7 +51,7 @@ export function FanProfile({
             title="하트는 계정당 한 번 집계돼요"
             onClick={() => void act('heart', !stats?.hearted)}
           >
-            <img src="/icons/heart.png" width={17} height={17} alt="" />
+            <img src="/icons/profile-received-heart.png" width={17} height={17} alt="" />
             {stats?.hearted ? '하트 보냄' : '하트 보내기'}
           </Button>
         </div>
