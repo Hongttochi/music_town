@@ -37,8 +37,8 @@ export function ProfileSocialLinks({
       {onEditMissing &&
         (
           [
-            ['instagram', '인스타 등록', instagram],
-            ['soundcloud', '사클 등록', soundcloud],
+            ['instagram', 'Instagram 등록', instagram],
+            ['soundcloud', 'SoundCloud 등록', soundcloud],
           ] as const
         )
           .filter(([, , value]) => !value)

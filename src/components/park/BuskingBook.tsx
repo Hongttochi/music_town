@@ -43,12 +43,14 @@ export function BuskingBook({
       <section className="book-page book-guide">
         <h3>한 번에 5분, 자유롭게 공연해요</h3>
         <p className="book-summary">
-          {stage.artist ? '내 차례가 되면 무대로 이동해요.' : '마이크를 켜고 공연을 시작해 보세요.'}
+          {stage.artist
+            ? '대기를 신청하면 순서대로 무대에 올라요. 내 차례가 되면 무대로 이동하고 마이크 권한을 요청해요.'
+            : '마이크를 켜면 가까이 있는 관객에게 목소리와 연주가 들려요. 노래나 악기 연주로 나만의 무대를 만들어 보세요.'}
         </p>
         <p className="book-demo-note">
           {stage.artist
-            ? '채널을 옮기거나 나가면 대기가 취소돼요.'
-            : '마이크 접근 권한이 필요해요.'}
+            ? '공연은 최대 5분이에요. 채널을 옮기거나 나가면 대기가 취소돼요.'
+            : '마이크 접근을 허용해 주세요. 공연은 최대 5분이며, 끝내고 싶을 때 공연 종료를 누르면 돼요.'}
         </p>
         <Button
           variant="primary"

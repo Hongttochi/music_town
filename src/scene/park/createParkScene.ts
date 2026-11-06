@@ -1,3 +1,4 @@
+import { createSchool, SCHOOL_SPOT, SCHOOL_NPC_SPOT, overlapsSchool } from './school';
 import { PARK_PATHS } from './parkPaths';
 import { remoteMovementStep } from '../../utils/remoteMovement';
 import type { useSoundEffects } from '../../hooks/useSoundEffects';
@@ -197,6 +198,7 @@ export function createParkScene({
   );
   const obstacles: { x: number; z: number; r: number }[] = [];
   function tree(x: number, z: number, s = 1) {
+    if (Math.abs(x - SCHOOL_SPOT.x) < 4.5 && Math.abs(z - SCHOOL_SPOT.z) < 5) return;
     if (walkways.some((p) => Math.hypot(x - p.x, z - p.z) < p.width + s)) return;
     // Keep trunks and their broad sprite canopies clear of the river.
     if (x > RIVER.left - 2.4 * s && x < RIVER.right + 2.4 * s) return;
@@ -281,6 +283,9 @@ export function createParkScene({
     riverStone(RIVER.left - 0.2, z);
     riverStone(RIVER.right + 0.2, z);
   }
+  const school = createSchool(scene);
+  obstacles.push({ x: SCHOOL_SPOT.x, z: SCHOOL_SPOT.z, r: 3.2 });
+  obstacles.push({ x: SCHOOL_NPC_SPOT.x, z: SCHOOL_NPC_SPOT.z, r: 0.45 });
   const campfire = createCampfire(scene);
   obstacles.push({ x: CAMPFIRE_SPOT.x, z: CAMPFIRE_SPOT.z, r: CAMPFIRE_RADIUS });
   const noticeBoard = createNoticeBoard(scene);
@@ -773,6 +778,7 @@ export function createParkScene({
       stopCoffeeSound = sound.current('coffeemachineEnd');
     }
     if (coffeePhase === 'drinking' && coffeeElapsed >= 3600) resetCoffee();
+    school.update(time, world(p.position.current));
     coffeeShop.update(coffeePhase, coffeeElapsed / 2300, orderedCoffee);
     player.userData.coffee = orderedCoffee;
     player.userData.coffeePreparing = coffeePhase === 'brewing' || coffeePhase === 'ready';
@@ -826,6 +832,7 @@ export function createParkScene({
     if (
       canCrossRiver(world(p.position.current), point) &&
       !overlapsCoffeeMachine(point, PLAYER_RADIUS) &&
+      !overlapsSchool(point, PLAYER_RADIUS) &&
       !obstacles.some((o) => Math.hypot(point.x - o.x, point.z - o.z) < o.r + PLAYER_RADIUS)
     )
       p.position.current = next;
@@ -961,8 +968,7 @@ export function createParkScene({
     if (benchBubble.current) {
       if (bubbleBench && !document.querySelector('dialog[open]')) {
         const anchor = bubbleBench.clone();
-        anchor.x += 1.5;
-        anchor.y = 1.9;
+        anchor.y = 2.1;
         anchor.project(camera);
         const x = (anchor.x * 0.5 + 0.5) * el.clientWidth;
         const y = (-anchor.y * 0.5 + 0.5) * el.clientHeight;
@@ -1039,6 +1045,7 @@ export function createParkScene({
     stopCoffeeSound();
     useCoffee.current = () => {};
     bridgeRailMaterial.dispose();
+    school.dispose();
     coffeeShop.dispose();
     noticeBoard.dispose();
     campfire.dispose();

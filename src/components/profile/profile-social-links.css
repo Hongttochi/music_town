@@ -1,7 +1,7 @@
 .profile-name-line {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: 8px 16px;
   min-width: 0;
 }
@@ -10,9 +10,10 @@
 }
 .profile-social-links {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 14px;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-left: auto;
+  gap: 6px;
   min-width: 0;
   max-width: 100%;
 }
@@ -64,4 +65,16 @@
   border: 0;
   padding: 2px 0;
   box-shadow: none;
+}
+.account-name {
+  flex: 1;
+}
+.profile-social-links > :first-child {
+  order: 0;
+}
+.profile-social-links > :has(img[src*='instagram']) {
+  order: 0;
+}
+.profile-social-links > :has(img[src*='soundcloud']) {
+  order: 1;
 }

@@ -103,12 +103,6 @@ dialog.town-panel.notice-board-dialog {
   line-height: 1.6;
   margin: 20px 0 0;
 }
-.bench-action.notice-board-action.town-button {
-  width: 42px;
-  height: 42px;
-  min-height: 42px;
-  padding: 6px;
-}
 @media (max-height: 500px) {
   dialog.town-panel.notice-board-dialog {
     padding: 16px 20px;
