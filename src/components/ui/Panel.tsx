@@ -2,11 +2,22 @@ import { forwardRef, type DialogHTMLAttributes, type HTMLAttributes } from 'reac
 import { X } from 'lucide-react';
 import { Button } from './Button';
 
-export const DialogPanel = forwardRef<HTMLDialogElement, DialogHTMLAttributes<HTMLDialogElement>>(
-  function DialogPanel({ className = '', ...props }, ref) {
-    return <dialog ref={ref} className={`town-panel ${className}`} {...props} />;
-  },
-);
+type DialogPanelProps = DialogHTMLAttributes<HTMLDialogElement> & { 'data-panel'?: string | null };
+export const DialogPanel = forwardRef<HTMLDialogElement, DialogPanelProps>(function DialogPanel(
+  { className = '', children, ...props },
+  ref,
+) {
+  const profile = ['account', 'participant', 'profile'].includes(props['data-panel'] ?? '');
+  return (
+    <dialog
+      ref={ref}
+      className={`town-panel ${profile ? 'profile-dialog' : ''} ${className}`}
+      {...props}
+    >
+      {profile ? <div className="profile-sheet">{children}</div> : children}
+    </dialog>
+  );
+});
 
 export function Panel({ className = '', ...props }: HTMLAttributes<HTMLDivElement>) {
   return <div className={`town-surface ${className}`} {...props} />;

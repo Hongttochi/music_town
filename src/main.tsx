@@ -125,8 +125,23 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
   useEffect(() => {
     if (panel) {
       motion.current = { x: 0, y: 0 };
-      dialog.current?.showModal();
-      if (dialog.current) dialog.current.scrollTop = 0;
+      const element = dialog.current;
+      const alreadyOpen = element?.open;
+      element?.showModal();
+      if (element) {
+        element.scrollTop = 0;
+        if (alreadyOpen && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          const surface = element.querySelector<HTMLElement>('.profile-sheet') ?? element;
+          surface.getAnimations().forEach((animation) => animation.cancel());
+          surface.animate(
+            [
+              { opacity: 0, transform: 'translateY(8px) scale(.985)' },
+              { opacity: 1, transform: 'translateY(0) scale(1)' },
+            ],
+            { duration: 220, easing: 'cubic-bezier(.2,.7,.3,1)' },
+          );
+        }
+      }
     } else dialog.current?.close();
   }, [panel]);
   useEffect(() => {
@@ -655,7 +670,9 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
         }}
         onClick={(e) => {
           if (entered && e.target === dialog.current) {
-            const r = dialog.current.getBoundingClientRect();
+            const r = (
+              dialog.current.querySelector<HTMLElement>('.profile-sheet') ?? dialog.current
+            ).getBoundingClientRect();
             if (
               e.clientX < r.left ||
               e.clientX > r.right ||

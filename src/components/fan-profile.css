@@ -269,14 +269,6 @@
   min-height: 0;
   overflow: hidden;
 }
-dialog.town-panel[data-panel='account'],
-dialog.town-panel[data-panel='participant'],
-dialog.town-panel[data-panel='profile'] {
-  height: auto;
-  max-height: calc(100dvh - 24px);
-  box-sizing: border-box;
-  overflow-y: auto;
-}
 @media (prefers-reduced-motion: reduce) {
   .activity-reveal,
   .activity-stats > .activity-toggle svg {
