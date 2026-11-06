@@ -28,7 +28,7 @@ dialog.town-panel.notice-board-dialog {
   letter-spacing: 0.04em;
 }
 .notice-board-heading h2 {
-  font-size: 25px;
+  font-size: 20px;
   font-weight: 800;
   margin: 3px 0 0;
   color: #fff3d6;
@@ -77,15 +77,15 @@ dialog.town-panel.notice-board-dialog {
 .notice-paper h3 {
   margin: 7px 0 12px;
   color: #4d543f;
-  font-size: 17px;
+  font-size: 14px;
   line-height: 1.5;
   font-weight: 750;
   word-break: keep-all;
 }
 .notice-paper p {
   margin: 9px 0 0;
-  font-size: 13px;
-  line-height: 1.85;
+  font-size: 12px;
+  line-height: 1.7;
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
