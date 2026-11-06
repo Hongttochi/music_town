@@ -6,6 +6,7 @@ import './styles/style.css';
 import './components/ui/town-ui.css';
 import './styles/mobile.css';
 import './styles/community-modals.css';
+import './styles/modal-typography.css';
 
 startTelemetry();
 createRoot(document.getElementById('root')!).render(

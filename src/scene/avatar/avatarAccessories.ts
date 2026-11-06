@@ -146,14 +146,29 @@ export function drawAccessories(
   if (avatar.earwear === 'headset') {
     ctx.strokeStyle = '#485460';
     ctx.lineWidth = 15;
+    ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.ellipse(256, 164, 134, 115, 0, Math.PI, Math.PI * 2);
+    if (side) {
+      // In profile the band runs from the crown down to the visible ear,
+      // not across the full front-facing width of the head.
+      const mirror = (x: number) => (right ? x : 512 - x);
+      ctx.moveTo(mirror(256), 53);
+      ctx.bezierCurveTo(mirror(231), 77, mirror(231), 128, mirror(236), 184);
+    } else {
+      ctx.ellipse(256, 164, 134, 115, 0, Math.PI, Math.PI * 2);
+    }
     ctx.stroke();
     ctx.strokeStyle = '#c6d2d3';
     ctx.lineWidth = 4;
-    for (const x of side ? [right ? 221 : 277] : [115, 370]) {
-      box(x, 178, 30, 61, 13, '#596e82');
-      box(x + 6, 190, 18, 36, 8, '#8fa9b5');
+    if (side) {
+      const x = right ? 215 : 255;
+      box(x, 176, 42, 64, 18, '#596e82');
+      box(x + 8, 185, 26, 46, 12, '#8fa9b5');
+    } else {
+      for (const x of [115, 370]) {
+        box(x, 178, 30, 61, 13, '#596e82');
+        box(x + 6, 190, 18, 36, 8, '#8fa9b5');
+      }
     }
   } else if (avatar.earwear === 'airpods') {
     ctx.strokeStyle = '#bbc7c8';

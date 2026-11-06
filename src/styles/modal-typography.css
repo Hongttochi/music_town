@@ -1,0 +1,86 @@
+/* Shared modal type scale. Input sizes are left to their mobile focus rules. */
+dialog.town-panel[open] {
+  --modal-heading-size: 14px;
+  --modal-body-size: 11px;
+  --modal-label-size: 10px;
+}
+dialog.town-panel[open] .panel-heading h2.modal-title,
+dialog.town-panel[open] .notice-board-heading h2,
+dialog.town-panel[open] .delete-account-title {
+  font-size: var(--modal-heading-size);
+  line-height: 1.4;
+}
+dialog.town-panel[open] .panel-heading {
+  margin-bottom: 14px;
+}
+dialog.town-panel[open] :is(.modal-sub, .book-summary, .notice-paper p, .report-form p) {
+  font-size: var(--modal-body-size);
+  line-height: 1.65;
+}
+dialog.town-panel[open] :is(.account-panel .account-bio, .participant-profile .participant-bio) {
+  font-size: var(--modal-body-size);
+  line-height: 1.7;
+}
+dialog.town-panel[open]
+  :is(.account-name .profile-name-line > strong, .participant-identity .profile-name-line h3) {
+  font-size: 16px;
+  line-height: 1.4;
+}
+dialog.town-panel[open]
+  :is(.account-section h3, .participant-about h4, .registration-fields label) {
+  font-size: var(--modal-label-size);
+  line-height: 1.5;
+}
+dialog.town-panel[open] .profile-social-links :is(a, .profile-social-add) {
+  font-size: var(--modal-label-size);
+  line-height: 1.5;
+}
+dialog.town-panel[open] .fan-profile .fan-counts dt {
+  font-size: var(--modal-label-size);
+}
+dialog.town-panel[open] .fan-profile .fan-counts dd {
+  font-size: 12px;
+}
+dialog.town-panel[open] .fan-profile .activity-toggle {
+  font-size: var(--modal-body-size);
+}
+dialog.town-panel[open] .fan-profile .activity-summary-time {
+  font-size: 10px;
+}
+dialog.town-panel[open] .fan-profile .activity-chart-heading {
+  font-size: 11px;
+}
+dialog.town-panel[open] .fan-profile .activity-detail strong {
+  font-size: 12px;
+}
+dialog.town-panel[open] .settings-menu :is(.town-button, .sound-effects-label) {
+  font-size: var(--modal-body-size);
+}
+dialog.town-panel[open] .busking-book :is(h2, h3) {
+  font-size: 12px;
+  line-height: 1.5;
+}
+dialog.town-panel[open] .busking-book .book-demo-note {
+  font-size: 10px;
+}
+dialog.town-panel[open] .notice-paper h3 {
+  font-size: 12px;
+}
+dialog.town-panel[open] .registration-description {
+  font-size: 10px;
+}
+dialog.town-panel[open]
+  :is(.registration-actions, .coffee-order-actions, .account-edit-actions)
+  > .town-button {
+  font-size: 11px;
+}
+dialog.town-panel[open].delete-account-dialog h2,
+dialog.error-modal[open] h2 {
+  font-size: 14px;
+  line-height: 1.4;
+}
+dialog.town-panel[open].delete-account-dialog p,
+dialog.error-modal[open] p {
+  font-size: 11px;
+  line-height: 1.65;
+}
