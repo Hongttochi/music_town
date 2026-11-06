@@ -1,3 +1,4 @@
+import { ProfileBio } from './ProfileBio';
 import type { Participant } from '../useTown';
 import { ModularPortrait } from '../ModularPortrait';
 import { Button } from './ui/Button';
@@ -21,7 +22,9 @@ export function ParticipantProfile({
           <h3>{person.avatar.name}</h3>
         </div>
       </div>
-      <p className="participant-bio">{person.bio || '아직 자기소개가 없어요.'}</p>
+      <p className="participant-bio">
+        <ProfileBio text={person.bio || '아직 자기소개가 없어요.'} />
+      </p>
       {fanStats}
       {person.role === 'musician' && (person.instagram || person.soundcloud) && (
         <div className="participant-socials">

@@ -1,3 +1,4 @@
+import { ProfileBio } from './components/ProfileBio';
 import { startTelemetry } from './telemetry';
 import { FanProfile, FollowedProfiles } from './components/FanProfile';
 import { fanAction } from './useFanStats';
@@ -857,7 +858,11 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                 <span className="pill">{selected.genre}</span>
               </div>
             </div>
-            {selected.bio && <p className="modal-sub">{selected.bio}</p>}
+            {selected.bio && (
+              <p className="modal-sub">
+                <ProfileBio text={selected.bio} />
+              </p>
+            )}
             <FanProfile
               userId={selectedMusician?.id}
               own={selectedMusician?.id === account.id}
@@ -877,6 +882,11 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                   인스타그램
                 </a>
               ) : null}
+              {selectedMusician?.soundcloud && (
+                <a href={selectedMusician.soundcloud} target="_blank" rel="noopener noreferrer">
+                  사운드클라우드
+                </a>
+              )}
             </div>
             <div className="actions musician-primary-actions">
               <Button

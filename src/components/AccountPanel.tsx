@@ -1,3 +1,4 @@
+import { ProfileBio } from './ProfileBio';
 import { useId, useRef, useState } from 'react';
 import { Button } from './ui/Button';
 import { ErrorModal } from './ui/ErrorModal';
@@ -82,7 +83,7 @@ export function AccountPanel({
       <section className="account-section account-bio-section">
         <h3>자기소개</h3>
         <p className={`account-bio ${profile.bio ? '' : 'is-empty'}`}>
-          {profile.bio || '아직 소개가 없어요. 나의 이야기를 들려주세요.'}
+          <ProfileBio text={profile.bio || '아직 소개가 없어요. 나의 이야기를 들려주세요.'} />
         </p>
       </section>
       {fanStats}
