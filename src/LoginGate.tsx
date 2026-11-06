@@ -1,3 +1,4 @@
+import { errorCode, logEvent } from './telemetry';
 import { ErrorModal } from './components/ui/ErrorModal';
 import { Button } from './components/ui/Button';
 import { Logo } from './Flaticon';
@@ -43,10 +44,13 @@ export function LoginGate({ children }: { children: (account: Account) => ReactN
   useEffect(() => {
     if (!supabase) return;
     let active = true;
+    let signedIn = false;
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, next) => {
       if (active) {
+        if (_event === 'SIGNED_IN' && next && !signedIn) logEvent('login_success');
+        signedIn = Boolean(next);
         setSession(next);
         setChecking(false);
         setPending(null);
@@ -69,6 +73,7 @@ export function LoginGate({ children }: { children: (account: Account) => ReactN
     const callback = new URL(window.location.href);
     const hashParams = new URLSearchParams(callback.hash.slice(1));
     if (callback.searchParams.has('error') || hashParams.has('error')) {
+      logEvent('login_failed', { operation: 'login', code: 'permission_denied' });
       setError('로그인이 취소되었거나 권한을 받지 못했어요. 다시 시도해 주세요.');
       setPending(null);
       setChecking(false);
@@ -89,7 +94,8 @@ export function LoginGate({ children }: { children: (account: Account) => ReactN
     setPending(provider);
     try {
       await signIn(provider);
-    } catch {
+    } catch (failure) {
+      logEvent('login_failed', { operation: 'login', code: errorCode(failure) });
       setError('로그인을 시작하지 못했어요. 연결 설정을 확인하거나 잠시 후 다시 시도해 주세요.');
       setPending(null);
     }

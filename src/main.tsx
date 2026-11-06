@@ -1,3 +1,4 @@
+import { startTelemetry } from './telemetry';
 import { FanProfile, FollowedProfiles } from './components/FanProfile';
 import { fanAction } from './useFanStats';
 import { useAmbientAudio } from './useAmbientAudio';
@@ -1004,6 +1005,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
     </>
   );
 }
+startTelemetry();
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <SoundEffectsProvider>

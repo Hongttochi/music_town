@@ -1,3 +1,4 @@
+import { errorCode, logEvent } from './telemetry';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from './auth';
 import type { Avatar, Stage } from './model';
@@ -68,6 +69,7 @@ export function useTown(
           pos_y: position.current.y,
         });
         if (failure) {
+          logEvent('api_failed', { operation: action, code: errorCode(failure) });
           if (failure.message.includes('SESSION_EXPIRED') && active.current)
             setState({
               ...emptyTown,
@@ -79,7 +81,22 @@ export function useTown(
               '공원 서버에 연결하지 못했어요. DB 설정과 네트워크를 확인해 주세요.',
           );
         }
+        const next = data as TownState;
+        const previous = current.current;
         if (active.current) {
+          if (next.channel !== previous.channel) {
+            if (previous.channel !== null) logEvent('channel_leave', { channel: previous.channel });
+            if (next.channel !== null) logEvent('channel_enter', { channel: next.channel });
+          }
+          const before = previous.performances.find((p) => p.user_id === userId);
+          const after = next.performances.find((p) => p.user_id === userId);
+          if (before?.ends_at !== after?.ends_at || before?.stage_id !== after?.stage_id) {
+            if (before)
+              logEvent('performance_end', { channel: before.channel_id, stage: before.stage_id });
+            if (after)
+              logEvent('performance_start', { channel: after.channel_id, stage: after.stage_id });
+          }
+          current.current = next;
           setState(data as TownState);
           setError('');
         }

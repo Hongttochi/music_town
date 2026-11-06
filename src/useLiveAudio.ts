@@ -1,3 +1,4 @@
+import { errorCode, logEvent } from './telemetry';
 import { useEffect, useRef, useState } from 'react';
 import { Room, RoomEvent, Track } from 'livekit-client';
 import { supabase } from './auth';
@@ -96,6 +97,12 @@ export function useLiveAudio(target: Target | null, client: string, stream: Medi
       clearAudio();
       if (!disposed) {
         setStatus('error');
+        logEvent('voice_failed', {
+          operation: 'voice_connect',
+          code: 'disconnected',
+          channel,
+          stage,
+        });
         setError('음성 연결이 끊겼어요. 다시 연결해 주세요.');
       }
     });
@@ -115,7 +122,15 @@ export function useLiveAudio(target: Target | null, client: string, stream: Medi
           body: JSON.stringify({ channel, stage, client }),
         });
         const data = await response.json();
-        if (!response.ok) throw new Error(data.error || '음성 연결에 실패했어요.');
+        if (!response.ok) {
+          logEvent('api_failed', {
+            operation: 'voice_token',
+            status: response.status,
+            channel,
+            stage,
+          });
+          throw new Error(data.error || '음성 연결에 실패했어요.');
+        }
         if (disposed) return;
         if (data.performerId !== performerId || data.expiresAt !== Date.parse(endsAt)) {
           throw new Error('공연 정보가 바뀌었어요. 다시 연결해 주세요.');
@@ -148,6 +163,12 @@ export function useLiveAudio(target: Target | null, client: string, stream: Medi
         setConnected();
       } catch (failure) {
         if (disposed) return;
+        logEvent('voice_failed', {
+          operation: 'voice_connect',
+          code: errorCode(failure),
+          channel,
+          stage,
+        });
         finish();
         setStatus('error');
         setError(failure instanceof Error ? failure.message : '음성 연결에 실패했어요.');
