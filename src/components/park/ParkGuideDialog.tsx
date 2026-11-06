@@ -71,7 +71,7 @@ export function ParkGuideDialog({ onClose }: { onClose: () => void }) {
       }}
     >
       <div id={titleId}>
-        <PanelHeading title="토끼의 공원 안내" onClose={onClose} />
+        <PanelHeading title="모리의 공원 안내" onClose={onClose} />
       </div>
       <div className="park-guide-welcome">
         <img src={rabbitImage} width={38} height={44} alt="" />

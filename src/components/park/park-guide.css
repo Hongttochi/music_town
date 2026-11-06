@@ -77,6 +77,8 @@ dialog.town-panel.park-guide-dialog > div:first-child {
   position: sticky;
   top: -16px;
   padding-top: 8px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #d7dfc6;
   z-index: 1;
   background: var(--town-paper, #fff9e9);
 }

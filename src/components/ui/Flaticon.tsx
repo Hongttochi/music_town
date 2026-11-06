@@ -1,4 +1,5 @@
 export type IconName =
+  | 'chat'
   | 'music'
   | 'bench'
   | 'blackboard'

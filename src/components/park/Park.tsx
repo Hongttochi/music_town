@@ -1,4 +1,3 @@
-import { MessageCircleMore } from 'lucide-react';
 import { ParkGuideDialog } from './ParkGuideDialog';
 import { useParkScene } from '../../hooks/useParkScene';
 import type { ParkProps } from '../../types/park';
@@ -43,11 +42,11 @@ export function Park(props: ParkProps) {
           ref={npcBubble}
           className="bench-action npc-action"
           style={{ visibility: 'hidden' }}
-          aria-label="토끼에게 공원 안내 듣기"
+          aria-label="모리에게 공원 안내 듣기"
           title="공원 안내"
           onClick={() => setGuideOpen(true)}
         >
-          <MessageCircleMore size={20} aria-hidden="true" />
+          <Flaticon name="chat" size={24} />
         </Button>
       )}
       {noticeBoardOpen && <NoticeBoardDialog onClose={() => setNoticeBoardOpen(false)} />}

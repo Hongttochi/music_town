@@ -14,7 +14,7 @@ export function TimeTransition({
     <div className="time-transition" data-phase={phase} role="status" aria-live="polite">
       {phase === 'talk' && (
         <div className="time-transition-speech">
-          <small>학교 앞 토끼</small>
+          <small>모리</small>
           <p>{message}</p>
         </div>
       )}
