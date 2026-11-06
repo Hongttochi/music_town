@@ -310,51 +310,58 @@ dialog.town-panel[data-panel='following'] {
   width: 440px;
   max-width: calc(100vw - 32px);
 }
+/* Keep the empty state readable within short landscape dialogs. */
 .following-empty {
   text-align: center;
-  padding: 22px 10px 4px;
+  padding: 8px 6px 0;
 }
 .following-empty-art {
   position: relative;
   display: grid;
   place-items: center;
-  width: 104px;
-  height: 104px;
-  margin: 0 auto 20px;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 12px;
   border-radius: 50%;
   background: #edf0df;
 }
-.following-empty-note {
+.following-empty-art > img:first-child {
+  width: 42px;
+  height: 42px;
+}
+.following-empty-art .following-empty-note {
   position: absolute;
-  right: -3px;
-  top: 7px;
+  width: 18px;
+  height: 18px;
+  right: -2px;
+  top: 4px;
   rotate: 12deg;
 }
 .following-empty h3 {
   color: #536348;
-  font-size: 17px;
-  font-weight: 700;
-  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 8px;
   word-break: keep-all;
 }
 .following-empty p {
   color: #818674;
-  font-size: 13px;
-  line-height: 1.9;
+  font-size: 11px;
+  line-height: 1.7;
   white-space: pre-line;
   word-break: keep-all;
-  margin: 0 0 22px;
+  margin: 0 0 12px;
 }
 .following-empty-guide {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   border-top: 1px solid #e2e7d6;
-  margin-top: 24px;
-  padding-top: 16px;
+  margin-top: 12px;
+  padding-top: 10px;
   color: #8c957e;
-  font-size: 11px;
+  font-size: 9px;
 }
 .following-empty-guide [aria-hidden] {
   color: #b3bba3;
@@ -390,22 +397,30 @@ dialog.town-panel[data-panel='following'] {
 }
 @media (max-height: 500px) {
   .following-empty {
-    padding-top: 8px;
+    padding-top: 0;
   }
   .following-empty-art {
-    width: 72px;
-    height: 72px;
-    margin-bottom: 12px;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 8px;
   }
   .following-empty-art > img:first-child {
-    width: 54px;
-    height: 54px;
+    width: 34px;
+    height: 34px;
+  }
+  .following-empty-art .following-empty-note {
+    width: 15px;
+    height: 15px;
+  }
+  .following-empty h3 {
+    font-size: 12px;
+    margin-bottom: 6px;
   }
   .following-empty p {
-    margin-bottom: 14px;
+    margin-bottom: 8px;
   }
   .following-empty-guide {
-    margin-top: 16px;
-    padding-top: 12px;
+    margin-top: 8px;
+    padding-top: 8px;
   }
 }
