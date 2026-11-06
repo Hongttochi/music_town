@@ -151,5 +151,142 @@ export function drawExtraHair(
         lock(151 + i * 25, 68 + (i % 2) * 6, 158 + i * 26, 128 + (i % 3) * 9, i + 8);
     }
   }
+  if (hair >= 14 && hair <= 19) {
+    const strand = (points: number[], width: number, shade: string | CanvasGradient = fill) => {
+      ctx.strokeStyle = shade;
+      ctx.lineWidth = width;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(points[0], points[1]);
+      ctx.bezierCurveTo(points[2], points[3], points[4], points[5], points[6], points[7]);
+      ctx.stroke();
+    };
+    const sheen = (points: number[]) => strand(points, 3, '#ffffff25');
+    ctx.fillStyle = fill;
+    // A cropped crown leaves room for each fringe; side profiles are mirrored above.
+    cap(hair === 16 ? 135 : 126);
+    ctx.fill();
+    if (hair === 14) {
+      // Light separated bangs and a softly curled, chin-length silhouette.
+      for (const x of side ? [143] : [137, 375]) {
+        strand([x, 116, x - 10, 174, x - 7, 242, x + (x < 256 ? 18 : -18), 257], 31);
+        sheen([x - 5, 127, x - 9, 175, x - 3, 221, x + (x < 256 ? 10 : -10), 242]);
+      }
+      if (!back)
+        for (let i = 0; i < (side ? 4 : 7); i++) {
+          const x = (side ? 234 : 177) + i * 24;
+          strand([x, 105, x + 8, 123, x + 5, 142, x + 2, 155 + (i % 3) * 5], 8);
+        }
+    } else if (hair === 15) {
+      // Centre-parted, broad leaf-shaped locks with outward turned ends.
+      for (const flip of side ? [-1] : [-1, 1]) {
+        ctx.save();
+        ctx.translate(256, 0);
+        ctx.scale(flip, 1);
+        ctx.beginPath();
+        ctx.moveTo(0, 64);
+        ctx.bezierCurveTo(125, 30, 160, 122, 136, 174);
+        ctx.quadraticCurveTo(125, 216, 147, 238);
+        ctx.quadraticCurveTo(82, 227, 91, 169);
+        ctx.quadraticCurveTo(28, 177, 0, 95);
+        ctx.closePath();
+        ctx.fill();
+        sheen([9, 79, 60, 80, 94, 112, 111, 163]);
+        ctx.restore();
+      }
+      if (side) strand([282, 75, 350, 63, 393, 93, 384, 146], 37);
+    } else if (hair === 16) {
+      // Straight princess cut: blunt bangs, short cheek panels, longer outer lengths.
+      if (back) {
+        ctx.beginPath();
+        ctx.roundRect(126, 123, 263, 192, [15, 15, 8, 8]);
+        ctx.fill();
+        for (let x = 148; x < 380; x += 30) sheen([x, 136, x - 3, 185, x + 3, 247, x, 302]);
+      } else {
+        for (const x of side ? [126] : [126, 354]) {
+          ctx.fillRect(x, 116, 34, 191);
+          ctx.fillRect(x < 256 ? x + 19 : x - 19, 135, 29, 91);
+          sheen([x + 10, 128, x + 8, 188, x + 12, 248, x + 10, 295]);
+        }
+        ctx.beginPath();
+        ctx.moveTo(side ? 252 : 153, 104);
+        ctx.quadraticCurveTo(279, 78, 367, 111);
+        ctx.lineTo(359, 155);
+        ctx.lineTo(side ? 275 : 156, 155);
+        ctx.closePath();
+        ctx.fill();
+        for (let x = side ? 290 : 175; x < 350; x += 24)
+          sheen([x, 111, x - 3, 129, x + 1, 139, x, 148]);
+      }
+    } else if (hair === 17) {
+      // Layered wolf cut: short crown and a tapered, shaggy nape.
+      for (const flip of side ? [-1] : [-1, 1]) {
+        ctx.save();
+        ctx.translate(256, 0);
+        ctx.scale(flip, 1);
+        ctx.beginPath();
+        ctx.moveTo(88, 105);
+        ctx.lineTo(130, 113);
+        ctx.lineTo(142, 170);
+        ctx.lineTo(160, 181);
+        ctx.lineTo(134, 190);
+        ctx.lineTo(157, 228);
+        ctx.lineTo(132, 223);
+        ctx.lineTo(143, 270);
+        ctx.lineTo(105, 247);
+        ctx.lineTo(112, 291);
+        ctx.lineTo(72, 258);
+        ctx.quadraticCurveTo(105, 204, 88, 105);
+        ctx.closePath();
+        ctx.fill();
+        sheen([115, 145, 123, 186, 112, 224, 111, 251]);
+        ctx.restore();
+      }
+      if (!back)
+        for (let i = 0; i < 6; i++) {
+          const x = (side ? 229 : 153) + i * (side ? 24 : 37);
+          ctx.beginPath();
+          ctx.moveTo(x, 97);
+          ctx.quadraticCurveTo(x + 44, 103, x + 23, 159 + (i % 2) * 13);
+          ctx.lineTo(x + 9, 145);
+          ctx.closePath();
+          ctx.fill();
+        }
+    } else if (hair === 18) {
+      // Two interwoven braids, with small sage ties below the cheeks.
+      for (const x of side ? [141] : [134, 378]) {
+        strand([x, 147, x - 3, 207, x + 3, 256, x, 302], 29);
+        for (let i = 0; i < 7; i++) {
+          ctx.save();
+          ctx.translate(x, 193 + i * 16);
+          ctx.rotate(i % 2 ? -0.5 : 0.5);
+          ctx.fillStyle = i % 2 ? color : fill;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, 16, 12, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+        strand([x - 10, 299, x - 4, 302, x + 4, 302, x + 10, 299], 6, '#a6b88b');
+      }
+      ctx.fillStyle = fill;
+      if (!back) {
+        strand([253, 79, 225, 114, 184, 135, 154, 142], 28);
+        if (!side) strand([259, 79, 285, 114, 326, 135, 358, 142], 28);
+      }
+    } else if (hair === 19) {
+      // A single high bun, distinct from the original twin buns.
+      const x = side ? 195 : 256;
+      ctx.beginPath();
+      ctx.ellipse(x, 57, 56, 45, -0.13, 0, Math.PI * 2);
+      ctx.fill();
+      sheen([x - 39, 57, x - 28, 14, x + 29, 16, x + 40, 49]);
+      sheen([x - 20, 72, x - 29, 41, x + 12, 25, x + 24, 48]);
+      strand([x - 31, 88, x - 10, 98, x + 12, 98, x + 31, 87], 7, '#a6b88b');
+      if (!back) {
+        strand([155, 124, 150, 154, 161, 176, 148, 198], 9);
+        if (!side) strand([358, 124, 363, 154, 352, 176, 365, 198], 9);
+      }
+    }
+  }
   ctx.restore();
 }

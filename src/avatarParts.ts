@@ -14,6 +14,12 @@ export const hairNames = [
   '드레드',
   '스포츠머리',
   '모히칸',
+  '시스루뱅',
+  '리프컷',
+  '히메컷',
+  '울프컷',
+  '양갈래 땋기',
+  '하이 번',
 ];
 export const eyeNames = ['동그란 눈', '웃는 눈', '느긋한 눈', '아몬드 눈', '콩알 눈', '순한 눈'];
 export const noseNames = [
