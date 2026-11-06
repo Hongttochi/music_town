@@ -1,6 +1,5 @@
 import { ActivityChart } from './ActivityChart';
 import { useEffect, useState } from 'react';
-import { Users } from 'lucide-react';
 import { useFanStats } from '../useFanStats';
 import { Button } from './ui/Button';
 import { supabase } from '../auth';
@@ -21,17 +20,11 @@ export function FanProfile({
     <section className="fan-profile" aria-label="팬 활동">
       <dl className="fan-counts">
         <div>
-          <dt>
-            <Users size={17} />
-            팔로워
-          </dt>
+          <dt>팔로워</dt>
           <dd>{stats ? stats.followers.toLocaleString('ko-KR') : '—'}</dd>
         </div>
         <div>
-          <dt>
-            <img src="/icons/heart.png" width={19} height={19} alt="" />
-            받은 하트
-          </dt>
+          <dt>받은 하트</dt>
           <dd>{stats ? stats.hearts.toLocaleString('ko-KR') : '—'}</dd>
         </div>
       </dl>
@@ -49,13 +42,14 @@ export function FanProfile({
             variant="secondary"
             disabled={!stats || busy}
             aria-pressed={stats?.hearted ?? false}
+            title="하트는 계정당 한 번 집계돼요"
             onClick={() => void act('heart', !stats?.hearted)}
           >
+            <img src="/icons/heart.png" width={17} height={17} alt="" />
             {stats?.hearted ? '하트 보냄' : '하트 보내기'}
           </Button>
         </div>
       )}
-      <small>하트는 계정당 한 번 집계돼요.</small>
       <ActivityChart stats={stats} />
       {demo && <small>로그인 후 팬 정보를 볼 수 있어요.</small>}
       {error && (

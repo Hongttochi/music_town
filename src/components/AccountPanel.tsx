@@ -47,7 +47,6 @@ export function AccountPanel({
           <strong>{avatar.name}</strong>
         </div>
       </div>
-      {fanStats}
       <section
         id={badgePickerId}
         className="account-section account-badge-picker"
@@ -86,7 +85,8 @@ export function AccountPanel({
           {profile.bio || '아직 소개가 없어요. 나의 이야기를 들려주세요.'}
         </p>
       </section>
-      {profile.role === 'musician' && (
+      {fanStats}
+      {profile.role === 'musician' && (profile.instagram || profile.soundcloud) && (
         <section className="account-section">
           <h3>나의 음악과 소식</h3>
           <div className="account-socials">
@@ -95,32 +95,34 @@ export function AccountPanel({
                 { key: 'instagram', label: '인스타그램' },
                 { key: 'soundcloud', label: '사운드클라우드' },
               ] as const
-            ).map((item) => {
-              const url = profile[item.key];
-              const content = (
-                <>
-                  <img src={`/icons/brands/${item.key}.svg`} width={21} height={21} alt="" />
-                  <span>
-                    <strong>{item.label}</strong>
-                    <small>
-                      {url
-                        ? url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')
-                        : '등록된 링크가 없어요'}
-                    </small>
-                  </span>
-                  {url && <ChevronRight size={14} />}
-                </>
-              );
-              return url ? (
-                <a key={item.key} href={url} target="_blank" rel="noopener noreferrer">
-                  {content}
-                </a>
-              ) : (
-                <div key={item.key} className="account-social-empty">
-                  {content}
-                </div>
-              );
-            })}
+            )
+              .filter((item) => profile[item.key])
+              .map((item) => {
+                const url = profile[item.key];
+                const content = (
+                  <>
+                    <img src={`/icons/brands/${item.key}.svg`} width={21} height={21} alt="" />
+                    <span>
+                      <strong>{item.label}</strong>
+                      <small>
+                        {url
+                          ? url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')
+                          : '등록된 링크가 없어요'}
+                      </small>
+                    </span>
+                    {url && <ChevronRight size={14} />}
+                  </>
+                );
+                return url ? (
+                  <a key={item.key} href={url} target="_blank" rel="noopener noreferrer">
+                    {content}
+                  </a>
+                ) : (
+                  <div key={item.key} className="account-social-empty">
+                    {content}
+                  </div>
+                );
+              })}
           </div>
         </section>
       )}

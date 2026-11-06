@@ -21,9 +21,9 @@ export function ParticipantProfile({
           <h3>{person.avatar.name}</h3>
         </div>
       </div>
-      {fanStats}
       <p className="participant-bio">{person.bio || '아직 자기소개가 없어요.'}</p>
-      {person.role === 'musician' && (
+      {fanStats}
+      {person.role === 'musician' && (person.instagram || person.soundcloud) && (
         <div className="participant-socials">
           {(['instagram', 'soundcloud'] as const).map(
             (kind) =>

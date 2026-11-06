@@ -1,52 +1,211 @@
 .fan-profile {
-  margin: 16px 0;
+  margin: 12px 0 4px;
+  color: #4c5945;
 }
 .fan-counts {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin: 0 0 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  margin: 0 0 14px;
 }
 .fan-counts > div {
-  background: #f0f2e5;
-  border-radius: 14px;
-  padding: 14px;
-  text-align: center;
+  display: flex;
+  align-items: baseline;
+  flex-direction: row-reverse;
+  gap: 6px;
 }
 .fan-counts dt {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  color: #748064;
   font-size: 12px;
+  color: #7a8272;
 }
 .fan-counts dd {
-  margin: 6px 0 0;
-  font-size: 22px;
-  font-weight: 700;
-  color: #43583a;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
 }
 .fan-actions {
   display: flex;
-  gap: 10px;
-  margin-bottom: 8px;
+  gap: 8px;
+  margin-bottom: 18px;
 }
-.fan-actions > button {
-  flex: 1;
-  border-radius: 10px;
+.fan-actions > .town-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 8px;
+  min-height: 34px;
+  padding: 6px 16px;
+  font-size: 12px;
 }
-.fan-actions [aria-pressed='true'] {
-  background: #e0e9cd;
+.fan-actions > .town-button:first-child {
+  background: #657853;
+  border-color: #657853;
+  color: #fffdf5;
 }
-.fan-profile small {
+.fan-actions > .town-button:first-child[aria-pressed='true'] {
+  background: #ecf0e4;
+  color: #5b6a4c;
+  border-color: #d7dfcb;
+}
+.fan-actions > .town-button:last-child {
+  background: transparent;
+  border-color: #dfe2d6;
+  color: #777b6d;
+}
+.fan-actions > .town-button:last-child[aria-pressed='true'] {
+  color: #a16b61;
+  border-color: #ddc4bb;
+}
+.fan-profile > small {
   display: block;
   font-size: 11px;
   color: #79816e;
+  margin-top: 8px;
 }
-.fan-profile p {
-  font-size: 12px;
+.fan-profile > p[role='status'] {
   color: #9c564b;
+  font-size: 12px;
+}
+.activity-stats {
+  border-top: 1px solid #e3e6db;
+  border-bottom: 1px solid #e3e6db;
+  margin-top: 16px;
+}
+.activity-stats > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 0;
+  font-size: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+.activity-stats > summary::-webkit-details-marker {
+  display: none;
+}
+.activity-stats > summary > span:first-child {
+  flex-shrink: 0;
+  font-weight: 600;
+}
+.activity-summary-time {
+  margin-left: auto;
+  font-size: 11px;
+  color: #89907f;
+  text-align: right;
+}
+.activity-stats > summary svg {
+  flex-shrink: 0;
+  color: #89907f;
+}
+.activity-stats[open] > summary svg {
+  transform: rotate(180deg);
+}
+.activity-stats > summary:focus-visible {
+  outline: 2px solid #8c9e75;
+  outline-offset: 3px;
+}
+.activity-expanded {
+  padding: 4px 0 12px;
+  min-width: 0;
+}
+.activity-chart-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+}
+.activity-metrics {
+  display: flex;
+  gap: 2px;
+}
+.activity-metrics > .town-button {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  min-height: 30px;
+  padding: 3px 10px;
+  font-size: 11px;
+  color: #949989;
+}
+.activity-metrics > .town-button[aria-pressed='true'] {
+  color: #536845;
+  box-shadow: inset 0 -1px #71875b;
+}
+.activity-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 16px 0 0;
+  color: #89907f;
+  font-size: 11px;
+}
+.activity-detail strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: #56634b;
+}
+.activity-plot {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.activity-plot text {
+  font: 9px sans-serif;
+  fill: #9aa08f;
+}
+.activity-grid {
+  fill: none;
+  stroke: #e7eadd;
+  stroke-width: 1;
+}
+.activity-line {
+  fill: none;
+  stroke: #81916a;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.activity-point {
+  fill: #fffaf0;
+  stroke: #81916a;
+  stroke-width: 1.4;
+}
+.activity-point.is-selected {
+  fill: #81916a;
+}
+.activity-dates {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  margin: -7px 0 0;
+  padding-left: 0;
+}
+.activity-dates > .town-button {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  min-height: 32px;
+  min-width: 0;
+  padding: 4px 0;
+  font-size: 10px;
+  color: #969b8b;
+}
+.activity-dates > .town-button[aria-pressed='true'] {
+  color: #4d6240;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.activity-footnote,
+.activity-empty {
+  margin: 12px 0 0;
+  color: #969b8b;
+  font-size: 10px;
+  line-height: 1.6;
 }
 .followed-profiles {
   display: grid;
@@ -56,68 +215,29 @@
   display: flex;
   justify-content: space-between;
   padding: 12px;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 .followed-profiles small {
   color: #79816e;
 }
-.activity-stats {
-  margin-top: 18px;
+.account-panel .account-identity {
+  padding-bottom: 0;
 }
-.activity-stats .fan-counts dd {
-  font-size: 16px;
+.account-panel > .fan-profile {
+  margin: 0;
 }
-.activity-stats h3 {
-  font-size: 14px;
-  margin: 16px 0 8px;
+.participant-profile .participant-bio {
+  background: transparent;
+  padding: 0;
+  margin: 12px 0 16px;
+  color: #78816c;
+  font-size: 12px;
 }
-.activity-legend {
-  display: flex;
-  gap: 14px;
-  font-size: 11px;
-  color: #799667;
-}
-.activity-legend span:last-child {
-  color: #cb9661;
-}
-.activity-chart {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 4px;
-  margin-top: 12px;
-}
-.activity-chart > .town-button {
-  padding: 5px 3px;
-  display: flex;
-  flex-direction: column;
-  font-size: 10px;
-  border-radius: 8px;
-  gap: 6px;
-}
-.activity-chart [aria-pressed='true'] {
-  background: #edf0df;
-}
-.activity-bars {
-  height: 90px;
-  display: flex;
-  align-items: end;
-  justify-content: center;
-  gap: 3px;
-  width: 100%;
-  border-bottom: 1px solid #d7dcc9;
-}
-.activity-bars i {
-  display: block;
-  width: 12px;
-  max-width: 38%;
-  background: #799667;
-  border-radius: 4px 4px 0 0;
-}
-.activity-bars i:last-child {
-  background: #cb9661;
-}
-.fan-profile .activity-detail {
-  color: #647357;
-  font-size: 11px;
-  min-height: 18px;
+@media (max-width: 380px) {
+  .activity-stats > summary {
+    flex-wrap: wrap;
+  }
+  .activity-summary-time {
+    font-size: 10px;
+  }
 }
