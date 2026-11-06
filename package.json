@@ -11,7 +11,6 @@
     "format:check": "prettier --check src scripts tests *.json *.ts index.html"
   },
   "dependencies": {
-    "@portone/browser-sdk": "^0.1.13",
     "@supabase/supabase-js": "^2.118.0",
     "livekit-client": "^2.23.0",
     "livekit-server-sdk": "^2.19.2",
