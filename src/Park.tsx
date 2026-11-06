@@ -2,7 +2,7 @@ import { NoticeBoardDialog } from './components/NoticeBoardDialog';
 import { createNoticeBoard, NOTICE_BOARD_SPOT, NOTICE_BOARD_REACH } from './noticeBoard';
 import { CoffeeOrderDialog } from './components/CoffeeOrderDialog';
 import { findCoffee, type CoffeeId } from './coffeeMenu';
-import { createCoffeeShop, COFFEE_SPOT } from './coffeeShop';
+import { createCoffeeShop, COFFEE_SPOT, COFFEE_BUILDING } from './coffeeShop';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from './components/ui/Button';
 import { Flaticon } from './Flaticon';
@@ -298,7 +298,7 @@ export function Park(props: Props) {
     let noticeShown = false;
     const coffeeShop = createCoffeeShop(scene);
     obstacles.push({ x: COFFEE_SPOT.x, z: COFFEE_SPOT.z - 1.5, r: 0.6 });
-    path([new T.Vector3(0, 0, -4.5), COFFEE_SPOT.clone()], 0.65);
+    path([new T.Vector3(0, 0, -10.5), COFFEE_SPOT.clone()], 0.65);
     let coffeePhase: 'idle' | 'brewing' | 'ready' | 'drinking' = 'idle';
     let orderedCoffee: CoffeeId = 'americano';
     let coffeeStarted = 0;
@@ -333,7 +333,7 @@ export function Park(props: Props) {
       else return;
       coffeeStarted = performance.now();
     };
-    obstacles.push({ x: -5, z: -8, r: 2.5 });
+    obstacles.push({ x: COFFEE_BUILDING.x, z: COFFEE_BUILDING.z, r: 2.5 });
     [
       [-9, -6],
       [-7, -5.5],

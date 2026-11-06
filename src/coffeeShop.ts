@@ -1,11 +1,14 @@
 import { findCoffee, type CoffeeId } from './coffeeMenu';
 import * as T from 'three';
 
-export const COFFEE_SPOT = new T.Vector3(-2.3, 0, -4.5);
+const COFFEE_SHOP_OFFSET = new T.Vector3(-1, 0, -6);
+export const COFFEE_BUILDING = new T.Vector3(-5, 0, -8).add(COFFEE_SHOP_OFFSET);
+export const COFFEE_SPOT = new T.Vector3(-2.3, 0, -4.5).add(COFFEE_SHOP_OFFSET);
 /** Small walk-up café; the machine faces the open central path. */
 export function createCoffeeShop(scene: T.Scene) {
   const group = new T.Group();
   group.name = 'coffee-shop';
+  group.position.copy(COFFEE_SHOP_OFFSET);
   scene.add(group);
   const materials: T.Material[] = [];
   function block(x: number, y: number, z: number, w: number, h: number, d: number, color: string) {
@@ -40,8 +43,8 @@ export function createCoffeeShop(scene: T.Scene) {
   const sign = new T.Mesh(new T.PlaneGeometry(3.5, 0.8), signMaterial);
   sign.position.set(-5, 3.15, -6.2);
   group.add(sign);
-  const x = COFFEE_SPOT.x,
-    z = COFFEE_SPOT.z - 1.5;
+  const x = COFFEE_SPOT.x - COFFEE_SHOP_OFFSET.x,
+    z = COFFEE_SPOT.z - COFFEE_SHOP_OFFSET.z - 1.5;
   block(x, 1.05, z, 1.1, 2.1, 0.85, '#637d60');
   block(x, 1.55, z + 0.44, 0.8, 0.65, 0.05, '#efce88');
   block(x, 0.7, z + 0.45, 0.75, 0.65, 0.06, '#343f37');
