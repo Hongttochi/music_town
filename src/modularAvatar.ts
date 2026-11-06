@@ -17,6 +17,14 @@ type Layers = {
 };
 let loading: Promise<Layers> | null = null;
 const cache = new Map<string, HTMLCanvasElement>();
+const portraitCache = new Map<string, HTMLCanvasElement>();
+const bodyCache = new Map<string, HTMLCanvasElement>();
+const tintCache: {
+  input: HTMLCanvasElement;
+  color: string;
+  kind: string;
+  output: HTMLCanvasElement;
+}[] = [];
 const pieces = new Map<string, HTMLCanvasElement>();
 function load(src: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
@@ -93,6 +101,14 @@ function piece(image: HTMLImageElement, columns: number, rows: number, col: numb
 function tinted(input: HTMLCanvasElement, color: string, kind: 'hair' | 'skin' | 'eyes') {
   const rgb = hexRgb(color);
   if (!rgb) return input;
+  const found = tintCache.findIndex(
+    (item) => item.input === input && item.color === color && item.kind === kind,
+  );
+  if (found >= 0) {
+    const [entry] = tintCache.splice(found, 1);
+    tintCache.push(entry);
+    return entry.output;
+  }
   const output = canvas(input.width, input.height),
     ctx = output.getContext('2d', { willReadFrequently: true })!;
   ctx.drawImage(input, 0, 0);
@@ -126,13 +142,18 @@ function tinted(input: HTMLCanvasElement, color: string, kind: 'hair' | 'skin' |
     d[i + 2] = Math.min(255, rgb[2] * shade);
   }
   ctx.putImageData(data, 0, 0);
+  tintCache.push({ input, color, kind, output });
+  if (tintCache.length > 32) tintCache.shift();
   return output;
 }
-/** Four independent views share one set of selected parts. */
-export function composeAvatar(layers: Layers, avatar: Partial<Avatar>) {
+/** World textures use four views; portraits request only their visible direction. */
+export function composeAvatar(layers: Layers, avatar: Partial<Avatar>, view?: number) {
+  const singleView = view === undefined ? undefined : Math.max(0, Math.min(3, Math.trunc(view)));
+  const targetCache = singleView === undefined ? cache : portraitCache;
   const p = resolveParts(avatar),
     key = JSON.stringify([
       p,
+      singleView,
       avatar.headwear,
       avatar.earwear,
       avatar.eyewear,
@@ -143,13 +164,17 @@ export function composeAvatar(layers: Layers, avatar: Partial<Avatar>) {
       avatar.shirt,
       avatar.pants,
     ]);
-  const cached = cache.get(key);
-  if (cached) return cached;
-  const out = canvas(2048, 512),
+  const cached = targetCache.get(key);
+  if (cached) {
+    targetCache.delete(key);
+    targetCache.set(key, cached);
+    return cached;
+  }
+  const out = canvas(singleView === undefined ? 2048 : 512, 512),
     ctx = out.getContext('2d')!;
-  for (let direction = 0; direction < 4; direction++) {
+  for (let direction = singleView ?? 0; direction <= (singleView ?? 3); direction++) {
     ctx.save();
-    ctx.translate(direction * 512, 0);
+    ctx.translate(singleView === undefined ? direction * 512 : 0, 0);
     const skinBase = tinted(
       piece(layers.base, 2, 2, direction % 2, Math.floor(direction / 2)),
       p.skin,
@@ -157,7 +182,19 @@ export function composeAvatar(layers: Layers, avatar: Partial<Avatar>) {
     );
     // Garment masks use the original palette, before skin tinting.
     const original = piece(layers.base, 2, 2, direction % 2, Math.floor(direction / 2));
-    const base = dressBase(original, avatar, direction, skinBase);
+    const bodyKey = JSON.stringify([
+      direction,
+      p.skin,
+      avatar.clothingStyle,
+      avatar.shirt,
+      avatar.pants,
+    ]);
+    let base = bodyCache.get(bodyKey);
+    if (!base) {
+      base = dressBase(original, avatar, direction, skinBase);
+      bodyCache.set(bodyKey, base);
+      if (bodyCache.size > 16) bodyCache.delete(bodyCache.keys().next().value!);
+    }
     // Preserve source aspect and center the base on a common foot line.
     const bh = 418,
       bw = (bh * base.width) / base.height;
@@ -283,7 +320,8 @@ export function composeAvatar(layers: Layers, avatar: Partial<Avatar>) {
     }
     ctx.restore();
   }
-  cache.set(key, out);
-  if (cache.size > 36) cache.delete(cache.keys().next().value!);
+  targetCache.set(key, out);
+  const limit = singleView === undefined ? 12 : 48;
+  if (targetCache.size > limit) targetCache.delete(targetCache.keys().next().value!);
   return out;
 }

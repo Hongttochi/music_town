@@ -21,7 +21,7 @@ export function PartOptions({
           aria-pressed={(avatar[field] ?? 0) === index}
           onClick={() => onChange({ ...avatar, [field]: index })}
         >
-          <ModularPortrait avatar={{ ...avatar, [field]: index }} />
+          <ModularPortrait lazy avatar={{ ...avatar, [field]: index }} />
           <span>{label}</span>
         </Button>
       ))}

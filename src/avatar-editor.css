@@ -327,3 +327,50 @@ dialog.town-panel[data-panel='avatar'] .workshop-mirror {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Keep navigation outside the sole scrolling content area. */
+dialog.town-panel[data-panel='avatar'] .workshop-desk {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+.character-workshop .workshop-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding: 0 6px 8px 0;
+}
+dialog.town-panel[data-panel='avatar'] .workshop-desk .part-tabs {
+  position: static;
+  flex: none;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  padding: 3px 0 7px;
+  margin: 0 0 8px;
+  border-bottom: 1px solid #dce3ce;
+}
+dialog.town-panel[data-panel='avatar'] .part-tabs .town-button {
+  min-height: 30px;
+  height: 30px;
+  padding: 4px 2px;
+  font-size: 11px;
+  border-radius: 8px;
+}
+@media (max-width: 649px) {
+  dialog.town-panel[data-panel='avatar'] .part-tabs .town-button {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 649px) {
+  dialog.town-panel[data-panel='avatar'] .workshop-desk .part-tabs {
+    display: flex;
+    overflow-x: auto;
+  }
+  dialog.town-panel[data-panel='avatar'] .part-tabs .town-button {
+    flex: 0 0 auto;
+    padding-inline: 8px;
+  }
+}

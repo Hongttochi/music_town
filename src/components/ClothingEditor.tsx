@@ -25,7 +25,7 @@ export function ClothingEditor({
             }
             onClick={() => onChange({ ...avatar, ...outfit })}
           >
-            <ModularPortrait avatar={{ ...avatar, ...outfit, instrument: 'none' }} />
+            <ModularPortrait lazy avatar={{ ...avatar, ...outfit, instrument: 'none' }} />
             <span>{label}</span>
           </Button>
         ))}

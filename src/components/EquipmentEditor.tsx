@@ -22,7 +22,7 @@ export function EquipmentEditor({
                 aria-pressed={(avatar[group.key] || 'none') === value}
                 onClick={() => onChange({ ...avatar, [group.key]: value })}
               >
-                <ModularPortrait avatar={{ ...avatar, [group.key]: value }} />
+                <ModularPortrait lazy avatar={{ ...avatar, [group.key]: value }} />
                 <span>{label}</span>
               </Button>
             ))}
@@ -47,7 +47,7 @@ export function EquipmentEditor({
             aria-pressed={(avatar.instrument || 'none') === item.key}
             onClick={() => onChange({ ...avatar, instrument: item.key })}
           >
-            <ModularPortrait avatar={{ ...avatar, instrument: item.key }} />
+            <ModularPortrait lazy avatar={{ ...avatar, instrument: item.key }} />
             <span>{item.label}</span>
           </Button>
         ))}
