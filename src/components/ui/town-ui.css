@@ -884,6 +884,18 @@ dialog.town-panel[data-panel='settings'] {
   text-decoration: none;
   border-radius: 6px;
 }
+/* Buttons and links in the same menu share one text treatment. */
+.settings-menu > .town-button,
+.settings-menu .sound-effects-setting > .town-button,
+.settings-menu .settings-policy-links a {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.settings-menu .sound-effects-state,
+.settings-menu .sound-effects-slider output {
+  font-weight: 500;
+}
 .settings-menu .flaticon,
 .settings-menu svg {
   width: 16px;
