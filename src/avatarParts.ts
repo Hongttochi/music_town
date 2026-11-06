@@ -21,7 +21,20 @@ export const hairNames = [
   '양갈래 땋기',
   '하이 번',
 ];
-export const eyeNames = ['동그란 눈', '웃는 눈', '느긋한 눈', '아몬드 눈', '콩알 눈', '순한 눈'];
+export const eyeNames = [
+  '동그란 눈',
+  '웃는 눈',
+  '느긋한 눈',
+  '아몬드 눈',
+  '콩알 눈',
+  '순한 눈',
+  '반짝이는 눈',
+  '졸린 눈',
+  '윙크',
+  '초승달 눈',
+  '새침한 눈',
+  '처진 눈',
+];
 export const noseNames = [
   '세모 코',
   '동그란 코',
@@ -29,6 +42,10 @@ export const noseNames = [
   '둥근 세모 코',
   '납작한 코',
   '네모 코',
+  '버튼 코',
+  '물방울 코',
+  '복코',
+  '오뚝한 코',
 ];
 export const hairColors = ['#67402a', '#b17a46', '#352d34', '#d87593', '#76a68b'];
 const part = (value: number | undefined, count: number) =>

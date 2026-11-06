@@ -1,3 +1,4 @@
+import { drawExtraEyes, drawExtraNose } from './avatarExtraFeatures';
 import { drawExtraHair } from './avatarExtraHair';
 import { drawOutfit } from './avatarOutfit';
 import { drawEquipment } from './avatarEquipment';
@@ -221,38 +222,50 @@ export function composeAvatar(layers: Layers, avatar: Partial<Avatar>) {
     else drawExtraHair(ctx, p.hair, p.hairColor, direction);
     ctx.restore();
     if (direction !== 2) {
-      const eyes = tinted(
-        piece(p.eyes < 3 ? layers.features : layers.featuresExtra, 3, 2, p.eyes % 3, 0),
-        p.eyeColor,
-        'eyes',
-      );
-      const ew = 130,
-        eh = [54, 20, 34, 40, 42, 40][p.eyes],
-        ey = 171 + (54 - eh) / 2;
-      if (side) {
-        const right = direction === 1;
-        ctx.drawImage(
-          eyes,
-          right ? eyes.width / 2 : 0,
-          0,
-          eyes.width / 2,
-          eyes.height,
-          right ? 322 : 151,
-          ey,
-          40,
-          eh,
+      if (p.eyes >= 6) drawExtraEyes(ctx, p.eyes, p.eyeColor, direction);
+      else {
+        const eyes = tinted(
+          piece(p.eyes < 3 ? layers.features : layers.featuresExtra, 3, 2, p.eyes % 3, 0),
+          p.eyeColor,
+          'eyes',
         );
-      } else ctx.drawImage(eyes, 256 - ew / 2, ey, ew, eh);
-      const nose = piece(p.nose < 3 ? layers.features : layers.featuresExtra, 3, 2, p.nose % 3, 1),
-        nw = [23, 23, 20, 23, 27, 20][p.nose],
-        nh = [23, 23, 10, 21, 17, 20][p.nose];
-      ctx.drawImage(
-        nose,
-        (direction === 1 ? 369 : direction === 3 ? 143 : 256) - nw / 2,
-        202,
-        nw,
-        nh,
-      );
+        const ew = 130,
+          eh = [54, 20, 34, 40, 42, 40][p.eyes],
+          ey = 171 + (54 - eh) / 2;
+        if (side) {
+          const right = direction === 1;
+          ctx.drawImage(
+            eyes,
+            right ? eyes.width / 2 : 0,
+            0,
+            eyes.width / 2,
+            eyes.height,
+            right ? 322 : 151,
+            ey,
+            40,
+            eh,
+          );
+        } else ctx.drawImage(eyes, 256 - ew / 2, ey, ew, eh);
+      }
+      if (p.nose >= 6) drawExtraNose(ctx, p.nose, p.skin, direction);
+      else {
+        const nose = piece(
+            p.nose < 3 ? layers.features : layers.featuresExtra,
+            3,
+            2,
+            p.nose % 3,
+            1,
+          ),
+          nw = [23, 23, 20, 23, 27, 20][p.nose],
+          nh = [23, 23, 10, 21, 17, 20][p.nose];
+        ctx.drawImage(
+          nose,
+          (direction === 1 ? 369 : direction === 3 ? 143 : 256) - nw / 2,
+          202,
+          nw,
+          nh,
+        );
+      }
     }
     drawEquipment(ctx, avatar, direction);
     if (avatar.instrument === 'microphone') {
