@@ -1,3 +1,4 @@
+import { AdmissionGate } from './components/AdmissionGate';
 import { useAmbientAudio } from './useAmbientAudio';
 import { ProfileIcon } from './components/ProfileIcon';
 import { DeviceGuide } from './components/DeviceGuide';
@@ -994,15 +995,17 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <SoundEffectsProvider>
-      <DeviceGuide>
-        <LoginGate>
-          {(account) => (
-            <ProfileLoader key={account.id} account={account}>
-              {(initial) => <App account={account} initial={initial} />}
-            </ProfileLoader>
-          )}
-        </LoginGate>
-      </DeviceGuide>
+      <AdmissionGate>
+        <DeviceGuide>
+          <LoginGate>
+            {(account) => (
+              <ProfileLoader key={account.id} account={account}>
+                {(initial) => <App account={account} initial={initial} />}
+              </ProfileLoader>
+            )}
+          </LoginGate>
+        </DeviceGuide>
+      </AdmissionGate>
     </SoundEffectsProvider>
   </React.StrictMode>,
 );
