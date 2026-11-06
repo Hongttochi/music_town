@@ -347,7 +347,7 @@ dialog.town-panel[data-panel='avatar'] .workshop-desk .part-tabs {
   position: static;
   flex: none;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  padding: 3px 0 7px;
+  padding: 4px;
   margin: 0 0 8px;
   border-bottom: 1px solid #dce3ce;
 }
@@ -355,8 +355,9 @@ dialog.town-panel[data-panel='avatar'] .part-tabs .town-button {
   min-height: 30px;
   height: 30px;
   padding: 4px 2px;
+  margin: 0;
   font-size: 11px;
-  border-radius: 8px;
+  border-radius: 999px;
 }
 @media (max-width: 649px) {
   dialog.town-panel[data-panel='avatar'] .part-tabs .town-button {
