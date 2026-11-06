@@ -94,8 +94,7 @@ dialog.town-panel {
   width: 560px;
   max-width: min(560px, 94vw);
   padding: 22px;
-  border: 1px solid #d8d9bd;
-  border-top: 4px solid #a6b780;
+  border: 2px solid #a6b780;
   border-radius: var(--town-panel-radius);
   background: var(--town-paper);
   color: var(--town-ink);
@@ -850,7 +849,7 @@ body:has(#app.before-entry) .town-panel::backdrop {
   }
 }
 dialog.town-panel[data-panel='settings'] {
-  border: 1px solid #a6b780;
+  border: 2px solid #a6b780;
   width: 340px;
   max-width: calc(100vw - 32px);
 }
@@ -959,7 +958,7 @@ dialog.town-panel.profile-dialog[open] {
   max-height: none;
   margin: auto;
   padding: 22px;
-  border: 1px solid #d8d9bd;
+  border: 2px solid #a6b780;
   border-radius: var(--town-panel-radius);
   background: var(--town-paper);
   box-shadow: 0 16px 55px #26351b30;
@@ -973,7 +972,7 @@ dialog.town-panel.profile-dialog[open] {
 }
 .profile-dialog[data-panel='account'] > .profile-sheet {
   background: #fcfcf8;
-  border-color: #e3e6db;
+  border-color: #a6b780;
 }
 @media (max-height: 500px) {
   .profile-dialog > .profile-sheet {

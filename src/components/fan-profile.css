@@ -300,3 +300,111 @@
   background: #fffdf6;
   box-shadow: 0 1px 3px #42533112;
 }
+
+dialog.town-panel[data-panel='following'] {
+  width: 440px;
+  max-width: calc(100vw - 32px);
+}
+.following-empty {
+  text-align: center;
+  padding: 22px 10px 4px;
+}
+.following-empty-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 104px;
+  height: 104px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: #edf0df;
+}
+.following-empty-note {
+  position: absolute;
+  right: -3px;
+  top: 7px;
+  rotate: 12deg;
+}
+.following-empty h3 {
+  color: #536348;
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 10px;
+  word-break: keep-all;
+}
+.following-empty p {
+  color: #818674;
+  font-size: 13px;
+  line-height: 1.9;
+  white-space: pre-line;
+  word-break: keep-all;
+  margin: 0 0 22px;
+}
+.following-empty > .town-button {
+  padding-inline: 22px;
+  border-radius: 12px;
+}
+.following-empty-guide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-top: 1px solid #e2e7d6;
+  margin-top: 24px;
+  padding-top: 16px;
+  color: #8c957e;
+  font-size: 11px;
+}
+.following-empty-guide [aria-hidden] {
+  color: #b3bba3;
+}
+.following-status {
+  min-height: 150px;
+  display: grid;
+  place-items: center;
+  color: #818674;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.8;
+  padding: 24px;
+}
+.following-person-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.followed-profiles > .town-button {
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid #e1e5d5;
+  border-radius: 12px;
+}
+.followed-profiles small {
+  flex-shrink: 0;
+  font-size: 11px;
+}
+@media (max-height: 500px) {
+  .following-empty {
+    padding-top: 8px;
+  }
+  .following-empty-art {
+    width: 72px;
+    height: 72px;
+    margin-bottom: 12px;
+  }
+  .following-empty-art > img:first-child {
+    width: 54px;
+    height: 54px;
+  }
+  .following-empty p {
+    margin-bottom: 14px;
+  }
+  .following-empty-guide {
+    margin-top: 16px;
+    padding-top: 12px;
+  }
+}

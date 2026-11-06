@@ -940,18 +940,15 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
         )}
         {panel === 'following' && (
           <>
-            {title('YOUR FAVORITE VOICES', '다시 만나고 싶은 목소리')}
+            {title('', '팔로우한 사람들')}
             <FollowedProfiles
+              onExplore={() => setPanel(null)}
               demo={account.demo}
               onSelect={(person) => {
                 setSelectedPerson(person);
                 setPanel('participant');
               }}
             />
-            <div className="notice">
-              공연 시작 푸시는 아직 연결되지 않았어요. 출시 버전에서는 알림 동의 후 받을 수 있으며,
-              iPhone은 홈 화면 추가가 필요해요.
-            </div>
           </>
         )}
         {panel === 'participant' && selectedPerson && (

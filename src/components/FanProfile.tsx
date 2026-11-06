@@ -72,7 +72,9 @@ export function FanProfile({
 export function FollowedProfiles({
   demo,
   onSelect,
+  onExplore,
 }: {
+  onExplore?: () => void;
   demo: boolean;
   onSelect: (person: Participant) => void;
 }) {
@@ -90,16 +92,63 @@ export function FollowedProfiles({
       active = false;
     };
   }, [demo]);
-  if (demo) return <p>로그인 후 팔로우할 수 있어요.</p>;
-  if (error) return <p role="status">{error}</p>;
-  if (!people) return <p role="status">팔로우 목록을 불러오는 중…</p>;
-  if (!people.length) return <p>아직 팔로우한 뮤지션이 없어요.</p>;
+  if (demo || people?.length === 0)
+    return (
+      <section className="following-empty">
+        <div className="following-empty-art" aria-hidden="true">
+          <img src="/icons/profile-followers.png" width={72} height={72} alt="" />
+          <img
+            className="following-empty-note"
+            src="/icons/musical.png"
+            width={26}
+            height={26}
+            alt=""
+          />
+        </div>
+        <h3>{demo ? '좋아하는 목소리를 기억해 두세요' : '아직 팔로우한 사람이 없어요'}</h3>
+        <p>
+          {demo
+            ? '로그인하면 마음에 드는 사람을 팔로우하고 다시 찾아볼 수 있어요.'
+            : '마음에 드는 공연을 만났나요?\n프로필에서 팔로우하면 이곳에 모아 볼 수 있어요.'}
+        </p>
+        {onExplore && (
+          <Button variant="secondary" onClick={onExplore}>
+            공원 둘러보기
+          </Button>
+        )}
+        <div className="following-empty-guide">
+          <span>공연 만나기</span>
+          <span aria-hidden="true">→</span>
+          <span>프로필 열기</span>
+          <span aria-hidden="true">→</span>
+          <span>팔로우</span>
+        </div>
+      </section>
+    );
+  if (error)
+    return (
+      <p className="following-status" role="status">
+        {error}
+      </p>
+    );
+  if (!people)
+    return (
+      <p className="following-status" role="status">
+        팔로우한 사람들을 불러오고 있어요…
+      </p>
+    );
+
   return (
     <div className="followed-profiles">
       {people.map((person) => (
         <Button key={person.id} variant="choice" onClick={() => onSelect(person)}>
-          {person.avatar.name}
-          <small>프로필 보기</small>
+          <span className="following-person-name">
+            <img src="/icons/profile-followers.png" width={32} height={32} alt="" />
+            {person.avatar.name}
+          </span>
+          <small>
+            프로필 보기 <span aria-hidden="true">↗</span>
+          </small>
         </Button>
       ))}
     </div>
