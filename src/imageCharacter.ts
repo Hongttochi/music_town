@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { composeDrinkingAvatar } from './drinkingAvatar';
 import type { Avatar } from './model';
 import { composeSeatedAvatar } from './seatedAvatar';
 import { loadAvatarLayers, composeAvatar } from './modularAvatar';
@@ -15,6 +16,8 @@ export function createImageCharacters() {
     standingImage?: HTMLCanvasElement;
     seatedImage?: HTMLCanvasElement;
     seated?: boolean;
+    drinkingFrames?: HTMLCanvasElement[];
+    drinkFrame?: number;
   }>();
   let source: Awaited<ReturnType<typeof loadAvatarLayers>> | null = null;
   loadAvatarLayers()
@@ -76,6 +79,23 @@ export function createImageCharacters() {
         actor.texture.needsUpdate = true;
         actor.seated = seated;
       }
+      const drinking = actor.group.userData.drinking as number | undefined;
+      const drinkFrame = drinking === undefined ? -1 : Math.round(drinking * 8);
+      if (actor.standingImage && actor.drinkFrame !== drinkFrame) {
+        if (drinkFrame >= 0) {
+          if (!actor.drinkingFrames) {
+            const emptyHands = source
+              ? composeAvatar(source, { ...actor.avatar, instrument: 'none' })
+              : actor.standingImage;
+            actor.drinkingFrames = Array.from({ length: 9 }, (_, i) =>
+              composeDrinkingAvatar(emptyHands, i / 8),
+            );
+          }
+          actor.texture.image = actor.drinkingFrames[drinkFrame];
+        } else actor.texture.image = seated ? actor.seatedImage! : actor.standingImage;
+        actor.texture.needsUpdate = true;
+        actor.drinkFrame = drinkFrame;
+      }
       // Anchor the hips to the seat rather than anchoring seated feet to the ground.
       actor.sprite.center.set(0.5, seated ? 0.25 : 0.05);
       actor.sprite.position.y = seated ? 0.68 : 0;
@@ -90,7 +110,11 @@ export function createImageCharacters() {
               : 3;
       actor.texture.offset.set(cell * 0.25, 0);
       actor.sprite.material.rotation =
-        actor.group === player && moving ? Math.sin(time / 130) * 0.045 : 0;
+        drinking !== undefined
+          ? -drinking * 0.035
+          : actor.group === player && moving
+            ? Math.sin(time / 130) * 0.045
+            : 0;
     }
   }
   function dispose() {

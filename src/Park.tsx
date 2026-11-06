@@ -1,3 +1,5 @@
+import { Coffee } from 'lucide-react';
+import { createCoffeeShop, COFFEE_SPOT } from './coffeeShop';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from './components/ui/Button';
 import { Flaticon } from './Flaticon';
@@ -37,6 +39,9 @@ export function Park(props: Props) {
   const benchBubble = useRef<HTMLButtonElement>(null);
   const [benchAction, setBenchAction] = useState<'sit' | null>(null);
   const useBench = useRef<() => void>(() => {});
+  const coffeeBubble = useRef<HTMLButtonElement>(null);
+  const [coffeeAction, setCoffeeAction] = useState<string | null>(null);
+  const useCoffee = useRef<() => void>(() => {});
   useEffect(() => {
     const el = canvas.current!;
     let renderer: T.WebGLRenderer;
@@ -281,11 +286,41 @@ export function Park(props: Props) {
       riverStone(RIVER.left - 0.2, z);
       riverStone(RIVER.right + 0.2, z);
     }
-    scenery.prop(1, -5, -8, 5.3);
+    const coffeeShop = createCoffeeShop(scene);
+    obstacles.push({ x: COFFEE_SPOT.x, z: COFFEE_SPOT.z - 1.5, r: 0.6 });
+    path([new T.Vector3(0, 0, -4.5), COFFEE_SPOT.clone()], 0.65);
+    let coffeePhase: 'idle' | 'brewing' | 'ready' | 'drinking' = 'idle';
+    let coffeeStarted = 0;
+    let coffeeShown: string | null = null;
+    const resetCoffee = () => {
+      coffeePhase = 'idle';
+    };
+    useCoffee.current = () => {
+      const p = latest.current;
+      if (
+        p.performing !== null ||
+        document.querySelector('dialog[open]') ||
+        world(p.position.current).distanceTo(COFFEE_SPOT) > 2.3
+      )
+        return;
+      if (coffeePhase === 'idle') {
+        standUp(false);
+        // Stand beside the dispensing bay so neither the avatar nor the cup hides it.
+        p.position.current = {
+          x: (COFFEE_SPOT.x + 0.9) * 25 + 700,
+          y: (COFFEE_SPOT.z + 0.35) * 25 + 450,
+        };
+        p.motion.current = { x: 0, y: 0 };
+        p.onMove({ ...p.position.current });
+        coffeePhase = 'brewing';
+      } else if (coffeePhase === 'ready') coffeePhase = 'drinking';
+      else return;
+      coffeeStarted = performance.now();
+    };
     obstacles.push({ x: -5, z: -8, r: 2.5 });
     [
       [-9, -6],
-      [-1, -6],
+      [-7, -5.5],
       [-12, 3],
       [8, 8],
       [10, -11],
@@ -690,6 +725,38 @@ export function Park(props: Props) {
         dx = 0;
         dz = 0;
       }
+      if (
+        coffeePhase !== 'idle' &&
+        (dx ||
+          dz ||
+          p.performing !== null ||
+          world(p.position.current).distanceTo(COFFEE_SPOT) > 2.3 ||
+          document.querySelector('dialog[open]'))
+      )
+        resetCoffee();
+      const coffeeElapsed = Math.max(0, time - coffeeStarted);
+      if (coffeePhase === 'brewing' && coffeeElapsed >= 2300) coffeePhase = 'ready';
+      if (coffeePhase === 'drinking' && coffeeElapsed >= 3600) resetCoffee();
+      coffeeShop.update(coffeePhase, coffeeElapsed / 2300);
+      player.userData.drinking =
+        coffeePhase === 'drinking'
+          ? Math.sin(Math.min(1, coffeeElapsed / 3600) * Math.PI)
+          : undefined;
+      const coffeeLabel =
+        p.performing === null &&
+        !seatedBench &&
+        world(p.position.current).distanceTo(COFFEE_SPOT) < 2.3
+          ? {
+              idle: '커피 내리기',
+              brewing: '커피 추출 중…',
+              ready: '커피 받기',
+              drinking: '마시는 중…',
+            }[coffeePhase]
+          : null;
+      if (coffeeLabel !== coffeeShown) {
+        coffeeShown = coffeeLabel;
+        setCoffeeAction(coffeeLabel);
+      }
       if (seatedBench) {
         // A new performance or server relocation takes precedence over sitting.
         if (
@@ -722,7 +789,7 @@ export function Park(props: Props) {
         p.performing === null
           ? (benches.find((bench) => world(p.position.current).distanceTo(bench) < 2.5) ?? null)
           : null;
-      const action = !seatedBench && nearbyBench ? 'sit' : null;
+      const action = coffeePhase === 'idle' && !seatedBench && nearbyBench ? 'sit' : null;
       if (action !== shownBenchAction) {
         shownBenchAction = action;
         setBenchAction(action);
@@ -731,7 +798,7 @@ export function Park(props: Props) {
       player.position.copy(world(p.position.current));
       player.position.y = surfaceHeight(player.position);
       // Stage performers face the audience, regardless of their approach direction.
-      if (p.performing !== null || seatedBench) player.rotation.y = 0;
+      if (p.performing !== null || seatedBench || coffeePhase === 'drinking') player.rotation.y = 0;
       else if (dx || dz) player.rotation.y = Math.atan2(dx, dz);
       const walking = !!(dx || dz);
       (player.userData.limbs as T.Object3D[]).forEach((l, i) => {
@@ -782,6 +849,10 @@ export function Park(props: Props) {
         cameraFocusGoal.copy(world(watchedStage));
         stageZoom = 1.85;
       } else cameraFocusGoal.copy(player.position);
+      if (coffeePhase !== 'idle') {
+        cameraFocusGoal.copy(COFFEE_SPOT).lerp(player.position, 0.4);
+        stageZoom = 2.1;
+      }
       const smoothing = reducedMotion ? 1 : 1 - Math.exp(-dt * 4.5);
       focus.lerp(cameraFocusGoal, smoothing);
       const portrait = camera.aspect < 1;
@@ -804,6 +875,21 @@ export function Park(props: Props) {
       );
       camera.lookAt(target);
       camera.updateMatrixWorld();
+      if (coffeeBubble.current) {
+        const anchor = COFFEE_SPOT.clone();
+        anchor.y = 2.8;
+        anchor.z -= 1.5;
+        anchor.project(camera);
+        coffeeBubble.current.style.left = `${(anchor.x * 0.5 + 0.5) * el.clientWidth}px`;
+        coffeeBubble.current.style.top = `${(-anchor.y * 0.5 + 0.5) * el.clientHeight}px`;
+        coffeeBubble.current.style.visibility =
+          Math.abs(anchor.x) < 0.95 &&
+          Math.abs(anchor.y) < 0.9 &&
+          Math.abs(anchor.z) < 1 &&
+          !document.querySelector('dialog[open]')
+            ? 'visible'
+            : 'hidden';
+      }
       const bubbleBench = seatedBench ? null : nearbyBench;
       if (benchBubble.current) {
         if (bubbleBench && !document.querySelector('dialog[open]')) {
@@ -880,6 +966,8 @@ export function Park(props: Props) {
     }
     frame = requestAnimationFrame(animate);
     return () => {
+      useCoffee.current = () => {};
+      coffeeShop.dispose();
       useBench.current = () => {};
       scenery.dispose();
       waterTexture.dispose();
@@ -913,6 +1001,20 @@ export function Park(props: Props) {
         id="park"
         aria-label="3D 음악 공원. 조이스틱 또는 방향키로 산책하세요."
       />
+      {coffeeAction && !error && props.performing === null && (
+        <Button
+          ref={coffeeBubble}
+          className="bench-action coffee-action"
+          style={{ visibility: 'hidden' }}
+          aria-label={coffeeAction}
+          title={coffeeAction}
+          disabled={coffeeAction === '커피 추출 중…' || coffeeAction === '마시는 중…'}
+          onClick={() => useCoffee.current()}
+        >
+          <Coffee size={28} />
+          <span>{coffeeAction}</span>
+        </Button>
+      )}
       {benchAction && !error && props.performing === null && (
         <Button
           ref={benchBubble}
