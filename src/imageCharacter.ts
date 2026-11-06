@@ -1,3 +1,4 @@
+import { type CoffeeId } from './coffeeMenu';
 import * as THREE from 'three';
 import { composeDrinkingAvatar } from './drinkingAvatar';
 import type { Avatar } from './model';
@@ -18,6 +19,7 @@ export function createImageCharacters() {
     seated?: boolean;
     drinkingFrames?: HTMLCanvasElement[];
     drinkFrame?: number;
+    coffee?: CoffeeId;
   }>();
   let source: Awaited<ReturnType<typeof loadAvatarLayers>> | null = null;
   loadAvatarLayers()
@@ -80,6 +82,12 @@ export function createImageCharacters() {
         actor.seated = seated;
       }
       const drinking = actor.group.userData.drinking as number | undefined;
+      const coffee = (actor.group.userData.coffee ?? 'americano') as CoffeeId;
+      if (actor.coffee !== coffee) {
+        actor.drinkingFrames = undefined;
+        actor.drinkFrame = undefined;
+        actor.coffee = coffee;
+      }
       const drinkFrame = drinking === undefined ? -1 : Math.round(drinking * 8);
       if (actor.standingImage && actor.drinkFrame !== drinkFrame) {
         if (drinkFrame >= 0) {
@@ -88,7 +96,7 @@ export function createImageCharacters() {
               ? composeAvatar(source, { ...actor.avatar, instrument: 'none' })
               : actor.standingImage;
             actor.drinkingFrames = Array.from({ length: 9 }, (_, i) =>
-              composeDrinkingAvatar(emptyHands, i / 8),
+              composeDrinkingAvatar(emptyHands, i / 8, coffee),
             );
           }
           actor.texture.image = actor.drinkingFrames[drinkFrame];

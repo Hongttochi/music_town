@@ -1,3 +1,4 @@
+import { findCoffee, type CoffeeId } from './coffeeMenu';
 import * as T from 'three';
 
 export const COFFEE_SPOT = new T.Vector3(-2.3, 0, -4.5);
@@ -50,7 +51,9 @@ export function createCoffeeShop(scene: T.Scene) {
   const stream = block(x, 0.85, z + 0.65, 0.04, 0.25, 0.04, '#71482b');
   cup.visible = stream.visible = false;
   return {
-    update(phase: string, progress: number) {
+    update(phase: string, progress: number, drink: CoffeeId) {
+      stream.material.color.set(findCoffee(drink).color);
+      cup.material.color.set(findCoffee(drink).iced ? '#cda882' : '#fff1d6');
       cup.visible = phase === 'brewing' || phase === 'ready';
       stream.visible = phase === 'brewing' && progress > 0.2;
       cup.position.y = 0.58 + (phase === 'brewing' ? Math.max(0, 0.2 - progress) : 0);

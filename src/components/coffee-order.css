@@ -1,0 +1,73 @@
+dialog.town-panel.coffee-order-dialog {
+  width: min(430px, calc(100vw - 32px));
+  max-height: calc(100dvh - 24px);
+  margin: auto;
+  padding: 20px;
+  overflow-y: auto;
+  border: 2px solid #a9bc8c;
+  border-radius: 22px;
+}
+.coffee-order-intro {
+  color: #7b8369;
+  font-size: 13px;
+  margin: 4px 0 16px;
+}
+.coffee-menu {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.coffee-menu-item.town-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 10px;
+  text-align: left;
+  min-width: 0;
+  border: 1px solid #d5d9c3;
+  border-radius: 12px;
+}
+.coffee-menu-item.town-button[aria-pressed='true'] {
+  background: #e8edcf;
+  border-color: #708b58;
+  box-shadow: inset 0 0 0 1px #708b58;
+}
+.coffee-menu-item svg {
+  flex-shrink: 0;
+}
+.coffee-menu-item strong {
+  display: block;
+  font-size: 12px;
+}
+.coffee-menu-item small {
+  display: block;
+  font-size: 10px;
+  margin-top: 3px;
+  color: #778067;
+}
+.coffee-order-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+.coffee-order-actions > button {
+  flex: 1;
+  min-height: 34px;
+  border-radius: 10px;
+}
+@media (max-width: 400px) {
+  .coffee-menu {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-height: 450px) {
+  dialog.town-panel.coffee-order-dialog {
+    padding: 14px 18px;
+  }
+  .coffee-order-intro {
+    margin-bottom: 10px;
+  }
+  .coffee-order-actions {
+    margin-top: 12px;
+  }
+}

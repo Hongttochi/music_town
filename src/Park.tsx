@@ -1,3 +1,5 @@
+import { CoffeeOrderDialog } from './components/CoffeeOrderDialog';
+import { findCoffee, type CoffeeId } from './coffeeMenu';
 import { Coffee } from 'lucide-react';
 import { createCoffeeShop, COFFEE_SPOT } from './coffeeShop';
 import { useEffect, useRef, useState } from 'react';
@@ -41,7 +43,8 @@ export function Park(props: Props) {
   const useBench = useRef<() => void>(() => {});
   const coffeeBubble = useRef<HTMLButtonElement>(null);
   const [coffeeAction, setCoffeeAction] = useState<string | null>(null);
-  const useCoffee = useRef<() => void>(() => {});
+  const [coffeeMenuOpen, setCoffeeMenuOpen] = useState(false);
+  const useCoffee = useRef<(order?: CoffeeId) => void>(() => {});
   useEffect(() => {
     const el = canvas.current!;
     let renderer: T.WebGLRenderer;
@@ -290,12 +293,13 @@ export function Park(props: Props) {
     obstacles.push({ x: COFFEE_SPOT.x, z: COFFEE_SPOT.z - 1.5, r: 0.6 });
     path([new T.Vector3(0, 0, -4.5), COFFEE_SPOT.clone()], 0.65);
     let coffeePhase: 'idle' | 'brewing' | 'ready' | 'drinking' = 'idle';
+    let orderedCoffee: CoffeeId = 'americano';
     let coffeeStarted = 0;
     let coffeeShown: string | null = null;
     const resetCoffee = () => {
       coffeePhase = 'idle';
     };
-    useCoffee.current = () => {
+    useCoffee.current = (order) => {
       const p = latest.current;
       if (
         p.performing !== null ||
@@ -304,6 +308,11 @@ export function Park(props: Props) {
       )
         return;
       if (coffeePhase === 'idle') {
+        if (!order) {
+          setCoffeeMenuOpen(true);
+          return;
+        }
+        orderedCoffee = order;
         standUp(false);
         // Stand beside the dispensing bay so neither the avatar nor the cup hides it.
         p.position.current = {
@@ -737,7 +746,8 @@ export function Park(props: Props) {
       const coffeeElapsed = Math.max(0, time - coffeeStarted);
       if (coffeePhase === 'brewing' && coffeeElapsed >= 2300) coffeePhase = 'ready';
       if (coffeePhase === 'drinking' && coffeeElapsed >= 3600) resetCoffee();
-      coffeeShop.update(coffeePhase, coffeeElapsed / 2300);
+      coffeeShop.update(coffeePhase, coffeeElapsed / 2300, orderedCoffee);
+      player.userData.coffee = orderedCoffee;
       player.userData.drinking =
         coffeePhase === 'drinking'
           ? Math.sin(Math.min(1, coffeeElapsed / 3600) * Math.PI)
@@ -747,8 +757,8 @@ export function Park(props: Props) {
         !seatedBench &&
         world(p.position.current).distanceTo(COFFEE_SPOT) < 2.3
           ? {
-              idle: '커피 내리기',
-              brewing: '커피 추출 중…',
+              idle: '커피 주문하기',
+              brewing: `${findCoffee(orderedCoffee).shortName} 추출 중…`,
               ready: '커피 받기',
               drinking: '마시는 중…',
             }[coffeePhase]
@@ -1001,6 +1011,15 @@ export function Park(props: Props) {
         id="park"
         aria-label="3D 음악 공원. 조이스틱 또는 방향키로 산책하세요."
       />
+      {coffeeMenuOpen && (
+        <CoffeeOrderDialog
+          onClose={() => setCoffeeMenuOpen(false)}
+          onOrder={(id) => {
+            setCoffeeMenuOpen(false);
+            useCoffee.current(id);
+          }}
+        />
+      )}
       {coffeeAction && !error && props.performing === null && (
         <Button
           ref={coffeeBubble}
@@ -1008,7 +1027,7 @@ export function Park(props: Props) {
           style={{ visibility: 'hidden' }}
           aria-label={coffeeAction}
           title={coffeeAction}
-          disabled={coffeeAction === '커피 추출 중…' || coffeeAction === '마시는 중…'}
+          disabled={coffeeAction.endsWith('중…')}
           onClick={() => useCoffee.current()}
         >
           <Coffee size={28} />
