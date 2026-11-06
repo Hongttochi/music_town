@@ -46,7 +46,7 @@ export function Park(props: ParkProps) {
           title="공원 안내"
           onClick={() => setGuideOpen(true)}
         >
-          <Flaticon name="chat" size={24} />
+          <Flaticon name="chat" size={18} />
         </Button>
       )}
       {noticeBoardOpen && <NoticeBoardDialog onClose={() => setNoticeBoardOpen(false)} />}
@@ -59,7 +59,7 @@ export function Park(props: ParkProps) {
           title="마을 게시판"
           onClick={() => setNoticeBoardOpen(true)}
         >
-          <Flaticon name="blackboard" size={24} />
+          <Flaticon name="blackboard" size={18} />
         </Button>
       )}
       {coffeeMenuOpen && (

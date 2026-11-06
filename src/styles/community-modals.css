@@ -476,3 +476,10 @@ dialog.delete-account-dialog {
   padding: 1px 5px;
   font-size: 9px;
 }
+
+.bench-action:is(.npc-action, .notice-board-action) > .flaticon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  object-fit: contain;
+}
