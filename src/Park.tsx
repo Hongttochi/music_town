@@ -1,3 +1,4 @@
+import { PARK_PATHS } from './parkPaths';
 import { remoteMovementStep } from './remoteMovement';
 import { useSoundEffects } from './useSoundEffects';
 import { createCampfire, CAMPFIRE_SPOT, CAMPFIRE_RADIUS } from './campfire';
@@ -9,7 +10,7 @@ import { createCoffeeShop, COFFEE_SPOT, COFFEE_BUILDING } from './coffeeShop';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from './components/ui/Button';
 import { Flaticon } from './Flaticon';
-import { BRIDGE, PLAYER_RADIUS, RIVER, canCrossRiver } from './riverBoundary';
+import { BRIDGE, PLAYER_RADIUS, RIVER, canCrossRiver, isOnBridge } from './riverBoundary';
 import * as T from 'three';
 import { Avatar, Stage, stages, koreanHour } from './model';
 import { createImageCharacters } from './imageCharacter';
@@ -20,6 +21,7 @@ import { CHARACTER_ASSET, loadCharacterAsset, type CharacterRuntime } from './ch
 import type { Participant } from './useTown';
 export type Position = { x: number; y: number };
 type Props = {
+  mapPositions?: React.MutableRefObject<Map<string, Position>>;
   liveStages: Stage[];
   participants: Participant[];
   demo: boolean;
@@ -189,30 +191,11 @@ export function Park(props: Props) {
       m.receiveShadow = true;
       scene.add(m);
     }
-    // Continuous loops stay inside the walkable banks; only the bridge crosses water.
-    path(
-      [
-        [-14, 4],
-        [-14, -8],
-        [0, -10.5],
-        [10, -7],
-        [12, 1],
-        [12, 8],
-        [2, 11],
-        [-10, 10],
-        [-14, 4],
-      ].map(([x, z]) => new T.Vector3(x, 0, z)),
-      1,
-    );
-    path(
-      [
-        [0, -10.5],
-        [0, -3],
-        [0, 3],
-        [7, 4.5],
-        [15, BRIDGE.centerZ],
-      ].map(([x, z]) => new T.Vector3(x, 0, z)),
-      1,
+    PARK_PATHS.slice(0, 2).forEach(({ points, width }) =>
+      path(
+        points.map(([x, z]) => new T.Vector3(x, 0, z)),
+        width,
+      ),
     );
     const obstacles: { x: number; z: number; r: number }[] = [];
     function tree(x: number, z: number, s = 1) {
@@ -307,7 +290,10 @@ export function Park(props: Props) {
     let noticeShown = false;
     const coffeeShop = createCoffeeShop(scene);
     obstacles.push({ x: COFFEE_SPOT.x, z: COFFEE_SPOT.z - 1.5, r: 0.6 });
-    path([new T.Vector3(0, 0, -10.5), COFFEE_SPOT.clone()], 0.65);
+    path(
+      PARK_PATHS[2].points.map(([x, z]) => new T.Vector3(x, 0, z)),
+      PARK_PATHS[2].width,
+    );
     let coffeePhase: 'idle' | 'brewing' | 'ready' | 'drinking' = 'idle';
     let orderedCoffee: CoffeeId = 'americano';
     let coffeeStarted = 0;
@@ -360,32 +346,26 @@ export function Park(props: Props) {
 
     for (let x = -20; x < 14; x += 3.4) scenery.prop(5, x, -17, 1.2);
     // A small wooden footbridge makes the river part of the walk.
-    for (let x = 15; x < 25.3; x += 0.45)
-      box(x, 0.14, BRIDGE.centerZ, 0.42, 0.2, BRIDGE.width, '#bd9767');
+    for (let x = BRIDGE.left; x < BRIDGE.right; x += 0.45)
+      box(x, BRIDGE.surfaceHeight - 0.1, BRIDGE.centerZ, 0.42, 0.2, BRIDGE.width, '#bd9767');
+    // Billboards lean toward the camera and can intersect rails behind their feet.
+    // Fade only the bridge rails while someone crosses, leaving world depth intact.
+    const bridgeRailMaterial = new T.MeshStandardMaterial({
+      color: '#a88054',
+      transparent: true,
+      depthWrite: false,
+    });
     for (const z of [3.15, 5.85]) {
-      for (let x = 15; x < 25.3; x += 2) cyl(x, 0.65, z, 0.075, 0.075, 1.3, '#a88054');
-      box(20, 1.12, z, 10.5, 0.09, 0.09, '#c6a476');
+      for (let x = 15; x < 25.3; x += 2)
+        cyl(x, 0.65, z, 0.075, 0.075, 1.3, '#a88054').material = bridgeRailMaterial;
+      box(20, 1.12, z, 10.5, 0.09, 0.09, '#c6a476').material = bridgeRailMaterial;
     }
 
-    // A closed east-bank walk connects directly to the bridge landing.
-    path(
-      [
-        [24.5, BRIDGE.centerZ],
-        [29, BRIDGE.centerZ],
-      ].map(([x, z]) => new T.Vector3(x, 0, z)),
-      1,
-    );
-    path(
-      [
-        [29, 4.5],
-        [28, -6],
-        [34, -8],
-        [36, 0],
-        [35, 10],
-        [29, 10],
-        [29, 4.5],
-      ].map(([x, z]) => new T.Vector3(x, 0, z)),
-      0.9,
+    PARK_PATHS.slice(3).forEach(({ points, width }) =>
+      path(
+        points.map(([x, z]) => new T.Vector3(x, 0, z)),
+        width,
+      ),
     );
     [
       [28, -12],
@@ -460,11 +440,13 @@ export function Park(props: Props) {
       }
     };
     const surfaceHeight = (position: T.Vector3) =>
-      stageCenters.some(
-        (center) => Math.hypot(position.x - center.x, position.z - center.z) <= STAGE_RADIUS,
-      )
-        ? STAGE_SURFACE_HEIGHT
-        : 0;
+      isOnBridge(position)
+        ? BRIDGE.surfaceHeight
+        : stageCenters.some(
+              (center) => Math.hypot(position.x - center.x, position.z - center.z) <= STAGE_RADIUS,
+            )
+          ? STAGE_SURFACE_HEIGHT
+          : 0;
     // Shared soft glow for lantern halos and the pools of light beneath them.
     const glowCanvas = document.createElement('canvas');
     glowCanvas.width = glowCanvas.height = 128;
@@ -710,6 +692,7 @@ export function Park(props: Props) {
         if (!present.has(id)) {
           scene.remove(visitor.group);
           visitors.delete(id);
+          p.mapPositions?.current.delete(id);
         }
       }
       for (const person of p.participants) {
@@ -744,6 +727,10 @@ export function Park(props: Props) {
         visitor.group.position.x += deltaX * movement.fraction;
         visitor.group.position.z += deltaZ * movement.fraction;
         visitor.group.position.y = surfaceHeight(visitor.group.position);
+        p.mapPositions?.current.set(person.id, {
+          x: visitor.group.position.x * 25 + 700,
+          y: visitor.group.position.z * 25 + 450,
+        });
         visitor.group.userData.walking = movement.walking && !performing;
         const arrived = distance * (1 - movement.fraction) < 0.02;
         visitor.group.userData.seated =
@@ -864,6 +851,11 @@ export function Park(props: Props) {
       player.userData.seated = seatedBench !== null;
       player.position.copy(world(p.position.current));
       player.position.y = surfaceHeight(player.position);
+      const crossingBridge =
+        isOnBridge(player.position) ||
+        [...visitors.values()].some((v) => isOnBridge(v.group.position));
+      bridgeRailMaterial.opacity +=
+        ((crossingBridge ? 0.25 : 1) - bridgeRailMaterial.opacity) * (1 - Math.exp(-dt * 10));
       // Stage performers face the audience, regardless of their approach direction.
       if (p.performing !== null || seatedBench || coffeePhase === 'drinking') player.rotation.y = 0;
       else if (dx || dz) player.rotation.y = Math.atan2(dx, dz);
@@ -1049,8 +1041,10 @@ export function Park(props: Props) {
     }
     frame = requestAnimationFrame(animate);
     return () => {
+      latest.current.mapPositions?.current.clear();
       stopCoffeeSound();
       useCoffee.current = () => {};
+      bridgeRailMaterial.dispose();
       coffeeShop.dispose();
       noticeBoard.dispose();
       campfire.dispose();

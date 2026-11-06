@@ -1,0 +1,59 @@
+.profile-name-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  min-width: 0;
+}
+.profile-name-line > h3 {
+  margin: 0;
+}
+.profile-social-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  min-width: 0;
+  max-width: 100%;
+}
+.profile-social-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  max-width: 100%;
+  color: #738166;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-decoration: underline;
+  text-decoration-color: #b7c2a5;
+  text-underline-offset: 3px;
+}
+.profile-social-links a img {
+  flex: none;
+}
+.profile-social-links a span {
+  overflow-wrap: anywhere;
+}
+.profile-social-links a:hover {
+  color: #405b31;
+}
+.profile-social-links a:focus-visible {
+  outline: 2px solid #8fa777;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+.participant-identity-details {
+  min-width: 0;
+  flex: 1;
+}
+.participant-identity .profile-name-line {
+  margin-top: 5px;
+}
+.participant-profile .participant-identity .profile-name-line h3 {
+  margin: 0;
+}
+.account-name .profile-name-line > strong {
+  overflow-wrap: anywhere;
+}

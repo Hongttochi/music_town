@@ -5,7 +5,7 @@ import { ErrorModal } from './ui/ErrorModal';
 import type { Avatar } from '../model';
 import type { MemberProfile } from './Registration';
 import { ProfileIcon, profileIcons } from './ProfileIcon';
-import { ChevronRight } from 'lucide-react';
+import { ProfileSocialLinks } from './ProfileSocialLinks';
 import './account-panel.css';
 
 export function AccountPanel({
@@ -45,7 +45,12 @@ export function AccountPanel({
         </button>
         <div className="account-name">
           <span className="account-role">{profile.role === 'musician' ? '뮤지션' : '관람객'}</span>
-          <strong>{avatar.name}</strong>
+          <div className="profile-name-line">
+            <strong>{avatar.name}</strong>
+            {profile.role === 'musician' && (
+              <ProfileSocialLinks instagram={profile.instagram} soundcloud={profile.soundcloud} />
+            )}
+          </div>
         </div>
       </div>
       <section
@@ -87,46 +92,6 @@ export function AccountPanel({
         </p>
       </section>
       {fanStats}
-      {profile.role === 'musician' && (profile.instagram || profile.soundcloud) && (
-        <section className="account-section">
-          <h3>나의 음악과 소식</h3>
-          <div className="account-socials">
-            {(
-              [
-                { key: 'instagram', label: '인스타그램' },
-                { key: 'soundcloud', label: '사운드클라우드' },
-              ] as const
-            )
-              .filter((item) => profile[item.key])
-              .map((item) => {
-                const url = profile[item.key];
-                const content = (
-                  <>
-                    <img src={`/icons/brands/${item.key}.svg`} width={21} height={21} alt="" />
-                    <span>
-                      <strong>{item.label}</strong>
-                      <small>
-                        {url
-                          ? url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')
-                          : '등록된 링크가 없어요'}
-                      </small>
-                    </span>
-                    {url && <ChevronRight size={14} />}
-                  </>
-                );
-                return url ? (
-                  <a key={item.key} href={url} target="_blank" rel="noopener noreferrer">
-                    {content}
-                  </a>
-                ) : (
-                  <div key={item.key} className="account-social-empty">
-                    {content}
-                  </div>
-                );
-              })}
-          </div>
-        </section>
-      )}
       <div className="account-edit-actions">
         <Button variant="secondary" onClick={onEditProfile}>
           <img src="/icons/pencil.png" width={18} height={18} alt="" /> 소개 수정

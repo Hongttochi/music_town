@@ -28,16 +28,16 @@ dialog.town-panel.notice-board-dialog {
   letter-spacing: 0.04em;
 }
 .notice-board-heading h2 {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 800;
   margin: 3px 0 0;
   color: #fff3d6;
 }
 .notice-board-dialog .town-button.notice-board-close {
   color: #fff3d6;
-  border: 1px solid #d3d9b750;
+  border: 0;
   border-radius: 8px;
-  background: #ffffff0a;
+  background: transparent;
   font-size: 25px;
   min-height: 32px;
   width: 32px;

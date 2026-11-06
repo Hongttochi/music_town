@@ -1,3 +1,4 @@
+import { ParkMinimap } from './components/ParkMinimap';
 import { ProfileBio } from './components/ProfileBio';
 import { startTelemetry } from './telemetry';
 import { FanProfile, FollowedProfiles } from './components/FanProfile';
@@ -108,6 +109,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
   const [now, setNow] = useState(new Date());
   const dialog = useRef<HTMLDialogElement>(null);
   const position = useRef<Position>({ x: 650, y: 470 });
+  const mapPositions = useRef(new Map<string, Position>());
   const motion = useRef<Position>({ x: 0, y: 0 });
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const notify = (text: string) => {
@@ -290,6 +292,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
           <>
             <Park
               key={`${channel}|${stages.map((s) => `${s.id}:${s.x}:${s.y}`).join('|')}`}
+              mapPositions={mapPositions}
               avatar={avatar}
               liveStages={stages}
               participants={town.state.participants.filter((p) => p.id !== account.id)}
@@ -581,38 +584,12 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                 </div>
               )}
             </div>
-            <div className="map-card" role="img" aria-label="공원 지도">
-              <span>OUR LITTLE PARK</span>
-              <svg viewBox="0 0 180 95">
-                <rect width="180" height="95" rx="14" fill="#c4d6a5" />
-                <path
-                  d="M0 50Q45 10 90 50T180 40M85 0Q65 50 100 95"
-                  stroke="#eee3c8"
-                  strokeWidth="14"
-                  fill="none"
-                />
-                <ellipse cx="145" cy="20" rx="25" ry="13" fill="#91c6c4" />
-                <g fill="#668753">
-                  <circle cx="18" cy="19" r="8" />
-                  <circle cx="163" cy="74" r="10" />
-                  <circle cx="30" cy="80" r="11" />
-                </g>
-                <g fill="#fcf8e8" stroke="#a57c50" strokeWidth="2">
-                  {stages.map((s) => (
-                    <circle key={s.id} cx={s.x / 10} cy={s.y / 9} r="5" />
-                  ))}
-                </g>
-                <circle
-                  cx={position.current.x / 10}
-                  cy={position.current.y / 9}
-                  r="5"
-                  fill="#ef976c"
-                  stroke="white"
-                  strokeWidth="2"
-                />
-              </svg>
-              <span className="map-caption">나만의 속도로 걸어보세요</span>
-            </div>
+            <ParkMinimap
+              position={position}
+              mapPositions={mapPositions}
+              stages={stages}
+              participants={town.state.participants.filter((p) => p.id !== account.id)}
+            />
             {audiblePerformance && performing === null && (
               <div className="live-audio-status" role="status">
                 <span>

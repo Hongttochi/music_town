@@ -1005,3 +1005,14 @@ html:has(#app.before-entry),
 body:has(#app.before-entry) {
   background: var(--town-entry-background);
 }
+
+/* Compact dialog headings and unframed close icons. */
+dialog.town-panel .panel-heading .modal-title {
+  font-size: 16px;
+}
+dialog .panel-heading > .town-button[aria-label='닫기'],
+dialog .town-button.notice-board-close {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}

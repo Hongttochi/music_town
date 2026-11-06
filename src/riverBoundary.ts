@@ -1,6 +1,13 @@
 export const PLAYER_RADIUS = 0.35;
 export const RIVER = { left: 16, right: 24, bankPadding: 0.5 };
-export const BRIDGE = { centerZ: 4.5, width: 2.6 };
+export const BRIDGE = { centerZ: 4.5, width: 2.6, left: 15, right: 25.3, surfaceHeight: 0.24 };
+export function isOnBridge(point: { x: number; z: number }) {
+  return (
+    point.x >= BRIDGE.left &&
+    point.x <= BRIDGE.right &&
+    Math.abs(point.z - BRIDGE.centerZ) <= BRIDGE.width / 2
+  );
+}
 type Point = { x: number; z: number };
 
 /** The entire player's footprint must stay on the banks or inside the bridge rails. */

@@ -10,7 +10,7 @@ export function SoundEffectsSetting() {
   const id = useId();
   const percent = enabled ? Math.round(volume * 100) : 0;
   return (
-    <div className="sound-effects-setting">
+    <div className="sound-effects-setting" data-expanded={expanded}>
       <Button
         variant="ghost"
         aria-expanded={expanded}
@@ -26,21 +26,23 @@ export function SoundEffectsSetting() {
           <ChevronDown size={16} aria-hidden="true" />
         )}
       </Button>
-      {expanded && (
-        <div className="sound-effects-slider" id={id}>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            step={1}
-            value={percent}
-            aria-label="효과음 볼륨"
-            aria-valuetext={percent === 0 ? '꺼짐' : `${percent}%`}
-            onChange={(event) => setVolume(Number(event.target.value) / 100)}
-          />
-          <output aria-hidden="true">{percent}%</output>
+      <div className="sound-effects-reveal" id={id} aria-hidden={!expanded} inert={!expanded}>
+        <div className="sound-effects-reveal-inner">
+          <div className="sound-effects-slider">
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={1}
+              value={percent}
+              aria-label="효과음 볼륨"
+              aria-valuetext={percent === 0 ? '꺼짐' : `${percent}%`}
+              onChange={(event) => setVolume(Number(event.target.value) / 100)}
+            />
+            <output aria-hidden="true">{percent}%</output>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

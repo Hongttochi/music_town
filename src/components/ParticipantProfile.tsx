@@ -1,3 +1,4 @@
+import { ProfileSocialLinks } from './ProfileSocialLinks';
 import { ProfileBio } from './ProfileBio';
 import type { Participant } from '../useTown';
 import { ModularPortrait } from '../ModularPortrait';
@@ -17,9 +18,14 @@ export function ParticipantProfile({
     <div className="participant-profile">
       <div className="participant-identity">
         <ModularPortrait avatar={person.avatar} />
-        <div>
+        <div className="participant-identity-details">
           <small>{person.role === 'musician' ? '뮤지션' : '관람객'}</small>
-          <h3>{person.avatar.name}</h3>
+          <div className="profile-name-line">
+            <h3>{person.avatar.name}</h3>
+            {person.role === 'musician' && (
+              <ProfileSocialLinks instagram={person.instagram} soundcloud={person.soundcloud} />
+            )}
+          </div>
         </div>
       </div>
       <section className="participant-about" aria-label="자기소개">
@@ -29,19 +35,6 @@ export function ParticipantProfile({
         </div>
       </section>
       {fanStats}
-      {person.role === 'musician' && (person.instagram || person.soundcloud) && (
-        <div className="participant-socials">
-          {(['instagram', 'soundcloud'] as const).map(
-            (kind) =>
-              person[kind] && (
-                <a key={kind} href={person[kind]} target="_blank" rel="noopener noreferrer">
-                  <img src={`/icons/brands/${kind}.svg`} width={18} height={18} alt="" />
-                  {kind === 'instagram' ? '인스타그램' : '사운드클라우드'}
-                </a>
-              ),
-          )}
-        </div>
-      )}
       <Button variant="ghost" className="participant-report" onClick={onReport}>
         신고하기
       </Button>
