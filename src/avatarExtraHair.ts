@@ -178,23 +178,42 @@ export function drawExtraHair(
           strand([x, 105, x + 8, 123, x + 5, 142, x + 2, 155 + (i % 3) * 5], 8);
         }
     } else if (hair === 15) {
-      // Centre-parted, broad leaf-shaped locks with outward turned ends.
-      for (const flip of side ? [-1] : [-1, 1]) {
-        ctx.save();
-        ctx.translate(256, 0);
-        ctx.scale(flip, 1);
+      // In profile, project the centre part toward the forehead rather than
+      // leaving the front-view split over the ear. The left view mirrors this.
+      if (side) {
         ctx.beginPath();
-        ctx.moveTo(0, 64);
-        ctx.bezierCurveTo(125, 30, 160, 122, 136, 174);
-        ctx.quadraticCurveTo(125, 216, 147, 238);
-        ctx.quadraticCurveTo(82, 227, 91, 169);
-        ctx.quadraticCurveTo(28, 177, 0, 95);
+        ctx.moveTo(326, 67);
+        ctx.bezierCurveTo(250, 15, 112, 60, 126, 150);
+        ctx.quadraticCurveTo(117, 208, 138, 238);
+        ctx.bezierCurveTo(203, 238, 247, 180, 271, 137);
+        ctx.quadraticCurveTo(309, 120, 326, 67);
         ctx.closePath();
         ctx.fill();
-        sheen([9, 79, 60, 80, 94, 112, 111, 163]);
-        ctx.restore();
-      }
-      if (side) strand([282, 75, 350, 63, 393, 93, 384, 146], 37);
+        sheen([313, 78, 266, 93, 205, 146, 168, 205]);
+        ctx.beginPath();
+        ctx.moveTo(326, 67);
+        ctx.bezierCurveTo(369, 57, 400, 109, 387, 151);
+        ctx.quadraticCurveTo(368, 145, 351, 119);
+        ctx.quadraticCurveTo(334, 104, 326, 67);
+        ctx.closePath();
+        ctx.fill();
+        sheen([339, 81, 359, 92, 375, 115, 379, 136]);
+      } else
+        for (const flip of [-1, 1]) {
+          ctx.save();
+          ctx.translate(256, 0);
+          ctx.scale(flip, 1);
+          ctx.beginPath();
+          ctx.moveTo(0, 64);
+          ctx.bezierCurveTo(125, 30, 160, 122, 136, 174);
+          ctx.quadraticCurveTo(125, 216, 147, 238);
+          ctx.quadraticCurveTo(82, 227, 91, 169);
+          ctx.quadraticCurveTo(28, 177, 0, 95);
+          ctx.closePath();
+          ctx.fill();
+          sheen([9, 79, 60, 80, 94, 112, 111, 163]);
+          ctx.restore();
+        }
     } else if (hair === 16) {
       // Straight princess cut: blunt bangs, short cheek panels, longer outer lengths.
       if (back) {
