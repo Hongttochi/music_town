@@ -308,7 +308,7 @@ export function composeAvatar(layers: Layers, avatar: Partial<Avatar>, view?: nu
     }
     drawEquipment(ctx, avatar, direction);
     drawWristwear(ctx, avatar, direction);
-    if (avatar.instrument === 'microphone') {
+    if (avatar.instrument === 'microphone' && direction !== 3) {
       // Restore the palm over the handle so the microphone is visibly gripped.
       const handX = [329, 262, 182, 250][direction];
       ctx.save();

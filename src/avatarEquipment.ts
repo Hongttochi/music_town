@@ -93,7 +93,9 @@ export function drawEquipment(
     }
     ctx.restore();
   }
-  if (avatar.instrument === 'microphone') {
+  // The microphone arm is behind the body in the left-facing profile.
+  // Do not transfer the microphone onto the visible, accessorized free arm.
+  if (avatar.instrument === 'microphone' && direction !== 3) {
     const handX = direction === 0 ? 329 : direction === 1 ? 262 : direction === 2 ? 182 : 250;
     ctx.save();
     ctx.translate(handX, 385);

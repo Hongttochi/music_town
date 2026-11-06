@@ -1,33 +1,35 @@
 import type { Avatar } from './model';
 
-/** Wrist position stays inside the forearm crop used by sitting and drinking poses. */
+/** Wear on the free arm, opposite the microphone; pose crops carry the band with the wrist. */
 export function drawWristwear(
   ctx: CanvasRenderingContext2D,
   avatar: Partial<Avatar>,
   direction: number,
 ) {
   const style = avatar.wristwear;
-  if (!style || style === 'none') return;
-  const x = [329, 262, 182, 250][direction];
+  if (!style || style === 'none' || direction === 1) return;
+  // In the right-facing profile this arm is behind the body, so hide it instead
+  // of transferring the accessory to the visible microphone arm.
+  const x = [184, 0, 328, 250][direction];
   const side = direction === 1 || direction === 3;
   ctx.save();
-  ctx.translate(x, 364);
-  ctx.rotate(direction === 0 || direction === 3 ? -0.12 : 0.12);
+  ctx.translate(x, 356);
+  ctx.rotate(direction === 0 ? 0.28 : direction === 2 ? -0.28 : 0);
   if (side) ctx.scale(0.85, 1);
   ctx.lineWidth = 1.4;
   if (style === 'bracelet') {
     ctx.strokeStyle = '#9f7846';
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.ellipse(0, 0, 11, 4, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, 14, 4.5, 0, 0, Math.PI * 2);
     ctx.stroke();
     for (let i = 0; i < 7; i++) {
       const t = (i / 6) * Math.PI;
       const shade = ctx.createRadialGradient(
-        Math.cos(t) * 10 - 1,
+        Math.cos(t) * 13 - 1,
         Math.sin(t) * 3 - 1,
         0,
-        Math.cos(t) * 10,
+        Math.cos(t) * 13,
         Math.sin(t) * 3,
         3,
       );
@@ -35,14 +37,22 @@ export function drawWristwear(
       shade.addColorStop(1, '#af8352');
       ctx.fillStyle = shade;
       ctx.beginPath();
-      ctx.arc(Math.cos(t) * 10, Math.sin(t) * 3, 2.8, 0, Math.PI * 2);
+      ctx.arc(Math.cos(t) * 13, Math.sin(t) * 3, 2.8, 0, Math.PI * 2);
       ctx.fill();
     }
   } else if (style === 'watch' || style === 'apple-watch') {
     const smart = style === 'apple-watch';
-    ctx.fillStyle = smart ? '#8b9e82' : '#8b6046';
+    const band = ctx.createLinearGradient(-15, 0, 15, 0);
+    band.addColorStop(0, smart ? '#5f735a' : '#68452f');
+    band.addColorStop(0.45, smart ? '#a6b59b' : '#af805b');
+    band.addColorStop(1, smart ? '#65795e' : '#715038');
+    ctx.fillStyle = band;
     ctx.beginPath();
-    ctx.roundRect(-12, -5, 24, 10, 4);
+    ctx.moveTo(-15, -3);
+    ctx.quadraticCurveTo(0, -8, 15, -3);
+    ctx.lineTo(15, 4);
+    ctx.quadraticCurveTo(0, 9, -15, 4);
+    ctx.closePath();
     ctx.fill();
     ctx.fillStyle = smart ? '#596361' : '#d8c18a';
     ctx.strokeStyle = smart ? '#424b49' : '#a18a5a';
