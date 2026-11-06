@@ -340,10 +340,6 @@ dialog.town-panel[data-panel='following'] {
   word-break: keep-all;
   margin: 0 0 22px;
 }
-.following-empty > .town-button {
-  padding-inline: 22px;
-  border-radius: 12px;
-}
 .following-empty-guide {
   display: flex;
   align-items: center;

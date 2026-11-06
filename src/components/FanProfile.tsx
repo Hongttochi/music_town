@@ -72,9 +72,7 @@ export function FanProfile({
 export function FollowedProfiles({
   demo,
   onSelect,
-  onExplore,
 }: {
-  onExplore?: () => void;
   demo: boolean;
   onSelect: (person: Participant) => void;
 }) {
@@ -111,11 +109,6 @@ export function FollowedProfiles({
             ? '로그인하면 마음에 드는 사람을 팔로우하고 다시 찾아볼 수 있어요.'
             : '마음에 드는 공연을 만났나요?\n프로필에서 팔로우하면 이곳에 모아 볼 수 있어요.'}
         </p>
-        {onExplore && (
-          <Button variant="secondary" onClick={onExplore}>
-            공원 둘러보기
-          </Button>
-        )}
         <div className="following-empty-guide">
           <span>공연 만나기</span>
           <span aria-hidden="true">→</span>

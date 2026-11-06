@@ -942,7 +942,6 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
           <>
             {title('', '팔로우한 사람들')}
             <FollowedProfiles
-              onExplore={() => setPanel(null)}
               demo={account.demo}
               onSelect={(person) => {
                 setSelectedPerson(person);
