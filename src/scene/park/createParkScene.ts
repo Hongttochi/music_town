@@ -778,7 +778,7 @@ export function createParkScene({
       stopCoffeeSound = sound.current('coffeemachineEnd');
     }
     if (coffeePhase === 'drinking' && coffeeElapsed >= 3600) resetCoffee();
-    school.update(time, world(p.position.current));
+    school.update(time);
     coffeeShop.update(coffeePhase, coffeeElapsed / 2300, orderedCoffee);
     player.userData.coffee = orderedCoffee;
     player.userData.coffeePreparing = coffeePhase === 'brewing' || coffeePhase === 'ready';

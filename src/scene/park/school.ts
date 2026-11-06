@@ -1,3 +1,4 @@
+import { createRabbitNpc } from '../avatar/rabbitNpc';
 import * as T from 'three';
 
 export const SCHOOL_SPOT = new T.Vector3(-19, 0, -4);
@@ -91,42 +92,14 @@ export function createSchool(scene: T.Scene) {
   }
   const hourHand = hand(0.29, 0.06),
     minuteHand = hand(0.43, 0.035);
-  const rabbit = new T.Group();
-  rabbit.name = 'school-rabbit-caretaker';
-  rabbit.position.copy(SCHOOL_NPC_SPOT);
-  scene.add(rabbit);
-  function oval(
-    x: number,
-    y: number,
-    z: number,
-    sx: number,
-    sy: number,
-    sz: number,
-    color: string,
-  ) {
-    const mesh = part(rabbit, new T.SphereGeometry(1, 16, 12), color, x, y, z);
-    mesh.scale.set(sx, sy, sz);
-    return mesh;
-  }
-  oval(0, 0.8, 0, 0.4, 0.5, 0.29, '#809b79');
-  oval(0, 1.48, 0.03, 0.48, 0.45, 0.36, '#f5e9d4');
-  for (const side of [-1, 1]) {
-    oval(side * 0.23, 2.03, 0, 0.14, 0.46, 0.13, '#f5e9d4').rotation.z = -side * 0.13;
-    oval(side * 0.23, 2.06, 0.11, 0.065, 0.3, 0.035, '#dbb1a0');
-    oval(side * 0.17, 1.54, 0.36, 0.045, 0.062, 0.025, '#414836');
-    oval(side * 0.3, 1.38, 0.32, 0.09, 0.045, 0.025, '#dfb09c');
-    oval(side * 0.21, 0.18, 0.1, 0.18, 0.16, 0.25, '#b39170');
-    oval(side * 0.39, 0.86, 0.09, 0.13, 0.28, 0.14, '#f5e9d4');
-  }
-  oval(0, 1.39, 0.4, 0.055, 0.04, 0.03, '#a77b67');
-  box(0, 0.82, 0.35, 0.48, 0.36, 0.12, '#be885c', rabbit);
-  box(0, 0.84, 0.42, 0.38, 0.24, 0.03, '#f3dfaf', rabbit);
+  const rabbit = createRabbitNpc(SCHOOL_NPC_SPOT);
+  scene.add(rabbit.sprite);
   const entranceLight = new T.PointLight('#ffe0a2', 0, 9, 1.8);
   entranceLight.position.set(SCHOOL_SPOT.x, 3, SCHOOL_SPOT.z + 3);
   scene.add(entranceLight);
   let lastMinute = -1;
   return {
-    update(time: number, player: T.Vector3) {
+    update(time: number) {
       const minute = Math.floor(Date.now() / 60000);
       if (minute !== lastMinute) {
         lastMinute = minute;
@@ -137,16 +110,10 @@ export function createSchool(scene: T.Scene) {
         hourHand.rotation.z =
           (-(((date.getUTCHours() + 9) % 12) + date.getUTCMinutes() / 60) * Math.PI) / 6;
       }
-      rabbit.position.y = Math.sin(time * 0.002) * 0.035;
-      const near = player.distanceTo(SCHOOL_NPC_SPOT) < 5;
-      const target = near
-        ? Math.atan2(player.x - rabbit.position.x, player.z - rabbit.position.z)
-        : 0.2;
-      rabbit.rotation.y +=
-        Math.atan2(Math.sin(target - rabbit.rotation.y), Math.cos(target - rabbit.rotation.y)) *
-        0.04;
+      rabbit.update(time);
     },
     dispose() {
+      rabbit.dispose();
       materials.forEach((m) => m.dispose());
     },
   };
