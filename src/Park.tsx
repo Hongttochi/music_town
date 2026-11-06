@@ -1,7 +1,7 @@
 import { NoticeBoardDialog } from './components/NoticeBoardDialog';
 import { createNoticeBoard, NOTICE_BOARD_SPOT, NOTICE_BOARD_REACH } from './noticeBoard';
 import { CoffeeOrderDialog } from './components/CoffeeOrderDialog';
-import { findCoffee, type CoffeeId } from './coffeeMenu';
+import { findCoffee, preloadCoffeeIcons, type CoffeeId } from './coffeeMenu';
 import { createCoffeeShop, COFFEE_SPOT, COFFEE_BUILDING } from './coffeeShop';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from './components/ui/Button';
@@ -50,6 +50,7 @@ export function Park(props: Props) {
   const [coffeeMenuOpen, setCoffeeMenuOpen] = useState(false);
   const useCoffee = useRef<(order?: CoffeeId) => void>(() => {});
   useEffect(() => {
+    void preloadCoffeeIcons();
     const el = canvas.current!;
     let renderer: T.WebGLRenderer;
     try {
@@ -1080,7 +1081,13 @@ export function Park(props: Props) {
           disabled={coffeeAction.endsWith('중…')}
           onClick={() => useCoffee.current()}
         >
-          <img src="/icons/coffee/americano.png" width={24} height={24} alt="" aria-hidden="true" />
+          <img
+            src={findCoffee('americano').icon}
+            width={24}
+            height={24}
+            alt=""
+            aria-hidden="true"
+          />
         </Button>
       )}
       {benchAction && !error && props.performing === null && (

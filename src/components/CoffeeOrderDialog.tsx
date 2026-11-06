@@ -44,7 +44,7 @@ export function CoffeeOrderDialog({
           >
             <img
               className="coffee-menu-icon"
-              src={`/icons/coffee/${drink.id}.png`}
+              src={drink.icon}
               width={44}
               height={44}
               alt=""
