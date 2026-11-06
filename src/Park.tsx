@@ -1,3 +1,4 @@
+import { createCampfire, CAMPFIRE_SPOT, CAMPFIRE_RADIUS } from './campfire';
 import { NoticeBoardDialog } from './components/NoticeBoardDialog';
 import { createNoticeBoard, NOTICE_BOARD_SPOT, NOTICE_BOARD_REACH } from './noticeBoard';
 import { CoffeeOrderDialog } from './components/CoffeeOrderDialog';
@@ -294,6 +295,8 @@ export function Park(props: Props) {
       riverStone(RIVER.left - 0.2, z);
       riverStone(RIVER.right + 0.2, z);
     }
+    const campfire = createCampfire(scene);
+    obstacles.push({ x: CAMPFIRE_SPOT.x, z: CAMPFIRE_SPOT.z, r: CAMPFIRE_RADIUS });
     const noticeBoard = createNoticeBoard(scene);
     obstacles.push({ x: NOTICE_BOARD_SPOT.x, z: NOTICE_BOARD_SPOT.z, r: 1.4 });
     let noticeShown = false;
@@ -959,7 +962,9 @@ export function Park(props: Props) {
               : 'hidden';
         } else benchBubble.current.style.visibility = 'hidden';
       }
-      const night = koreanHour() < 6 || koreanHour() >= 19;
+      const hour = koreanHour();
+      const night = hour < 6 || hour >= 19;
+      campfire.update(night, time, reducedMotion);
       hemi.intensity = night ? 0.85 : 2.5;
       hemi.color.set(night ? '#8eabed' : '#fff4db');
       hemi.groundColor.set(night ? '#293650' : '#8b9f63');
@@ -1016,6 +1021,7 @@ export function Park(props: Props) {
       useCoffee.current = () => {};
       coffeeShop.dispose();
       noticeBoard.dispose();
+      campfire.dispose();
       useBench.current = () => {};
       scenery.dispose();
       waterTexture.dispose();
