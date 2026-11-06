@@ -305,7 +305,7 @@ dialog.town-panel[data-panel='avatar'] .workshop-mirror {
 .character-workshop .part-tabs [aria-current='location'] {
   background: #dfe8ce;
   color: #3e5936;
-  box-shadow: inset 0 -2px #79915d;
+  box-shadow: none;
 }
 .workshop-section {
   padding-bottom: 22px;
