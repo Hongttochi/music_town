@@ -150,7 +150,7 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
       actor.sprite.material.rotation =
         drinking !== undefined
           ? -drinking * 0.035
-          : actor.group === player && moving
+          : (actor.group === player ? moving : actor.group.userData.walking === true)
             ? Math.sin(time / 130) * 0.045
             : 0;
     }

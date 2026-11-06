@@ -1,3 +1,4 @@
+import { remoteMovementStep } from './remoteMovement';
 import { useSoundEffects } from './useSoundEffects';
 import { createCampfire, CAMPFIRE_SPOT, CAMPFIRE_RADIUS } from './campfire';
 import { NoticeBoardDialog } from './components/NoticeBoardDialog';
@@ -671,7 +672,7 @@ export function Park(props: Props) {
     const focus = world(latest.current.position.current),
       target = new T.Vector3(),
       cameraFocusGoal = new T.Vector3();
-    const visitors = new Map<string, { group: T.Group; appearance: string }>();
+    const visitors = new Map<string, { group: T.Group; appearance: string; performing: boolean }>();
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let entranceReady = false,
       entranceStart: number | null = null;
@@ -715,23 +716,39 @@ export function Park(props: Props) {
         const appearance = JSON.stringify(person.avatar);
         let visitor = visitors.get(person.id);
         if (!visitor || visitor.appearance !== appearance) {
+          const previousPosition = visitor?.group.position.clone();
+          const previousRotation = visitor?.group.rotation.y;
+          const previousPerforming = visitor?.performing;
           if (visitor) scene.remove(visitor.group);
           const group = imageCharacters.create(person.avatar);
           group.userData.participantId = person.id;
-          group.position.copy(world(person));
+          group.position.copy(previousPosition ?? world(person));
+          group.rotation.y = previousRotation ?? 0;
           scene.add(group);
-          visitor = { group, appearance };
+          visitor = {
+            group,
+            appearance,
+            performing: previousPerforming ?? p.performerIds.includes(person.id),
+          };
           visitors.set(person.id, visitor);
         }
-        const destination = world(person),
-          delta = destination.clone().sub(visitor.group.position);
-        if (p.performerIds.includes(person.id)) visitor.group.rotation.y = 0;
-        else if (Math.hypot(delta.x, delta.z) > 0.02)
-          visitor.group.rotation.y = Math.atan2(delta.x, delta.z);
-        visitor.group.position.lerp(destination, 1 - Math.exp(-dt * 6));
+        const destination = world(person);
+        const deltaX = destination.x - visitor.group.position.x;
+        const deltaZ = destination.z - visitor.group.position.z;
+        const distance = Math.hypot(deltaX, deltaZ);
+        const performing = p.performerIds.includes(person.id);
+        const movement = remoteMovementStep(distance, dt, performing !== visitor.performing);
+        visitor.performing = performing;
+        if (performing) visitor.group.rotation.y = 0;
+        else if (movement.walking) visitor.group.rotation.y = Math.atan2(deltaX, deltaZ);
+        visitor.group.position.x += deltaX * movement.fraction;
+        visitor.group.position.z += deltaZ * movement.fraction;
         visitor.group.position.y = surfaceHeight(visitor.group.position);
+        visitor.group.userData.walking = movement.walking && !performing;
+        const arrived = distance * (1 - movement.fraction) < 0.02;
         visitor.group.userData.seated =
-          !p.performerIds.includes(person.id) &&
+          arrived &&
+          !performing &&
           benches.some((bench) => destination.distanceTo(seatPosition(bench)) < 0.1);
         if (visitor.group.userData.seated) visitor.group.rotation.y = 0;
       }
