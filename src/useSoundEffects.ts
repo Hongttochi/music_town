@@ -1,3 +1,4 @@
+import { resumeAudio } from './resumeAudio';
 import {
   createContext,
   createElement,
@@ -16,7 +17,24 @@ import click from './sounds/click.mp3';
 import ok from './sounds/ok.mp3';
 import cancel from './sounds/cancel.mp3';
 
-const sources = { clap, complete, heart, lightstick, click, ok, cancel };
+import coffeemachine from './sounds/coffeemachine.mp3';
+import coffeemachineEnd from './sounds/coffeemachine_end.mp3';
+import drink from './sounds/drink.mp3';
+import sitdown from './sounds/sitdown.mp3';
+
+const sources = {
+  clap,
+  complete,
+  heart,
+  lightstick,
+  click,
+  ok,
+  cancel,
+  coffeemachine,
+  coffeemachineEnd,
+  drink,
+  sitdown,
+};
 export type SoundEffect = keyof typeof sources;
 
 const preferenceKey = 'music-town-sound-effects';
@@ -31,7 +49,9 @@ export function useSoundSettings() {
   return useContext(SoundSettingsContext);
 }
 
-const SoundContext = createContext<(name: SoundEffect) => void>(() => {});
+const SoundContext = createContext<(name: SoundEffect, loop?: boolean) => () => void>(
+  () => () => {},
+);
 export function useSoundEffects() {
   return useContext(SoundContext);
 }
@@ -105,7 +125,7 @@ export function SoundEffectsProvider({ children }: { children: ReactNode }) {
     }
     const audio = engine.current;
     // Resume within the tap/key event so mobile browsers permit later completion sounds.
-    if (audio.context.state === 'suspended') void audio.context.resume().catch(() => {});
+    void resumeAudio(audio.context);
     for (const name of Object.keys(sources) as SoundEffect[]) {
       if (audio.buffers.has(name)) continue;
       const buffer = fetch(sources[name])
@@ -129,9 +149,19 @@ export function SoundEffectsProvider({ children }: { children: ReactNode }) {
         // Sound support must never block park controls.
       }
     };
+    const restore = () => {
+      if (!document.hidden && enabledRef.current && engine.current)
+        void resumeAudio(engine.current.context);
+    };
+    document.addEventListener('visibilitychange', restore);
+    window.addEventListener('pageshow', restore);
+    window.addEventListener('focus', restore);
     window.addEventListener('pointerdown', unlock);
     window.addEventListener('keydown', unlock);
     return () => {
+      document.removeEventListener('visibilitychange', restore);
+      window.removeEventListener('pageshow', restore);
+      window.removeEventListener('focus', restore);
       window.removeEventListener('pointerdown', unlock);
       window.removeEventListener('keydown', unlock);
       const audio = engine.current;
@@ -141,15 +171,17 @@ export function SoundEffectsProvider({ children }: { children: ReactNode }) {
   }, [prepare]);
 
   const play = useCallback(
-    (name: SoundEffect) => {
-      if (!enabledRef.current) return;
+    (name: SoundEffect, loop = false) => {
+      if (!enabledRef.current) return () => {};
+      let canceled = false;
+      let playing: AudioBufferSourceNode | null = null;
       const version = playbackVersion.current;
       try {
         const audio = prepare();
-        void audio.buffers
-          .get(name)!
-          .then((buffer) => {
+        void Promise.all([audio.buffers.get(name)!, resumeAudio(audio.context)])
+          .then(([buffer]) => {
             if (
+              canceled ||
               !enabledRef.current ||
               version !== playbackVersion.current ||
               engine.current !== audio ||
@@ -163,6 +195,8 @@ export function SoundEffectsProvider({ children }: { children: ReactNode }) {
             const gain = audio.context.createGain();
             gain.gain.value = 0.55;
             source.buffer = buffer;
+            source.loop = loop;
+            playing = source;
             source.connect(gain).connect(audio.master);
             audio.active.set(name, source);
             source.onended = () => {
@@ -176,6 +210,10 @@ export function SoundEffectsProvider({ children }: { children: ReactNode }) {
       } catch {
         // An unavailable audio device should not interrupt the action.
       }
+      return () => {
+        canceled = true;
+        playing?.stop();
+      };
     },
     [prepare],
   );

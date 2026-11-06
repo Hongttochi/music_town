@@ -1,3 +1,6 @@
+import { CAMPFIRE_SPOT } from './campfire';
+import fire from './sounds/fire.mp3';
+import { resumeAudio } from './resumeAudio';
 import { useEffect, useRef, type MutableRefObject } from 'react';
 import { useSoundSettings } from './useSoundEffects';
 import { koreanHour } from './model';
@@ -17,7 +20,7 @@ export function useAmbientAudio(
   settings.current = { enabled, volume, entered, quiet };
   useEffect(() => {
     const context = new AudioContext();
-    const tracks = [morning, night, river].map((url) => {
+    const tracks = [morning, night, river, fire].map((url) => {
       const audio = new Audio(url);
       audio.loop = true;
       audio.preload = 'auto';
@@ -32,7 +35,7 @@ export function useAmbientAudio(
     let disposed = false;
     const start = () => {
       if (disposed || document.hidden) return;
-      if (context.state === 'suspended') void context.resume().catch(() => {});
+      void resumeAudio(context);
       // Invoke play directly in the gesture for Safari's autoplay policy.
       for (const { audio } of tracks) {
         if (audio.paused) void audio.play().catch(() => {});
@@ -56,10 +59,16 @@ export function useAmbientAudio(
       const distance = Math.max(RIVER.left - x, x - RIVER.right, 0);
       const proximity = Math.max(0, 1 - distance / 7);
       const mix = proximity * proximity * (3 - 2 * proximity);
+      const z = (position.current.y - 450) / 25;
+      const fireProximity = Math.max(
+        0,
+        1 - Math.hypot(x - CAMPFIRE_SPOT.x, z - CAMPFIRE_SPOT.z) / 7,
+      );
       const targets = [
         isNight ? 0 : master * (1 - mix * 0.65),
         isNight ? master * (1 - mix * 0.65) : 0,
         master * mix,
+        isNight ? master * fireProximity * fireProximity : 0,
       ];
       tracks.forEach(({ gain }, i) => {
         // Smooth changes over roughly a second, including sliders and day/night changes.
@@ -70,6 +79,8 @@ export function useAmbientAudio(
     window.addEventListener('pointerdown', unlock);
     window.addEventListener('keydown', unlock);
     document.addEventListener('visibilitychange', visibility);
+    window.addEventListener('pageshow', visibility);
+    window.addEventListener('focus', visibility);
     const timer = window.setInterval(update, 150);
     return () => {
       disposed = true;
@@ -77,6 +88,8 @@ export function useAmbientAudio(
       window.removeEventListener('pointerdown', unlock);
       window.removeEventListener('keydown', unlock);
       document.removeEventListener('visibilitychange', visibility);
+      window.removeEventListener('pageshow', visibility);
+      window.removeEventListener('focus', visibility);
       tracks.forEach(({ audio, gain }) => {
         audio.pause();
         gain.disconnect();

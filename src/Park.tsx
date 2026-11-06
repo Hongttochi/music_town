@@ -1,3 +1,4 @@
+import { useSoundEffects } from './useSoundEffects';
 import { createCampfire, CAMPFIRE_SPOT, CAMPFIRE_RADIUS } from './campfire';
 import { NoticeBoardDialog } from './components/NoticeBoardDialog';
 import { createNoticeBoard, NOTICE_BOARD_SPOT, NOTICE_BOARD_REACH } from './noticeBoard';
@@ -36,6 +37,9 @@ const world = (p: Position) => new T.Vector3((p.x - 700) / 25, 0, (p.y - 450) / 
 const STAGE_RADIUS = 2.2;
 const STAGE_SURFACE_HEIGHT = 0.24;
 export function Park(props: Props) {
+  const playSound = useSoundEffects();
+  const sound = useRef(playSound);
+  sound.current = playSound;
   const canvas = useRef<HTMLCanvasElement>(null),
     latest = useRef(props);
   latest.current = props;
@@ -307,7 +311,9 @@ export function Park(props: Props) {
     let orderedCoffee: CoffeeId = 'americano';
     let coffeeStarted = 0;
     let coffeeShown: string | null = null;
+    let stopCoffeeSound = () => {};
     const resetCoffee = () => {
+      stopCoffeeSound();
       coffeePhase = 'idle';
     };
     useCoffee.current = (order) => {
@@ -333,8 +339,12 @@ export function Park(props: Props) {
         p.motion.current = { x: 0, y: 0 };
         p.onMove({ ...p.position.current });
         coffeePhase = 'brewing';
-      } else if (coffeePhase === 'ready') coffeePhase = 'drinking';
-      else return;
+        stopCoffeeSound = sound.current('coffeemachine', true);
+      } else if (coffeePhase === 'ready') {
+        coffeePhase = 'drinking';
+        stopCoffeeSound();
+        stopCoffeeSound = sound.current('drink');
+      } else return;
       coffeeStarted = performance.now();
     };
     obstacles.push({ x: COFFEE_BUILDING.x, z: COFFEE_BUILDING.z, r: 2.5 });
@@ -440,6 +450,7 @@ export function Park(props: Props) {
       if (seatedBench) return;
       if (nearbyBench && world(p.position.current).distanceTo(nearbyBench) < 2.5) {
         seatedBench = nearbyBench;
+        sound.current('sitdown');
         standingPosition = { ...p.position.current };
         const seat = seatPosition(seatedBench);
         p.position.current = { x: seat.x * 25 + 700, y: seat.z * 25 + 450 };
@@ -759,8 +770,11 @@ export function Park(props: Props) {
         coffeePhase === 'brewing' &&
         coffeeElapsed >= 2300 &&
         imageCharacters.drinkingReady(player, orderedCoffee)
-      )
+      ) {
         coffeePhase = 'ready';
+        stopCoffeeSound();
+        stopCoffeeSound = sound.current('coffeemachineEnd');
+      }
       if (coffeePhase === 'drinking' && coffeeElapsed >= 3600) resetCoffee();
       coffeeShop.update(coffeePhase, coffeeElapsed / 2300, orderedCoffee);
       player.userData.coffee = orderedCoffee;
@@ -1018,6 +1032,7 @@ export function Park(props: Props) {
     }
     frame = requestAnimationFrame(animate);
     return () => {
+      stopCoffeeSound();
       useCoffee.current = () => {};
       coffeeShop.dispose();
       noticeBoard.dispose();
