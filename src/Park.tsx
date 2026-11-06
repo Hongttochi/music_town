@@ -1044,7 +1044,6 @@ export function Park(props: Props) {
             alt=""
             aria-hidden="true"
           />
-          <span>{coffeeAction}</span>
         </Button>
       )}
       {benchAction && !error && props.performing === null && (
