@@ -1,0 +1,123 @@
+.fan-profile {
+  margin: 16px 0;
+}
+.fan-counts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 0 0 10px;
+}
+.fan-counts > div {
+  background: #f0f2e5;
+  border-radius: 14px;
+  padding: 14px;
+  text-align: center;
+}
+.fan-counts dt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #748064;
+  font-size: 12px;
+}
+.fan-counts dd {
+  margin: 6px 0 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #43583a;
+}
+.fan-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.fan-actions > button {
+  flex: 1;
+  border-radius: 10px;
+}
+.fan-actions [aria-pressed='true'] {
+  background: #e0e9cd;
+}
+.fan-profile small {
+  display: block;
+  font-size: 11px;
+  color: #79816e;
+}
+.fan-profile p {
+  font-size: 12px;
+  color: #9c564b;
+}
+.followed-profiles {
+  display: grid;
+  gap: 8px;
+}
+.followed-profiles > button {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  border-radius: 10px;
+}
+.followed-profiles small {
+  color: #79816e;
+}
+.activity-stats {
+  margin-top: 18px;
+}
+.activity-stats .fan-counts dd {
+  font-size: 16px;
+}
+.activity-stats h3 {
+  font-size: 14px;
+  margin: 16px 0 8px;
+}
+.activity-legend {
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  color: #799667;
+}
+.activity-legend span:last-child {
+  color: #cb9661;
+}
+.activity-chart {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 12px;
+}
+.activity-chart > .town-button {
+  padding: 5px 3px;
+  display: flex;
+  flex-direction: column;
+  font-size: 10px;
+  border-radius: 8px;
+  gap: 6px;
+}
+.activity-chart [aria-pressed='true'] {
+  background: #edf0df;
+}
+.activity-bars {
+  height: 90px;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+  border-bottom: 1px solid #d7dcc9;
+}
+.activity-bars i {
+  display: block;
+  width: 12px;
+  max-width: 38%;
+  background: #799667;
+  border-radius: 4px 4px 0 0;
+}
+.activity-bars i:last-child {
+  background: #cb9661;
+}
+.fan-profile .activity-detail {
+  color: #647357;
+  font-size: 11px;
+  min-height: 18px;
+}

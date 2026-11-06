@@ -6,7 +6,9 @@ import './participant-profile.css';
 export function ParticipantProfile({
   person,
   onReport,
+  fanStats,
 }: {
+  fanStats?: React.ReactNode;
   person: Participant;
   onReport: () => void;
 }) {
@@ -19,6 +21,7 @@ export function ParticipantProfile({
           <h3>{person.avatar.name}</h3>
         </div>
       </div>
+      {fanStats}
       <p className="participant-bio">{person.bio || '아직 자기소개가 없어요.'}</p>
       {person.role === 'musician' && (
         <div className="participant-socials">

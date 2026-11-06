@@ -256,3 +256,74 @@
 .clothing-catalog .modular-portrait {
   pointer-events: none;
 }
+
+/* One scroll surface for all categories; option grids never clip their own contents. */
+dialog.town-panel[data-panel='avatar'] {
+  overflow: hidden;
+}
+dialog.town-panel[data-panel='avatar'] .character-workshop {
+  height: min(640px, calc(100dvh - 120px));
+  min-height: 0;
+  overflow: hidden;
+  align-items: start;
+}
+dialog.town-panel[data-panel='avatar'] .workshop-desk {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: block;
+  overscroll-behavior: contain;
+  padding: 0 6px 8px 0;
+}
+dialog.town-panel[data-panel='avatar'] .workshop-mirror {
+  height: 100%;
+  min-height: 0;
+}
+.character-workshop .workshop-desk .part-catalog {
+  max-height: none;
+  overflow: visible;
+  overscroll-behavior: auto;
+}
+.character-workshop .workshop-desk .part-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  overflow: visible;
+  background: #fff9e9;
+  padding: 8px 0;
+  gap: 3px;
+  margin-bottom: 12px;
+}
+.character-workshop .part-tabs .town-button {
+  min-width: 0;
+  padding: 8px 3px;
+  font-size: 11px;
+}
+.character-workshop .part-tabs [aria-current='location'] {
+  background: #dfe8ce;
+  color: #3e5936;
+  box-shadow: inset 0 -2px #79915d;
+}
+.workshop-section {
+  padding-bottom: 22px;
+  border-bottom: 1px solid #dde3cf;
+  margin-bottom: 16px;
+}
+.workshop-section:last-child {
+  min-height: 220px;
+}
+@media (max-width: 649px) {
+  dialog.town-panel[data-panel='avatar'] .character-workshop {
+    grid-template-columns: minmax(80px, 28%) minmax(0, 1fr);
+    gap: 10px;
+  }
+  .character-workshop .workshop-desk .part-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .character-workshop .workshop-desk .part-catalog {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

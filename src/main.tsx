@@ -1,3 +1,5 @@
+import { FanProfile, FollowedProfiles } from './components/FanProfile';
+import { fanAction } from './useFanStats';
 import { useAmbientAudio } from './useAmbientAudio';
 import { ProfileIcon } from './components/ProfileIcon';
 import { DeviceGuide } from './components/DeviceGuide';
@@ -40,7 +42,6 @@ import {
   MapPin,
   Mic,
   Hand,
-  ArrowRight,
   X,
 } from 'lucide-react';
 import { Park, Position } from './Park';
@@ -91,7 +92,6 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
   const [selectedStage, setSelected] = useState<Stage>(demoStages[0]);
   const [channel, setChannel] = useState(0);
   const [near, setNear] = useState<Stage | null>(null);
-  const [follow, setFollow] = useState<number[]>(() => readSaved(storagePrefix + '-follow', []));
   const [muted, setMuted] = useState<number[]>([]);
   const playSound = useSoundEffects();
   const [toast, setToast] = useState('');
@@ -132,9 +132,6 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
   useEffect(() => {
     localStorage.setItem(storagePrefix + '-avatar', JSON.stringify(avatar));
   }, [avatar]);
-  useEffect(() => {
-    localStorage.setItem(storagePrefix + '-follow', JSON.stringify(follow));
-  }, [follow]);
   const town = useTown(account.id, !account.demo, position);
   const currentPerformance =
     town.performance && Date.parse(town.performance.ends_at) > now.getTime()
@@ -272,11 +269,6 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
     } catch (error) {
       setActionError((error as Error).message);
     }
-  };
-  const followArtist = () => {
-    const has = follow.includes(selected.id);
-    setFollow(has ? follow.filter((id) => id !== selected.id) : [...follow, selected.id]);
-    notify(has ? '팔로우를 취소했어요.' : '팔로우했어요. 공연 알림은 서비스 연결 후 제공돼요.');
   };
   const title = (_eyebrow: string, name: string) => (
     <PanelHeading title={name} onClose={entered ? () => setPanel(null) : undefined} />
@@ -562,6 +554,16 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
                       onClick={() => {
                         setReaction({ symbol: r.s, at: Date.now() });
                         playSound(r.sound as SoundEffect);
+                        if (
+                          r.s === '♡' &&
+                          !account.demo &&
+                          audiblePerformance &&
+                          audiblePerformance.user_id !== account.id
+                        ) {
+                          void fanAction(audiblePerformance.user_id, 'heart', true).catch((error) =>
+                            notify(error.message),
+                          );
+                        }
                       }}
                     >
                       {r.icon}
@@ -694,6 +696,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
           <>
             {title('', '\uB0B4 \uD504\uB85C\uD544')}
             <AccountPanel
+              fanStats={<FanProfile userId={account.id} own demo={account.demo} />}
               avatar={avatar}
               onCustomize={() => setPanel('avatar')}
               profile={memberProfile}
@@ -756,7 +759,7 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
               </Button>
               <Button variant="ghost" onClick={() => setPanel('following')}>
                 <Flaticon name="terms-3d" size={16} />
-                팔로우한 뮤지션
+                팔로우한 사람들
               </Button>
               <div className="settings-policy-links">
                 <a href="/terms/" target="_blank" rel="noopener noreferrer">
@@ -837,10 +840,12 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
               </div>
             </div>
             {selected.bio && <p className="modal-sub">{selected.bio}</p>}
+            <FanProfile
+              userId={selectedMusician?.id}
+              own={selectedMusician?.id === account.id}
+              demo={account.demo}
+            />
             <div className="profile-stats">
-              <div>
-                <strong>{selected.followers + (follow.includes(selected.id) ? 1 : 0)}</strong>팔로워
-              </div>
               <div>
                 <strong>{selected.listeners}</strong>관람 중
               </div>
@@ -856,9 +861,6 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
               ) : null}
             </div>
             <div className="actions musician-primary-actions">
-              <Button variant="primary" className="primary" onClick={followArtist}>
-                {follow.includes(selected.id) ? '✓ 팔로잉' : '♡ 팔로우'}
-              </Button>
               <Button
                 variant="secondary"
                 className="secondary"
@@ -921,29 +923,13 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
         {panel === 'following' && (
           <>
             {title('YOUR FAVORITE VOICES', '다시 만나고 싶은 목소리')}
-            {follow.length ? (
-              follow.map((id) => (
-                <Button
-                  variant="choice"
-                  className="channel-row"
-                  key={id}
-                  onClick={() => openStage(stages[id])}
-                >
-                  <Flaticon name="music" size={25} />
-                  <span className="channel-detail">
-                    {stages[id].artist}
-                    <small>{stages[id].name} · 공연 중</small>
-                  </span>
-                  <ArrowRight size={16} />
-                </Button>
-              ))
-            ) : (
-              <div className="text-center py-9 text-[#8c9b7d]">
-                <Flaticon name="heart" size={36} className="mx-auto mb-4" />
-                <p className="text-sm">아직 팔로우한 뮤지션이 없어요.</p>
-                <p className="text-xs mt-2">마음에 드는 무대에서 팔로우를 눌러보세요.</p>
-              </div>
-            )}
+            <FollowedProfiles
+              demo={account.demo}
+              onSelect={(person) => {
+                setSelectedPerson(person);
+                setPanel('participant');
+              }}
+            />
             <div className="notice">
               공연 시작 푸시는 아직 연결되지 않았어요. 출시 버전에서는 알림 동의 후 받을 수 있으며,
               iPhone은 홈 화면 추가가 필요해요.
@@ -953,7 +939,17 @@ function App({ account, initial }: { account: Account; initial: SavedProfile | n
         {panel === 'participant' && selectedPerson && (
           <>
             {title('', '프로필')}
-            <ParticipantProfile person={selectedPerson} onReport={() => setPanel('report')} />
+            <ParticipantProfile
+              person={selectedPerson}
+              onReport={() => setPanel('report')}
+              fanStats={
+                <FanProfile
+                  userId={selectedPerson.id}
+                  own={selectedPerson.id === account.id}
+                  demo={account.demo}
+                />
+              }
+            />
           </>
         )}
         {panel === 'report' && selectedPerson && (

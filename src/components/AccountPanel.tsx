@@ -13,7 +13,9 @@ export function AccountPanel({
   profile,
   onEditProfile,
   onChooseIcon,
+  fanStats,
 }: {
+  fanStats?: React.ReactNode;
   avatar: Avatar;
   onCustomize: () => void;
   profile: MemberProfile;
@@ -45,6 +47,7 @@ export function AccountPanel({
           <strong>{avatar.name}</strong>
         </div>
       </div>
+      {fanStats}
       <section
         id={badgePickerId}
         className="account-section account-badge-picker"
