@@ -275,3 +275,28 @@
     transition: none;
   }
 }
+
+/* Compact segmented control replaces the underlined chart tabs. */
+.activity-stats .activity-metrics {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid #e1e5d7;
+  border-radius: 10px;
+  background: #f0f2e9;
+}
+.activity-stats .activity-expanded .activity-metrics > .town-button {
+  min-height: 28px;
+  min-width: 48px;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  box-shadow: none;
+  color: #8a9380;
+}
+.activity-stats .activity-expanded .activity-metrics > .town-button[aria-pressed='true'] {
+  color: #536347;
+  background: #fffdf6;
+  box-shadow: 0 1px 3px #42533112;
+}

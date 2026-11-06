@@ -79,7 +79,7 @@ export function AccountPanel({
           ))}
         </div>
       </section>
-      <section className="account-section">
+      <section className="account-section account-bio-section">
         <h3>자기소개</h3>
         <p className={`account-bio ${profile.bio ? '' : 'is-empty'}`}>
           {profile.bio || '아직 소개가 없어요. 나의 이야기를 들려주세요.'}

@@ -306,3 +306,15 @@ dialog.town-panel[data-panel='account'] {
     min-height: 40px;
   }
 }
+
+/* Share the statistics row height, including every frame of its expansion. */
+.account-panel .account-bio-section {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  min-width: 0;
+}
+.account-panel .account-bio-section .account-bio {
+  flex: 1;
+  margin: 0;
+}
