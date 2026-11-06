@@ -16,7 +16,8 @@
   min-width: 0;
   max-width: 100%;
 }
-.profile-social-links a {
+.profile-social-links a,
+.profile-social-links .profile-social-add {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -56,4 +57,11 @@
 }
 .account-name .profile-name-line > strong {
   overflow-wrap: anywhere;
+}
+
+.profile-social-links .profile-social-add {
+  background: transparent;
+  border: 0;
+  padding: 2px 0;
+  box-shadow: none;
 }

@@ -4,6 +4,22 @@ import * as T from 'three';
 const COFFEE_SHOP_OFFSET = new T.Vector3(-1, 0, -6);
 export const COFFEE_BUILDING = new T.Vector3(-5, 0, -8).add(COFFEE_SHOP_OFFSET);
 export const COFFEE_SPOT = new T.Vector3(-2.3, 0, -4.5).add(COFFEE_SHOP_OFFSET);
+// Include the dispensing tray and clearance for the camera-facing character sprite.
+export const COFFEE_MACHINE_BOUNDS = {
+  left: COFFEE_SPOT.x - 0.7,
+  right: COFFEE_SPOT.x + 0.7,
+  back: COFFEE_SPOT.z - 2,
+  front: COFFEE_SPOT.z + 0.35,
+};
+export function overlapsCoffeeMachine(point: { x: number; z: number }, radius: number) {
+  const bounds = COFFEE_MACHINE_BOUNDS;
+  return (
+    point.x + radius > bounds.left &&
+    point.x - radius < bounds.right &&
+    point.z + radius > bounds.back &&
+    point.z - radius < bounds.front
+  );
+}
 /** Small walk-up café; the machine faces the open central path. */
 export function createCoffeeShop(scene: T.Scene) {
   const group = new T.Group();

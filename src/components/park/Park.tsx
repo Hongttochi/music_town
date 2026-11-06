@@ -41,7 +41,7 @@ export function Park(props: ParkProps) {
           title="마을 게시판"
           onClick={() => setNoticeBoardOpen(true)}
         >
-          <Flaticon name="blackboard" size={28} />
+          <Flaticon name="blackboard" size={24} />
         </Button>
       )}
       {coffeeMenuOpen && (
@@ -81,7 +81,7 @@ export function Park(props: ParkProps) {
           title="앉기"
           onClick={() => useBench.current()}
         >
-          <Flaticon name="bench" size={32} />
+          <Flaticon name="bench" size={24} />
         </Button>
       )}
       <span

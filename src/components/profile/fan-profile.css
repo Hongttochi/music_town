@@ -5,7 +5,7 @@
 .fan-counts {
   display: flex;
   flex-wrap: wrap;
-  gap: 22px;
+  gap: 16px;
   margin: 0 0 14px;
 }
 .fan-counts > div {
@@ -15,7 +15,7 @@
   gap: 6px;
 }
 .fan-counts dt {
-  font-size: 12px;
+  font-size: 11px;
   color: #7a8272;
 }
 .fan-counts dd {
@@ -23,8 +23,8 @@
   align-items: center;
   gap: 5px;
   margin: 0;
-  font-size: 16px;
-  font-weight: 650;
+  font-size: 14px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 .fan-actions {
@@ -253,6 +253,8 @@
 }
 
 .fan-counts dd img {
+  width: 20px;
+  height: 20px;
   flex: none;
   object-fit: contain;
 }

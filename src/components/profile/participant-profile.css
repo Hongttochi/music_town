@@ -142,11 +142,11 @@ dialog.profile-dialog[data-panel='participant'] > .profile-sheet {
   font-size: 11px;
 }
 .participant-profile .fan-counts dd {
-  font-size: 16px;
+  font-size: 14px;
 }
 .participant-profile .fan-counts img {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
 }
 .participant-profile .fan-actions {
   margin-bottom: 12px;

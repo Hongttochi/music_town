@@ -299,12 +299,12 @@ dialog.town-panel:is([data-panel='profile'], [data-panel='report']) {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 50px;
-  height: 48px;
-  min-height: 44px;
-  padding: 8px;
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 4px;
   border: 2px solid #fff8dc;
-  border-radius: 17px;
+  border-radius: 12px;
   background: #fff9e9f2;
   color: #385c49;
   box-shadow: 0 3px 12px #26351b20;
@@ -312,10 +312,10 @@ dialog.town-panel:is([data-panel='profile'], [data-panel='report']) {
 .bench-action::after {
   content: '';
   position: absolute;
-  bottom: -7px;
-  left: 13px;
-  width: 12px;
-  height: 12px;
+  bottom: -5px;
+  left: 12px;
+  width: 8px;
+  height: 8px;
   transform: rotate(45deg);
   background: #fff9e9;
   border-right: 2px solid #fff8dc;
@@ -408,19 +408,6 @@ dialog.delete-account-dialog {
   background: #a43b35;
 }
 
-.coffee-action.town-button {
-  width: 36px;
-  height: 36px;
-  min-height: 36px;
-  padding: 4px;
-  border-radius: 12px;
-}
-.coffee-action::after {
-  width: 8px;
-  height: 8px;
-  bottom: -5px;
-  left: 12px;
-}
 .coffee-action.town-button:disabled {
   opacity: 1;
   cursor: wait;

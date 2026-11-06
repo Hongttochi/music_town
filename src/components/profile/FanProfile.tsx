@@ -22,14 +22,14 @@ export function FanProfile({
         <div>
           <dt>팔로워</dt>
           <dd>
-            <img src="/icons/profile-followers.png" width={26} height={26} alt="" />
+            <img src="/icons/profile-followers.png" width={20} height={20} alt="" />
             <span>{stats ? stats.followers.toLocaleString('ko-KR') : '—'}</span>
           </dd>
         </div>
         <div>
           <dt>받은 하트</dt>
           <dd>
-            <img src="/icons/profile-received-heart.png" width={26} height={26} alt="" />
+            <img src="/icons/profile-received-heart.png" width={20} height={20} alt="" />
             <span>{stats ? stats.hearts.toLocaleString('ko-KR') : '—'}</span>
           </dd>
         </div>

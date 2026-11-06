@@ -338,8 +338,51 @@ dialog.town-panel[data-panel='registration'] {
 }
 
 .registration-fields .registration-bio textarea {
-  background: repeating-linear-gradient(transparent 0 27px, #dcd5bd35 27px 28px), #faf6eb;
-  background-position: 0 10px;
-  border-color: #e5deca;
-  line-height: 28px;
+  background: #fffef9;
+  border-color: #dce2d3;
+  line-height: 1.6;
+}
+
+/* Compact controls override the generic touch minimum without changing text zoom. */
+dialog.town-panel[data-panel='registration'] {
+  padding: 16px 18px;
+}
+dialog.town-panel[data-panel='registration'] .registration-form {
+  gap: 12px;
+}
+.registration-fields {
+  gap: 16px;
+}
+.registration-bio,
+.registration-social {
+  gap: 6px;
+}
+.registration-social label:not(:first-child) {
+  margin-top: 4px;
+}
+dialog.town-panel .registration-fields input {
+  height: 36px;
+  min-height: 36px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  line-height: 1.4;
+}
+dialog.town-panel .registration-fields textarea {
+  min-height: 96px;
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+dialog.town-panel[data-panel='registration'] .registration-actions {
+  gap: 8px;
+  padding-top: 10px;
+}
+dialog.town-panel[data-panel='registration'] .registration-actions > .town-button {
+  min-height: 36px;
+  height: 36px;
+  padding: 6px 12px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  box-shadow: none;
 }

@@ -3,9 +3,11 @@ import './profile-social-links.css';
 export function ProfileSocialLinks({
   instagram,
   soundcloud,
+  onEditMissing,
 }: {
   instagram?: string;
   soundcloud?: string;
+  onEditMissing?: () => void;
 }) {
   const links = (
     [
@@ -29,9 +31,23 @@ export function ProfileSocialLinks({
       return [];
     }
   });
-  if (!links.length) return null;
+  if (!links.length && !onEditMissing) return null;
   return (
     <div className="profile-social-links" aria-label="뮤지션 소셜 링크">
+      {onEditMissing &&
+        (
+          [
+            ['instagram', '인스타 등록', instagram],
+            ['soundcloud', '사클 등록', soundcloud],
+          ] as const
+        )
+          .filter(([, , value]) => !value)
+          .map(([kind, label]) => (
+            <button key={kind} type="button" className="profile-social-add" onClick={onEditMissing}>
+              <img src={`/icons/brands/${kind}.svg`} width={16} height={16} alt="" />
+              {label}
+            </button>
+          ))}
       {links.map(({ kind, label, href, address }) => (
         <a
           key={kind}

@@ -32,7 +32,6 @@ export function CoffeeOrderDialog({
       <div id={title}>
         <PanelHeading title="어떤 커피 마실까요?" onClose={onClose} />
       </div>
-      <p className="coffee-order-intro">공원에서 즐기는 무료 커피 한 잔</p>
       <div className="coffee-menu" role="group" aria-label="커피 메뉴">
         {coffeeMenu.map((drink) => (
           <Button
@@ -45,8 +44,8 @@ export function CoffeeOrderDialog({
             <img
               className="coffee-menu-icon"
               src={drink.icon}
-              width={44}
-              height={44}
+              width={36}
+              height={36}
               alt=""
               aria-hidden="true"
             />

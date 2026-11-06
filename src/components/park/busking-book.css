@@ -38,6 +38,9 @@ dialog.town-panel[data-panel='queue'] {
   justify-content: center;
 }
 .book-guide {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   background: linear-gradient(90deg, #eee7d3, #fffdf3 8%);
 }
 .book-kicker {
@@ -63,43 +66,27 @@ dialog.town-panel[data-panel='queue'] {
   color: #646d58;
   margin: 0;
 }
-.book-guide ol {
-  list-style: none;
-  padding: 0;
-  margin: 20px 0;
-}
-.book-guide li {
-  display: flex;
-  gap: 12px;
-  margin: 0 0 18px;
-  align-items: baseline;
-}
-.book-guide li > span {
-  font-size: 12px;
-  color: #927c50;
-  font-variant-numeric: tabular-nums;
-}
-.book-guide li p {
-  font-size: 13px;
-  line-height: 1.8;
-  color: #505c44;
-  margin: 0;
-}
-.book-guide li small {
-  display: block;
-  font-size: 12px;
-  color: #717866;
-}
-.book-demo-note {
+.book-summary {
   font-size: 12px;
   line-height: 1.7;
+  color: #505c44;
+  margin: 0 0 8px;
+}
+.book-demo-note {
+  font-size: 11px;
+  line-height: 1.6;
   color: #717568;
   margin: 0 0 12px;
 }
-.book-join {
+.busking-book .book-guide .town-button.book-join {
   width: 100%;
-  font-size: 12px;
+  height: auto;
   min-height: 36px;
+  padding: 7px 14px;
+  border-radius: 14px;
+  font-size: 12px;
+  line-height: 1.4;
+  box-shadow: none;
 }
 @media (max-width: 540px) {
   .busking-book {
@@ -119,22 +106,10 @@ dialog.town-panel[data-panel='queue'] {
     height: 100px;
     margin: 4px 0;
   }
-  .book-guide ol {
-    margin: 14px 0;
-  }
-  .book-guide li {
-    margin-bottom: 12px;
-  }
 }
 @media (min-width: 541px) and (max-height: 500px) {
   .book-page {
     padding: 18px 20px;
-  }
-  .book-guide li {
-    margin-bottom: 10px;
-  }
-  .book-guide ol {
-    margin: 12px 0;
   }
   .book-illustration {
     height: 125px;

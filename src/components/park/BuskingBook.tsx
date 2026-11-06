@@ -41,35 +41,14 @@ export function BuskingBook({
         <p>{stage.artist ? `${stage.artist} 공연 중` : '지금 비어 있는 자리예요'}</p>
       </section>
       <section className="book-page book-guide">
-        <h3>무대에 오르기 전에</h3>
-        <ol>
-          <li>
-            <span>01</span>
-            <p>
-              대기 중에도 같은 채널에서
-              <br />
-              자유롭게 산책해요.
-            </p>
-          </li>
-          <li>
-            <span>02</span>
-            <p>
-              내 차례가 오면 무대로 이동해요.
-              {stage.artist && <small>신청 순서대로 입장해요. 공연은 한 번에 5분이에요.</small>}
-            </p>
-          </li>
-          <li>
-            <span>03</span>
-            <p>
-              채널을 옮기거나 접속을 종료하면
-              <br />
-              대기가 취소돼요.
-            </p>
-          </li>
-        </ol>
+        <h3>한 번에 5분, 자유롭게 공연해요</h3>
+        <p className="book-summary">
+          {stage.artist ? '내 차례가 되면 무대로 이동해요.' : '마이크를 켜고 공연을 시작해 보세요.'}
+        </p>
         <p className="book-demo-note">
-          내 차례가 되면 마이크 권한을 요청해요. 허용하면 가까운 관객에게 목소리가 전달돼요. 이어폰
-          사용을 권장해요.
+          {stage.artist
+            ? '채널을 옮기거나 나가면 대기가 취소돼요.'
+            : '마이크 접근 권한이 필요해요.'}
         </p>
         <Button
           variant="primary"

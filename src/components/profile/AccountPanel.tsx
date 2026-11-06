@@ -48,7 +48,11 @@ export function AccountPanel({
           <div className="profile-name-line">
             <strong>{avatar.name}</strong>
             {profile.role === 'musician' && (
-              <ProfileSocialLinks instagram={profile.instagram} soundcloud={profile.soundcloud} />
+              <ProfileSocialLinks
+                instagram={profile.instagram}
+                soundcloud={profile.soundcloud}
+                onEditMissing={onEditProfile}
+              />
             )}
           </div>
         </div>

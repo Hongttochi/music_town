@@ -4,7 +4,12 @@ import type { useSoundEffects } from '../../hooks/useSoundEffects';
 import { createCampfire, CAMPFIRE_SPOT, CAMPFIRE_RADIUS } from './campfire';
 import { createNoticeBoard, NOTICE_BOARD_SPOT, NOTICE_BOARD_REACH } from './noticeBoard';
 import { findCoffee, preloadCoffeeIcons, type CoffeeId } from '../../data/coffeeMenu';
-import { createCoffeeShop, COFFEE_SPOT, COFFEE_BUILDING } from './coffeeShop';
+import {
+  createCoffeeShop,
+  COFFEE_SPOT,
+  COFFEE_BUILDING,
+  overlapsCoffeeMachine,
+} from './coffeeShop';
 import { BRIDGE, PLAYER_RADIUS, RIVER, canCrossRiver, isOnBridge } from './riverBoundary';
 import * as T from 'three';
 import { koreanHour } from '../../utils/time';
@@ -313,8 +318,8 @@ export function createParkScene({
       standUp(false);
       // Stand beside the dispensing bay so neither the avatar nor the cup hides it.
       p.position.current = {
-        x: (COFFEE_SPOT.x + 0.9) * 25 + 700,
-        y: (COFFEE_SPOT.z + 0.35) * 25 + 450,
+        x: (COFFEE_SPOT.x + 1.15) * 25 + 700,
+        y: (COFFEE_SPOT.z + 0.9) * 25 + 450,
       };
       p.motion.current = { x: 0, y: 0 };
       p.onMove({ ...p.position.current });
@@ -820,6 +825,7 @@ export function createParkScene({
       point = world(next);
     if (
       canCrossRiver(world(p.position.current), point) &&
+      !overlapsCoffeeMachine(point, PLAYER_RADIUS) &&
       !obstacles.some((o) => Math.hypot(point.x - o.x, point.z - o.z) < o.r + PLAYER_RADIUS)
     )
       p.position.current = next;
