@@ -1,3 +1,5 @@
+import { NoticeBoardDialog } from './components/NoticeBoardDialog';
+import { createNoticeBoard, NOTICE_BOARD_SPOT, NOTICE_BOARD_REACH } from './noticeBoard';
 import { CoffeeOrderDialog } from './components/CoffeeOrderDialog';
 import { findCoffee, type CoffeeId } from './coffeeMenu';
 import { createCoffeeShop, COFFEE_SPOT } from './coffeeShop';
@@ -40,6 +42,9 @@ export function Park(props: Props) {
   const benchBubble = useRef<HTMLButtonElement>(null);
   const [benchAction, setBenchAction] = useState<'sit' | null>(null);
   const useBench = useRef<() => void>(() => {});
+  const noticeBubble = useRef<HTMLButtonElement>(null);
+  const [nearNoticeBoard, setNearNoticeBoard] = useState(false);
+  const [noticeBoardOpen, setNoticeBoardOpen] = useState(false);
   const coffeeBubble = useRef<HTMLButtonElement>(null);
   const [coffeeAction, setCoffeeAction] = useState<string | null>(null);
   const [coffeeMenuOpen, setCoffeeMenuOpen] = useState(false);
@@ -288,6 +293,9 @@ export function Park(props: Props) {
       riverStone(RIVER.left - 0.2, z);
       riverStone(RIVER.right + 0.2, z);
     }
+    const noticeBoard = createNoticeBoard(scene);
+    obstacles.push({ x: NOTICE_BOARD_SPOT.x, z: NOTICE_BOARD_SPOT.z, r: 1.4 });
+    let noticeShown = false;
     const coffeeShop = createCoffeeShop(scene);
     obstacles.push({ x: COFFEE_SPOT.x, z: COFFEE_SPOT.z - 1.5, r: 0.6 });
     path([new T.Vector3(0, 0, -4.5), COFFEE_SPOT.clone()], 0.65);
@@ -757,6 +765,15 @@ export function Park(props: Props) {
         coffeePhase === 'drinking'
           ? Math.sin(Math.min(1, coffeeElapsed / 3600) * Math.PI)
           : undefined;
+      const nearNotice =
+        p.performing === null &&
+        !seatedBench &&
+        coffeePhase === 'idle' &&
+        world(p.position.current).distanceTo(NOTICE_BOARD_SPOT) < NOTICE_BOARD_REACH;
+      if (nearNotice !== noticeShown) {
+        noticeShown = nearNotice;
+        setNearNoticeBoard(nearNotice);
+      }
       const coffeeLabel =
         p.performing === null &&
         !seatedBench &&
@@ -890,6 +907,20 @@ export function Park(props: Props) {
       );
       camera.lookAt(target);
       camera.updateMatrixWorld();
+      if (noticeBubble.current) {
+        const anchor = NOTICE_BOARD_SPOT.clone();
+        anchor.y = 3.6;
+        anchor.project(camera);
+        noticeBubble.current.style.left = `${(anchor.x * 0.5 + 0.5) * el.clientWidth}px`;
+        noticeBubble.current.style.top = `${(-anchor.y * 0.5 + 0.5) * el.clientHeight}px`;
+        noticeBubble.current.style.visibility =
+          Math.abs(anchor.x) < 0.95 &&
+          Math.abs(anchor.y) < 0.9 &&
+          Math.abs(anchor.z) < 1 &&
+          !document.querySelector('dialog[open]')
+            ? 'visible'
+            : 'hidden';
+      }
       if (coffeeBubble.current) {
         const anchor = COFFEE_SPOT.clone();
         anchor.y = 2.8;
@@ -983,6 +1014,7 @@ export function Park(props: Props) {
     return () => {
       useCoffee.current = () => {};
       coffeeShop.dispose();
+      noticeBoard.dispose();
       useBench.current = () => {};
       scenery.dispose();
       waterTexture.dispose();
@@ -1016,6 +1048,19 @@ export function Park(props: Props) {
         id="park"
         aria-label="3D 음악 공원. 조이스틱 또는 방향키로 산책하세요."
       />
+      {noticeBoardOpen && <NoticeBoardDialog onClose={() => setNoticeBoardOpen(false)} />}
+      {nearNoticeBoard && !error && props.performing === null && (
+        <Button
+          ref={noticeBubble}
+          className="bench-action notice-board-action"
+          style={{ visibility: 'hidden' }}
+          aria-label="마을 공지사항 보기"
+          title="마을 게시판"
+          onClick={() => setNoticeBoardOpen(true)}
+        >
+          <Flaticon name="blackboard" size={28} />
+        </Button>
+      )}
       {coffeeMenuOpen && (
         <CoffeeOrderDialog
           onClose={() => setCoffeeMenuOpen(false)}
@@ -1035,13 +1080,7 @@ export function Park(props: Props) {
           disabled={coffeeAction.endsWith('중…')}
           onClick={() => useCoffee.current()}
         >
-          <img
-            src="/icons/coffee/americano.png"
-            width={24}
-            height={24}
-            alt=""
-            aria-hidden="true"
-          />
+          <img src="/icons/coffee/americano.png" width={24} height={24} alt="" aria-hidden="true" />
         </Button>
       )}
       {benchAction && !error && props.performing === null && (

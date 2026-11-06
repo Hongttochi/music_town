@@ -1,0 +1,130 @@
+dialog.town-panel.notice-board-dialog {
+  width: min(580px, calc(100vw - 32px));
+  max-height: calc(var(--visible-height, 100dvh) - 32px);
+  padding: 22px;
+  margin: auto;
+  overflow-y: auto;
+  color: #f6ecd2;
+  border: 10px solid #b48d60;
+  border-radius: 16px;
+  background: repeating-linear-gradient(0deg, #ffffff02 0 2px, transparent 2px 7px), #405d4f;
+  box-shadow:
+    0 6px 0 #806044,
+    inset 0 0 0 2px #2f493d,
+    0 22px 60px #1e302d40;
+}
+.notice-board-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.notice-board-heading > div {
+  flex: 1;
+}
+.notice-board-heading span {
+  font-size: 11px;
+  color: #d2d9bd;
+  letter-spacing: 0.04em;
+}
+.notice-board-heading h2 {
+  font-size: 25px;
+  font-weight: 800;
+  margin: 3px 0 0;
+  color: #fff3d6;
+}
+.notice-board-dialog .town-button.notice-board-close {
+  color: #fff3d6;
+  border: 1px solid #d3d9b750;
+  border-radius: 50%;
+  background: #ffffff0a;
+  font-size: 25px;
+  min-height: 32px;
+  width: 32px;
+  height: 32px;
+  flex: none;
+}
+.notice-board-papers {
+  display: grid;
+  gap: 20px;
+  padding: 0 3px;
+}
+.notice-paper {
+  position: relative;
+  padding: 25px 23px 18px;
+  border: 1px solid #e4d5ae;
+  border-radius: 3px 5px 8px 3px;
+  background: #fff8e6;
+  color: #5d5846;
+  box-shadow: 2px 5px 0 #23382c24;
+}
+.notice-pin {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  left: calc(50% - 5px);
+  top: -5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 28%, #e2aa87, #ac604d 70%);
+  box-shadow: 1px 2px 2px #54382940;
+}
+.notice-label {
+  color: #8d684a;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.notice-paper h3 {
+  margin: 7px 0 12px;
+  color: #4d543f;
+  font-size: 17px;
+  line-height: 1.5;
+  font-weight: 750;
+  word-break: keep-all;
+}
+.notice-paper p {
+  margin: 9px 0 0;
+  font-size: 13px;
+  line-height: 1.85;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.notice-paper footer {
+  margin-top: 16px;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: #a69b80;
+  text-align: right;
+}
+.notice-board-footnote {
+  text-align: center;
+  color: #c9d2b8;
+  font-size: 11px;
+  line-height: 1.6;
+  margin: 20px 0 0;
+}
+.bench-action.notice-board-action.town-button {
+  width: 42px;
+  height: 42px;
+  min-height: 42px;
+  padding: 6px;
+}
+@media (max-height: 500px) {
+  dialog.town-panel.notice-board-dialog {
+    padding: 16px 20px;
+    border-width: 7px;
+    max-height: calc(var(--visible-height, 100dvh) - 20px);
+  }
+  .notice-board-heading {
+    margin-bottom: 20px;
+  }
+}
+@media (max-width: 430px) {
+  dialog.town-panel.notice-board-dialog {
+    padding: 18px 14px;
+    border-width: 7px;
+  }
+  .notice-paper {
+    padding: 22px 17px 16px;
+  }
+}
