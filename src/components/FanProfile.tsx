@@ -37,22 +37,28 @@ export function FanProfile({
       {!own && !demo && userId && (
         <div className="fan-actions">
           <Button
-            variant="secondary"
+            variant="plain"
+            size="icon"
+            className="fan-action-icon"
             disabled={!stats || busy}
             aria-pressed={stats?.following ?? false}
+            aria-label={stats?.following ? '팔로우 취소' : '팔로우'}
+            title={stats?.following ? '팔로우 취소' : '팔로우'}
             onClick={() => void act('follow', !stats?.following)}
           >
-            {stats?.following ? '팔로잉' : '팔로우'}
+            <img src="/icons/profile-followers.png" width={28} height={28} alt="" />
           </Button>
           <Button
-            variant="secondary"
+            variant="plain"
+            size="icon"
+            className="fan-action-icon"
             disabled={!stats || busy}
             aria-pressed={stats?.hearted ?? false}
-            title="하트는 계정당 한 번 집계돼요"
+            aria-label={stats?.hearted ? '하트 취소' : '하트 보내기'}
+            title={stats?.hearted ? '하트 취소' : '하트 보내기'}
             onClick={() => void act('heart', !stats?.hearted)}
           >
-            <img src="/icons/profile-received-heart.png" width={17} height={17} alt="" />
-            {stats?.hearted ? '하트 보냄' : '하트 보내기'}
+            <img src="/icons/profile-received-heart.png" width={28} height={28} alt="" />
           </Button>
         </div>
       )}

@@ -32,34 +32,44 @@
   gap: 8px;
   margin-bottom: 18px;
 }
-.fan-actions > .town-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border-radius: 8px;
-  min-height: 34px;
-  padding: 6px 16px;
-  font-size: 12px;
-}
-.fan-actions > .town-button:first-child {
-  background: #657853;
-  border-color: #657853;
-  color: #fffdf5;
-}
-.fan-actions > .town-button:first-child[aria-pressed='true'] {
-  background: #ecf0e4;
-  color: #5b6a4c;
-  border-color: #d7dfcb;
-}
-.fan-actions > .town-button:last-child {
+.fan-profile .fan-actions > .town-button.fan-action-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 4px;
+  border: 0;
+  border-radius: 10px;
   background: transparent;
-  border-color: #dfe2d6;
-  color: #777b6d;
+  box-shadow: none;
 }
-.fan-actions > .town-button:last-child[aria-pressed='true'] {
-  color: #a16b61;
-  border-color: #ddc4bb;
+.fan-action-icon img {
+  object-fit: contain;
+  transition:
+    opacity 150ms ease,
+    filter 150ms ease,
+    scale 150ms ease;
+}
+.fan-action-icon[aria-pressed='false'] img {
+  filter: grayscale(0.75);
+  opacity: 0.65;
+}
+.fan-action-icon[aria-pressed='true'] img {
+  filter: none;
+  opacity: 1;
+}
+.fan-action-icon:not(:disabled):hover img {
+  filter: none;
+  opacity: 1;
+}
+.fan-action-icon:not(:disabled):active img {
+  scale: 0.9;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fan-action-icon img {
+    transition: none;
+  }
 }
 .fan-profile > small {
   display: block;
@@ -232,13 +242,6 @@
 }
 .account-panel > .fan-profile {
   margin: 0;
-}
-.participant-profile .participant-bio {
-  background: transparent;
-  padding: 0;
-  margin: 12px 0 16px;
-  color: #78816c;
-  font-size: 12px;
 }
 @media (max-width: 380px) {
   .activity-stats > .activity-toggle {

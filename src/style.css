@@ -18,9 +18,12 @@ button:disabled {
 * {
   box-sizing: border-box;
 }
+html {
+  background: var(--town-entry-background, #d6e3bd);
+}
 body {
   margin: 0;
-  background: #d6e3bd;
+  background: var(--town-entry-background, #d6e3bd);
   overflow: hidden;
 }
 button,
