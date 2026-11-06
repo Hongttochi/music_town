@@ -436,12 +436,19 @@ dialog.delete-account-dialog {
 }
 
 /* Compact park controls, including touch layouts. */
-.topbar .header-right {
+.topbar > div.header-right {
+  height: 32px;
+  min-height: 32px;
+  align-self: flex-start;
+  box-sizing: border-box;
   padding: 3px 4px;
   gap: 2px;
-  border-radius: 14px;
+  border-radius: 11px;
 }
-.topbar .header-right > .town-button {
+.topbar .header-right > button.town-button {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
   width: 26px;
   height: 26px;
   min-width: 26px;
@@ -449,9 +456,9 @@ dialog.delete-account-dialog {
   padding: 3px;
   border-radius: 10px;
 }
-.topbar .header-right img {
-  width: 17px;
-  height: 17px;
+.topbar .header-right > button.town-button .flaticon {
+  width: 18px;
+  height: 18px;
 }
 .town-button.stage-toggle {
   min-height: 28px;

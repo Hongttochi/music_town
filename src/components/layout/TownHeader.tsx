@@ -20,7 +20,7 @@ export function TownHeader({
       </div>
       <div className="header-right">
         <Button className="avatar-button" onClick={onProfile} aria-label="마이페이지">
-          <ProfileIcon id={profileIcon} size={17} />
+          <ProfileIcon id={profileIcon} size={10} />
         </Button>
         <Button className="icon-button" onClick={onSettings} aria-label="설정">
           <Flaticon name="setting" size={18} className="settings-button-icon" />
