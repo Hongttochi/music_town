@@ -1,3 +1,5 @@
+import timeChange from '../sounds/time_change.mp3';
+import screenChange from '../sounds/screen_change.mp3';
 import clap from '../sounds/clap.mp3';
 import complete from '../sounds/complete.mp3';
 import heart from '../sounds/heart.mp3';
@@ -12,6 +14,8 @@ import drink from '../sounds/drink.mp3';
 import sitdown from '../sounds/sitdown.mp3';
 
 export const sources = {
+  timeChange,
+  screenChange,
   clap,
   complete,
   heart,

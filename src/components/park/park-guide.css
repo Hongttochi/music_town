@@ -1,0 +1,91 @@
+dialog.town-panel.park-guide-dialog {
+  width: 400px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(var(--visible-height, 100dvh) - 24px);
+  padding: 16px;
+  overflow-y: auto;
+}
+.park-guide-welcome {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.park-guide-welcome img {
+  object-fit: contain;
+  flex: none;
+}
+.park-guide-welcome p {
+  margin: 0;
+  color: #7c866f;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.park-guide-topics {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 9px;
+  background: #edf0e3;
+}
+dialog.town-panel .park-guide-topics > .town-button {
+  flex: 1;
+  min-height: 28px;
+  padding: 4px 6px;
+  font-size: 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  box-shadow: none;
+}
+dialog.town-panel .park-guide-topics > .town-button[aria-pressed='true'] {
+  background: #fffdf5;
+  color: #4e6543;
+}
+.park-guide-content {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+.park-guide-content h3 {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #536348;
+}
+.park-guide-content p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.65;
+  color: #7a826f;
+  word-break: keep-all;
+}
+@media (max-height: 500px) {
+  .park-guide-welcome {
+    margin-bottom: 8px;
+  }
+  .park-guide-welcome img {
+    width: 26px;
+    height: 30px;
+  }
+  .park-guide-content {
+    gap: 8px;
+    margin-top: 10px;
+  }
+}
+dialog.town-panel.park-guide-dialog > div:first-child {
+  position: sticky;
+  top: -16px;
+  padding-top: 8px;
+  z-index: 1;
+  background: var(--town-paper, #fff9e9);
+}
+dialog.town-panel.park-guide-dialog .panel-heading {
+  margin-bottom: 8px;
+}
+dialog.town-panel.park-guide-dialog .panel-heading > .town-button {
+  min-height: 24px;
+  height: 24px;
+  width: 24px;
+  padding: 2px;
+}

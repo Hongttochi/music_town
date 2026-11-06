@@ -1,3 +1,4 @@
+import { isParkNight } from '../../utils/time';
 import { createRabbitNpc } from '../avatar/rabbitNpc';
 import * as T from 'three';
 
@@ -104,8 +105,7 @@ export function createSchool(scene: T.Scene) {
       if (minute !== lastMinute) {
         lastMinute = minute;
         const date = new Date();
-        const hour = (date.getUTCHours() + 9) % 24;
-        entranceLight.intensity = hour >= 19 || hour < 6 ? 8 : 0;
+        entranceLight.intensity = isParkNight() ? 8 : 0;
         minuteHand.rotation.z = (-date.getUTCMinutes() * Math.PI) / 30;
         hourHand.rotation.z =
           (-(((date.getUTCHours() + 9) % 12) + date.getUTCMinutes() / 60) * Math.PI) / 6;

@@ -424,3 +424,69 @@ dialog.town-panel[data-panel='following'] {
     padding-top: 8px;
   }
 }
+
+/* A compact park-toned activity card with a clear selected day. */
+.activity-stats {
+  --activity-accent: #7e9763;
+}
+.activity-stats[data-metric='stageSeconds'] {
+  --activity-accent: #bf9470;
+}
+.activity-stats .activity-expanded {
+  margin-top: 4px;
+  padding: 10px;
+  border: 1px solid #e7eadc;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #f8f9f1, #f0f3e7);
+}
+.activity-stats .activity-metrics {
+  padding: 2px;
+  gap: 1px;
+  border: 0;
+  border-radius: 7px;
+  background: #e5eadb;
+}
+dialog.town-panel[open] .fan-profile .activity-stats .activity-metrics > .town-button {
+  min-width: 34px;
+  min-height: 22px;
+  height: 22px;
+  padding: 2px 6px;
+  font-size: 10px;
+  line-height: 1.4;
+  border-radius: 5px;
+}
+.activity-stats .activity-detail {
+  margin-top: 10px;
+}
+.activity-stats .activity-line {
+  stroke: var(--activity-accent);
+  stroke-width: 2;
+}
+.activity-stats .activity-grid {
+  stroke: #dde4d3;
+  stroke-dasharray: 3 5;
+}
+.activity-selected-column {
+  fill: var(--activity-accent);
+  opacity: 0.08;
+}
+.activity-point-halo {
+  fill: var(--activity-accent);
+  opacity: 0.16;
+}
+.activity-stats .activity-point {
+  stroke: var(--activity-accent);
+}
+.activity-stats .activity-point.is-selected {
+  fill: var(--activity-accent);
+}
+.activity-stats .activity-dates > .town-button[aria-pressed='true'] {
+  background: #e5ebda;
+  border-radius: 7px;
+  text-decoration: none;
+}
+.activity-stats .activity-footnote {
+  font-size: 9px;
+  line-height: 1.5;
+  margin: 8px 0 0;
+}

@@ -115,3 +115,20 @@ dialog.town-panel[data-panel='queue'] {
     height: 125px;
   }
 }
+@media (min-width: 541px) {
+  .book-guide {
+    justify-content: flex-start;
+  }
+  .book-guide > h3 {
+    margin-top: auto;
+  }
+  .busking-book .book-guide .town-button.book-join {
+    margin-top: auto;
+  }
+  .book-stage > p {
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

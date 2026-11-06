@@ -13,7 +13,7 @@ import {
 } from './coffeeShop';
 import { BRIDGE, PLAYER_RADIUS, RIVER, canCrossRiver, isOnBridge } from './riverBoundary';
 import * as T from 'three';
-import { koreanHour } from '../../utils/time';
+import { isParkNight } from '../../utils/time';
 import { Avatar, stages } from '../../data/model';
 import { createImageCharacters } from '../avatar/imageCharacter';
 import { loadAvatarLayers } from '../avatar/modularAvatar';
@@ -33,6 +33,8 @@ type ParkSceneBindings = {
   latest: React.MutableRefObject<ParkProps>;
   sound: React.MutableRefObject<ReturnType<typeof useSoundEffects>>;
   benchBubble: React.RefObject<HTMLButtonElement | null>;
+  npcBubble: React.RefObject<HTMLButtonElement | null>;
+  setNearNpc: (value: boolean) => void;
   noticeBubble: React.RefObject<HTMLButtonElement | null>;
   coffeeBubble: React.RefObject<HTMLButtonElement | null>;
   useBench: React.MutableRefObject<() => void>;
@@ -49,6 +51,8 @@ export function createParkScene({
   sound,
   benchBubble,
   noticeBubble,
+  npcBubble,
+  setNearNpc,
   coffeeBubble,
   useBench,
   useCoffee,
@@ -291,6 +295,7 @@ export function createParkScene({
   const noticeBoard = createNoticeBoard(scene);
   obstacles.push({ x: NOTICE_BOARD_SPOT.x, z: NOTICE_BOARD_SPOT.z, r: 1.4 });
   let noticeShown = false;
+  let npcShown = false;
   const coffeeShop = createCoffeeShop(scene);
   obstacles.push({ x: COFFEE_SPOT.x, z: COFFEE_SPOT.z - 1.5, r: 0.6 });
   path(
@@ -754,7 +759,7 @@ export function createParkScene({
         p.motion.current.y +
         Number(keys.has('s') || keys.has('ArrowDown')) -
         Number(keys.has('w') || keys.has('ArrowUp'));
-    if (document.querySelector('dialog[open]') || p.performing !== null) {
+    if (document.querySelector('dialog[open]') || p.performing !== null || p.timeTransition) {
       dx = 0;
       dz = 0;
     }
@@ -786,6 +791,15 @@ export function createParkScene({
       coffeePhase === 'drinking'
         ? Math.sin(Math.min(1, coffeeElapsed / 3600) * Math.PI)
         : undefined;
+    const nearNpc =
+      p.performing === null &&
+      !seatedBench &&
+      coffeePhase === 'idle' &&
+      world(p.position.current).distanceTo(SCHOOL_NPC_SPOT) < 3;
+    if (nearNpc !== npcShown) {
+      npcShown = nearNpc;
+      setNearNpc(nearNpc);
+    }
     const nearNotice =
       p.performing === null &&
       !seatedBench &&
@@ -913,6 +927,10 @@ export function createParkScene({
       cameraFocusGoal.copy(COFFEE_SPOT).lerp(player.position, 0.4);
       stageZoom = 2.1;
     }
+    if (p.focusNpc) {
+      cameraFocusGoal.copy(SCHOOL_NPC_SPOT);
+      stageZoom = 2.3;
+    }
     const smoothing = reducedMotion ? 1 : 1 - Math.exp(-dt * 4.5);
     focus.lerp(cameraFocusGoal, smoothing);
     const portrait = camera.aspect < 1;
@@ -935,6 +953,20 @@ export function createParkScene({
     );
     camera.lookAt(target);
     camera.updateMatrixWorld();
+    if (npcBubble.current) {
+      const anchor = SCHOOL_NPC_SPOT.clone();
+      anchor.y = 3.1;
+      anchor.project(camera);
+      npcBubble.current.style.left = `${(anchor.x * 0.5 + 0.5) * el.clientWidth}px`;
+      npcBubble.current.style.top = `${(-anchor.y * 0.5 + 0.5) * el.clientHeight}px`;
+      npcBubble.current.style.visibility =
+        Math.abs(anchor.x) < 0.95 &&
+        Math.abs(anchor.y) < 0.9 &&
+        Math.abs(anchor.z) < 1 &&
+        !document.querySelector('dialog[open]')
+          ? 'visible'
+          : 'hidden';
+    }
     if (noticeBubble.current) {
       const anchor = NOTICE_BOARD_SPOT.clone();
       anchor.y = 3.6;
@@ -985,8 +1017,7 @@ export function createParkScene({
             : 'hidden';
       } else benchBubble.current.style.visibility = 'hidden';
     }
-    const hour = koreanHour();
-    const night = hour < 6 || hour >= 19;
+    const night = p.night ?? isParkNight();
     campfire.update(night, time, reducedMotion);
     hemi.intensity = night ? 0.85 : 2.5;
     hemi.color.set(night ? '#8eabed' : '#fff4db');

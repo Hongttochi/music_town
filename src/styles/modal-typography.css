@@ -84,3 +84,8 @@ dialog.error-modal[open] p {
   font-size: 11px;
   line-height: 1.65;
 }
+/* The introduction itself uses the compact body size, including on touch screens. */
+dialog.town-panel[open] .registration-fields .registration-bio textarea {
+  font-size: 13px;
+  line-height: 1.65;
+}

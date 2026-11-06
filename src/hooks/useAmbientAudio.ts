@@ -3,7 +3,7 @@ import fire from '../sounds/fire.mp3';
 import { resumeAudio } from '../utils/resumeAudio';
 import { useEffect, useRef, type MutableRefObject } from 'react';
 import { useSoundSettings } from './useSoundEffects';
-import { koreanHour } from '../utils/time';
+import { isParkNight } from '../utils/time';
 import { RIVER } from '../scene/park/riverBoundary';
 import morning from '../sounds/morning.mp3';
 import night from '../sounds/night.mp3';
@@ -14,10 +14,11 @@ export function useAmbientAudio(
   position: MutableRefObject<Position>,
   entered: boolean,
   quiet: boolean,
+  parkNight?: boolean,
 ) {
   const { enabled, volume } = useSoundSettings();
-  const settings = useRef({ enabled, volume, entered, quiet });
-  settings.current = { enabled, volume, entered, quiet };
+  const settings = useRef({ enabled, volume, entered, quiet, parkNight });
+  settings.current = { enabled, volume, entered, quiet, parkNight };
   useEffect(() => {
     const context = new AudioContext();
     const tracks = [morning, night, river, fire].map((url) => {
@@ -53,8 +54,7 @@ export function useAmbientAudio(
       const s = settings.current;
       const master =
         s.entered && s.enabled && !document.hidden ? s.volume * (s.quiet ? 0.08 : 0.3) : 0;
-      const hour = koreanHour();
-      const isNight = hour < 6 || hour >= 19;
+      const isNight = s.parkNight ?? isParkNight();
       const x = (position.current.x - 700) / 25;
       const distance = Math.max(RIVER.left - x, x - RIVER.right, 0);
       const proximity = Math.max(0, 1 - distance / 7);

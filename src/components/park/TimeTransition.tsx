@@ -1,0 +1,38 @@
+import { useId } from 'react';
+import type { TimeTransitionPhase } from '../../hooks/useParkTimeTransition';
+import './time-transition.css';
+export function TimeTransition({
+  phase,
+  message,
+}: {
+  phase: TimeTransitionPhase;
+  message: string;
+}) {
+  const id = useId();
+  if (phase === 'idle') return null;
+  return (
+    <div className="time-transition" data-phase={phase} role="status" aria-live="polite">
+      {phase === 'talk' && (
+        <div className="time-transition-speech">
+          <small>학교 앞 토끼</small>
+          <p>{message}</p>
+        </div>
+      )}
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <mask id={id}>
+            <rect width="100" height="100" fill="white" />
+            <circle
+              className="time-transition-hole"
+              cx="50"
+              cy="50"
+              r={phase === 'closing' ? 0 : 80}
+              fill="black"
+            />
+          </mask>
+        </defs>
+        <rect width="100" height="100" fill="#101812" mask={`url(#${id})`} />
+      </svg>
+    </div>
+  );
+}

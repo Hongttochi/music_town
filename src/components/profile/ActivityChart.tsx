@@ -15,6 +15,7 @@ export function formatActivity(seconds: number) {
 export function ActivityChart({ stats }: { stats: FanStats | null }) {
   const [expanded, setExpanded] = useState(false);
   const contentId = useId();
+  const gradientId = useId();
   const [chosen, setChosen] = useState<string | null>(null);
   const [metric, setMetric] = useState<'onlineSeconds' | 'stageSeconds'>('onlineSeconds');
   const days = stats?.days ?? [];
@@ -26,7 +27,7 @@ export function ActivityChart({ stats }: { stats: FanStats | null }) {
     day,
   }));
   return (
-    <section className="activity-stats" data-expanded={expanded}>
+    <section className="activity-stats" data-expanded={expanded} data-metric={metric}>
       <Button
         className="activity-toggle"
         aria-expanded={expanded}
@@ -75,10 +76,46 @@ export function ActivityChart({ stats }: { stats: FanStats | null }) {
                   role="img"
                   aria-label={`최근 7일 ${metric === 'onlineSeconds' ? '접속' : '무대'} 시간. 날짜별 값은 아래 버튼에서 확인할 수 있어요.`}
                 >
+                  <defs>
+                    <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="var(--activity-accent)" stopOpacity="0.28" />
+                      <stop offset="100%" stopColor="var(--activity-accent)" stopOpacity="0.02" />
+                    </linearGradient>
+                  </defs>
+                  {points
+                    .filter((p) => p.day.date === selected?.date)
+                    .map((p) => (
+                      <rect
+                        key={p.day.date}
+                        x={p.x - 12}
+                        y={24}
+                        width={24}
+                        height={80}
+                        rx={8}
+                        className="activity-selected-column"
+                      />
+                    ))}
                   <text x="0" y="15">
                     {formatActivity(max)}
                   </text>
                   <path d="M24 28H308 M24 64H308 M24 100H308" className="activity-grid" />
+                  {points.length > 1 && (
+                    <path
+                      d={`M${points[0].x},100 ${points.map((p) => `L${p.x},${p.y}`).join(' ')} L${points[points.length - 1].x},100 Z`}
+                      fill={`url(#${gradientId})`}
+                    />
+                  )}
+                  {points
+                    .filter((p) => p.day.date === selected?.date)
+                    .map((p) => (
+                      <circle
+                        key={p.day.date}
+                        cx={p.x}
+                        cy={p.y}
+                        r={8}
+                        className="activity-point-halo"
+                      />
+                    ))}
                   <polyline
                     points={points.map((p) => `${p.x},${p.y}`).join(' ')}
                     className="activity-line"
@@ -100,7 +137,12 @@ export function ActivityChart({ stats }: { stats: FanStats | null }) {
                     0
                   </text>
                 </svg>
-                <div className="activity-dates" role="group" aria-label="날짜별 활동">
+                <div
+                  className="activity-dates"
+                  role="group"
+                  aria-label="날짜별 활동"
+                  style={{ gridTemplateColumns: `repeat(${days.length}, minmax(0, 1fr))` }}
+                >
                   {days.map((day) => (
                     <Button
                       key={day.date}

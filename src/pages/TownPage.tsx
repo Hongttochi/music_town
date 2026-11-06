@@ -1,3 +1,5 @@
+import { useParkTimeTransition } from '../hooks/useParkTimeTransition';
+import { TimeTransition } from '../components/park/TimeTransition';
 import { PerformanceControls } from '../components/park/PerformanceControls';
 import { StageProfile } from '../components/park/StageProfile';
 import { SettingsMenu } from '../components/settings/SettingsMenu';
@@ -80,6 +82,10 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
   const [near, setNear] = useState<Stage | null>(null);
   const [muted, setMuted] = useState<number[]>([]);
   const playSound = useSoundEffects();
+  const timeTransition = useParkTimeTransition(entered);
+  useEffect(() => {
+    if (timeTransition.active) setPanel(null);
+  }, [timeTransition.active]);
   const [toast, setToast] = useState('');
   const [actionError, setActionError] = useState('');
   const [deletingAccount, setDeletingAccount] = useState(false);
@@ -186,7 +192,12 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
     town.clientId,
     microphone.stream,
   );
-  useAmbientAudio(position, entered, microphone.state === 'on' || voice.status === 'listening');
+  useAmbientAudio(
+    position,
+    entered,
+    timeTransition.active || microphone.state === 'on' || voice.status === 'listening',
+    timeTransition.night,
+  );
   const stages = account.demo ? demoStages : town.stages;
   const populations = account.demo ? demoPopulations : town.state.channels.map((c) => c.count);
   const selectedMusician = town.state.participants.find(
@@ -267,14 +278,18 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
     <PanelHeading title={name} onClose={entered ? () => setPanel(null) : undefined} />
   );
   const hour = koreanHour();
-  const night = hour < 6 || hour >= 19;
+  const night = timeTransition.night;
   return (
     <>
       <main id="app" className={entered ? '' : 'before-entry'}>
+        <TimeTransition phase={timeTransition.phase} message={timeTransition.message} />
         {entered && (
           <>
             <Park
-              key={`${channel}|${stages.map((s) => `${s.id}:${s.x}:${s.y}`).join('|')}`}
+              key={`${timeTransition.revision}|${channel}|${stages.map((s) => `${s.id}:${s.x}:${s.y}`).join('|')}`}
+              night={night}
+              timeTransition={timeTransition.active}
+              focusNpc={timeTransition.focusNpc}
               mapPositions={mapPositions}
               avatar={avatar}
               liveStages={stages}

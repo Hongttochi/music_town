@@ -1,3 +1,5 @@
+import { MessageCircleMore } from 'lucide-react';
+import { ParkGuideDialog } from './ParkGuideDialog';
 import { useParkScene } from '../../hooks/useParkScene';
 import type { ParkProps } from '../../types/park';
 export type { Position } from '../../types/park';
@@ -9,6 +11,10 @@ import { findCoffee } from '../../data/coffeeMenu';
 export function Park(props: ParkProps) {
   const {
     canvas,
+    npcBubble,
+    nearNpc,
+    guideOpen,
+    setGuideOpen,
     error,
     noticeBoardOpen,
     setNoticeBoardOpen,
@@ -31,6 +37,19 @@ export function Park(props: ParkProps) {
         id="park"
         aria-label="3D 음악 공원. 조이스틱 또는 방향키로 산책하세요."
       />
+      {guideOpen && <ParkGuideDialog onClose={() => setGuideOpen(false)} />}
+      {nearNpc && !error && props.performing === null && (
+        <Button
+          ref={npcBubble}
+          className="bench-action npc-action"
+          style={{ visibility: 'hidden' }}
+          aria-label="토끼에게 공원 안내 듣기"
+          title="공원 안내"
+          onClick={() => setGuideOpen(true)}
+        >
+          <MessageCircleMore size={20} aria-hidden="true" />
+        </Button>
+      )}
       {noticeBoardOpen && <NoticeBoardDialog onClose={() => setNoticeBoardOpen(false)} />}
       {nearNoticeBoard && !error && props.performing === null && (
         <Button
