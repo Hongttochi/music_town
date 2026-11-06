@@ -1,12 +1,12 @@
 import { type CoffeeId } from './coffeeMenu';
 import * as THREE from 'three';
-import { composeDrinkingAvatar } from './drinkingAvatar';
+import { drawDrinkingPose } from './drinkingAvatar';
 import type { Avatar } from './model';
 import { composeSeatedAvatar } from './seatedAvatar';
 import { loadAvatarLayers, composeAvatar } from './modularAvatar';
 
 /** Six character rows, each with front/right/back/left views. */
-export function createImageCharacters() {
+export function createImageCharacters(renderer: THREE.WebGLRenderer) {
   let ready = false;
   let disposed = false;
   const actors = new Set<{
@@ -17,8 +17,10 @@ export function createImageCharacters() {
     standingImage?: HTMLCanvasElement;
     seatedImage?: HTMLCanvasElement;
     seated?: boolean;
-    drinkingFrames?: HTMLCanvasElement[];
-    drinkFrame?: number;
+    drinkAtlas?: HTMLCanvasElement;
+    drinkTexture?: THREE.CanvasTexture;
+    drinkSource?: HTMLCanvasElement;
+    preparedFrames?: number;
     coffee?: CoffeeId;
   }>();
   let source: Awaited<ReturnType<typeof loadAvatarLayers>> | null = null;
@@ -66,6 +68,7 @@ export function createImageCharacters() {
   function update(player: THREE.Group, moving: boolean, time: number) {
     for (const actor of actors) {
       if (!actor.group.parent) {
+        actor.drinkTexture?.dispose();
         actor.texture.dispose();
         actor.sprite.material.dispose();
         actors.delete(actor);
@@ -84,26 +87,53 @@ export function createImageCharacters() {
       const drinking = actor.group.userData.drinking as number | undefined;
       const coffee = (actor.group.userData.coffee ?? 'americano') as CoffeeId;
       if (actor.coffee !== coffee) {
-        actor.drinkingFrames = undefined;
-        actor.drinkFrame = undefined;
+        actor.sprite.material.map = actor.texture;
+        actor.drinkTexture?.dispose();
+        actor.drinkTexture = undefined;
+        actor.drinkAtlas = undefined;
+        actor.drinkSource = undefined;
+        actor.preparedFrames = 0;
         actor.coffee = coffee;
       }
-      const drinkFrame = drinking === undefined ? -1 : Math.round(drinking * 8);
-      if (actor.standingImage && actor.drinkFrame !== drinkFrame) {
-        if (drinkFrame >= 0) {
-          if (!actor.drinkingFrames) {
-            const emptyHands = source
-              ? composeAvatar(source, { ...actor.avatar, instrument: 'none' })
-              : actor.standingImage;
-            actor.drinkingFrames = Array.from({ length: 9 }, (_, i) =>
-              composeDrinkingAvatar(emptyHands, i / 8, coffee),
-            );
+      // Prepare one front-facing pose per frame while the machine brews.
+      // A single atlas is uploaded once; drinking only changes UV coordinates.
+      if (
+        actor.group.userData.coffeePreparing &&
+        actor.standingImage &&
+        source &&
+        !actor.drinkTexture
+      ) {
+        if (!actor.drinkAtlas) {
+          actor.drinkAtlas = document.createElement('canvas');
+          actor.drinkAtlas.width = 2048;
+          actor.drinkAtlas.height = 1024;
+          actor.drinkSource = composeAvatar(source, { ...actor.avatar, instrument: 'none' });
+        } else {
+          const frame = actor.preparedFrames ?? 0;
+          const ctx = actor.drinkAtlas.getContext('2d')!;
+          ctx.save();
+          ctx.translate((frame % 8) * 256, Math.floor(frame / 8) * 256);
+          ctx.scale(0.5, 0.5);
+          drawDrinkingPose(ctx, actor.drinkSource!, frame / 31, coffee);
+          ctx.restore();
+          actor.preparedFrames = frame + 1;
+          if (actor.preparedFrames === 32) {
+            const texture = new THREE.CanvasTexture(actor.drinkAtlas);
+            texture.colorSpace = THREE.SRGBColorSpace;
+            texture.generateMipmaps = false;
+            texture.minFilter = texture.magFilter = THREE.LinearFilter;
+            texture.repeat.set(1 / 8, 1 / 4);
+            renderer.initTexture(texture);
+            actor.drinkTexture = texture;
+            actor.drinkSource = undefined;
           }
-          actor.texture.image = actor.drinkingFrames[drinkFrame];
-        } else actor.texture.image = seated ? actor.seatedImage! : actor.standingImage;
-        actor.texture.needsUpdate = true;
-        actor.drinkFrame = drinkFrame;
+        }
       }
+      if (drinking !== undefined && actor.drinkTexture) {
+        const frame = Math.round(Math.max(0, Math.min(1, drinking)) * 31);
+        actor.drinkTexture.offset.set((frame % 8) / 8, 1 - (Math.floor(frame / 8) + 1) / 4);
+        actor.sprite.material.map = actor.drinkTexture;
+      } else actor.sprite.material.map = actor.texture;
       // Anchor the hips to the seat rather than anchoring seated feet to the ground.
       actor.sprite.center.set(0.5, seated ? 0.25 : 0.05);
       actor.sprite.position.y = seated ? 0.68 : 0;
@@ -128,10 +158,16 @@ export function createImageCharacters() {
   function dispose() {
     disposed = true;
     actors.forEach((actor) => {
+      actor.drinkTexture?.dispose();
       actor.texture.dispose();
       actor.sprite.material.dispose();
     });
     actors.clear();
   }
-  return { create, update, dispose };
+  function drinkingReady(group: THREE.Group, coffee: CoffeeId) {
+    for (const actor of actors)
+      if (actor.group === group) return actor.coffee === coffee && !!actor.drinkTexture;
+    return false;
+  }
+  return { create, update, dispose, drinkingReady };
 }

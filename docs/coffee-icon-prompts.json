@@ -1,0 +1,16 @@
+{
+  "tool": "Built-in image_gen",
+  "transparent_background": true,
+  "assets": {
+    "americano": "public/icons/coffee/americano.png",
+    "latte": "public/icons/coffee/latte.png",
+    "vanilla": "public/icons/coffee/vanilla.png",
+    "mocha": "public/icons/coffee/mocha.png"
+  },
+  "prompts": {
+    "americano": "Use case: stylized-concept. Asset: one isolated square inventory coffee icon for a cozy Korean 3D village park game. Rounded soft toy-like 3D illustration, warm cream and muted sage palette, gently shaded matte surfaces, appealing chunky silhouette readable at 48px, three-quarter view slightly from above, soft upper-left lighting. Center single drink occupying 80% frame, generous transparent margins. No text, letters, logos, background, tile, or extra loose props. True transparent background. Iced americano in a short rounded clear takeaway tumbler, dark amber coffee, three chunky ice cubes, pale sage straw, simple cream sleeve.",
+    "latte": "Use case: stylized-concept. Asset: one isolated square inventory coffee icon for a cozy Korean 3D village park game. Rounded soft toy-like 3D illustration, warm cream and muted sage palette, gently shaded matte surfaces, appealing chunky silhouette readable at 48px, three-quarter view slightly from above, soft upper-left lighting. Center single drink occupying 80% frame, generous transparent margins. No text, letters, logos, background, tile, or extra loose props. True transparent background. Cafe latte in a rounded ivory ceramic cup with a small curved handle, warm tan latte topped with white heart-shaped foam art.",
+    "vanilla": "Use case: stylized-concept. Asset: one isolated square inventory coffee icon for a cozy Korean 3D village park game. Rounded soft toy-like 3D illustration, warm cream and muted sage palette, gently shaded matte surfaces, appealing chunky silhouette readable at 48px, three-quarter view slightly from above, soft upper-left lighting. Center single drink occupying 80% frame, generous transparent margins. No text, letters, logos, background, tile, or extra loose props. True transparent background. Vanilla latte in a rounded pastel butter-yellow ceramic cup with a small curved handle, pale creamy coffee, soft ivory foam swirl with tiny vanilla speckles.",
+    "mocha": "Use case: stylized-concept. Asset: one isolated square inventory coffee icon for a cozy Korean 3D village park game. Rounded soft toy-like 3D illustration, warm cream and muted sage palette, gently shaded matte surfaces, appealing chunky silhouette readable at 48px, three-quarter view slightly from above, soft upper-left lighting. Center single drink occupying 80% frame, generous transparent margins. No text, letters, logos, background, tile, or extra loose props. True transparent background. Cafe mocha in a rounded muted cocoa-brown ceramic cup with a small curved handle, chocolate coffee topped with a small whipped cream swirl and three chocolate drizzle stripes."
+  }
+}

@@ -1,5 +1,4 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { Coffee, Snowflake } from 'lucide-react';
 import { coffeeMenu, type CoffeeId } from '../coffeeMenu';
 import { Button } from './ui/Button';
 import { DialogPanel, PanelHeading } from './ui/Panel';
@@ -43,12 +42,18 @@ export function CoffeeOrderDialog({
             aria-pressed={selected === drink.id}
             onClick={() => setSelected(drink.id)}
           >
-            <Coffee size={26} style={{ color: drink.color }} aria-hidden="true" />
+            <img
+              className="coffee-menu-icon"
+              src={`/icons/coffee/${drink.id}.png`}
+              width={44}
+              height={44}
+              alt=""
+              aria-hidden="true"
+            />
             <span>
               <strong>{drink.name}</strong>
               <small>{drink.detail}</small>
             </span>
-            {drink.iced && <Snowflake size={16} aria-label="아이스" />}
           </Button>
         ))}
       </div>

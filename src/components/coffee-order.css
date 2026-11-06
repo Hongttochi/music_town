@@ -32,7 +32,10 @@ dialog.town-panel.coffee-order-dialog {
   border-color: #708b58;
   box-shadow: inset 0 0 0 1px #708b58;
 }
-.coffee-menu-item svg {
+.coffee-menu-icon {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
   flex-shrink: 0;
 }
 .coffee-menu-item strong {

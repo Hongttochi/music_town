@@ -1,6 +1,5 @@
 import { CoffeeOrderDialog } from './components/CoffeeOrderDialog';
 import { findCoffee, type CoffeeId } from './coffeeMenu';
-import { Coffee } from 'lucide-react';
 import { createCoffeeShop, COFFEE_SPOT } from './coffeeShop';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from './components/ui/Button';
@@ -43,6 +42,7 @@ export function Park(props: Props) {
   const useBench = useRef<() => void>(() => {});
   const coffeeBubble = useRef<HTMLButtonElement>(null);
   const [coffeeAction, setCoffeeAction] = useState<string | null>(null);
+  const [coffeeSelected, setCoffeeSelected] = useState<CoffeeId>('americano');
   const [coffeeMenuOpen, setCoffeeMenuOpen] = useState(false);
   const useCoffee = useRef<(order?: CoffeeId) => void>(() => {});
   useEffect(() => {
@@ -525,7 +525,7 @@ export function Park(props: Props) {
       box(p.x - 1.5, 0.4, p.z, 0.45, 0.6, 0.4, '#5d6858');
       ball(p.x - 1.5, 0.42, p.z + 0.21, 0.14, 0.18, 0.02, '#343e36');
     });
-    const imageCharacters = createImageCharacters();
+    const imageCharacters = createImageCharacters(renderer);
     let villagerIndex = 1;
     function character(a: Avatar) {
       return imageCharacters.create(
@@ -744,10 +744,16 @@ export function Park(props: Props) {
       )
         resetCoffee();
       const coffeeElapsed = Math.max(0, time - coffeeStarted);
-      if (coffeePhase === 'brewing' && coffeeElapsed >= 2300) coffeePhase = 'ready';
+      if (
+        coffeePhase === 'brewing' &&
+        coffeeElapsed >= 2300 &&
+        imageCharacters.drinkingReady(player, orderedCoffee)
+      )
+        coffeePhase = 'ready';
       if (coffeePhase === 'drinking' && coffeeElapsed >= 3600) resetCoffee();
       coffeeShop.update(coffeePhase, coffeeElapsed / 2300, orderedCoffee);
       player.userData.coffee = orderedCoffee;
+      player.userData.coffeePreparing = coffeePhase === 'brewing' || coffeePhase === 'ready';
       player.userData.drinking =
         coffeePhase === 'drinking'
           ? Math.sin(Math.min(1, coffeeElapsed / 3600) * Math.PI)
@@ -1016,6 +1022,7 @@ export function Park(props: Props) {
           onClose={() => setCoffeeMenuOpen(false)}
           onOrder={(id) => {
             setCoffeeMenuOpen(false);
+            setCoffeeSelected(id);
             useCoffee.current(id);
           }}
         />
@@ -1030,7 +1037,13 @@ export function Park(props: Props) {
           disabled={coffeeAction.endsWith('중…')}
           onClick={() => useCoffee.current()}
         >
-          <Coffee size={28} />
+          <img
+            src={`/icons/coffee/${coffeeSelected}.png`}
+            width={32}
+            height={32}
+            alt=""
+            aria-hidden="true"
+          />
           <span>{coffeeAction}</span>
         </Button>
       )}

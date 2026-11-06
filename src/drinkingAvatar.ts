@@ -1,15 +1,12 @@
 import { findCoffee, type CoffeeId } from './coffeeMenu';
 
 /** Cup and fingers share the same transformed palm anchor in every animation frame. */
-export function composeDrinkingAvatar(
+export function drawDrinkingPose(
+  ctx: CanvasRenderingContext2D,
   standing: HTMLCanvasElement,
   lift: number,
-  coffee: CoffeeId = 'americano',
+  coffee: CoffeeId,
 ) {
-  const canvas = document.createElement('canvas');
-  canvas.width = standing.width;
-  canvas.height = standing.height;
-  const ctx = canvas.getContext('2d')!;
   const drink = findCoffee(coffee);
   const angle = 0.4 + lift * 2.3;
   const stretch = (73 + lift * 27) / 73;
@@ -17,9 +14,8 @@ export function composeDrinkingAvatar(
     palmY = 62 * stretch;
   const handX = 310 + palmX * Math.cos(angle) - palmY * Math.sin(angle);
   const handY = 326 + palmX * Math.sin(angle) + palmY * Math.cos(angle);
-  for (let cell = 0; cell < 4; cell++) {
+  {
     ctx.save();
-    ctx.translate(cell * 512, 0);
     ctx.drawImage(standing, 0, 0, 512, 512, 0, 0, 512, 512);
     ctx.clearRect(306, 324, 48, 78);
     ctx.save();
@@ -70,5 +66,4 @@ export function composeDrinkingAvatar(
     ctx.restore();
     ctx.restore();
   }
-  return canvas;
 }
