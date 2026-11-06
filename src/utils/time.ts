@@ -10,10 +10,10 @@ export function koreanHour() {
   );
 }
 
-// Temporary preview: dawn at 00:45 KST on Nov 7, then rejoin the regular cycle at 06:00.
+// Temporary preview: dawn at 00:52 KST on Nov 7, then rejoin the regular cycle at 06:00.
 export function isParkNight(now = Date.now()) {
   if (
-    now >= Date.parse('2026-11-07T00:45:00+09:00') &&
+    now >= Date.parse('2026-11-07T00:52:00+09:00') &&
     now < Date.parse('2026-11-07T06:00:00+09:00')
   )
     return false;
