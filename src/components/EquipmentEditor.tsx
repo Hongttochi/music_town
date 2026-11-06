@@ -94,4 +94,14 @@ const accessoryGroups = [
       ['crossbody', '크로스백'],
     ],
   },
+  {
+    key: 'wristwear',
+    label: '손목',
+    items: [
+      ['none', '빼기'],
+      ['bracelet', '팔찌'],
+      ['watch', '손목시계'],
+      ['apple-watch', '애플워치'],
+    ],
+  },
 ] as const;

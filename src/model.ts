@@ -26,6 +26,7 @@ export type Avatar = {
   earwear?: 'none' | 'headset' | 'airpods';
   eyewear?: 'none' | 'sunglasses' | 'glasses';
   bag?: 'none' | 'backpack' | 'crossbody';
+  wristwear?: 'none' | 'bracelet' | 'watch' | 'apple-watch';
   instrument?: 'none' | 'guitar' | 'microphone' | 'electric' | 'ukulele' | 'tambourine';
 };
 export type Stage = {

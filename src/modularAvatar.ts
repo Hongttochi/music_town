@@ -1,3 +1,4 @@
+import { drawWristwear } from './avatarWristwear';
 import { drawExtraEyes, drawExtraNose } from './avatarExtraFeatures';
 import { drawExtraHair } from './avatarExtraHair';
 import { drawOutfit } from './avatarOutfit';
@@ -136,6 +137,7 @@ export function composeAvatar(layers: Layers, avatar: Partial<Avatar>) {
       avatar.earwear,
       avatar.eyewear,
       avatar.bag,
+      avatar.wristwear,
       avatar.instrument || 'none',
       avatar.clothingStyle,
       avatar.shirt,
@@ -268,6 +270,7 @@ export function composeAvatar(layers: Layers, avatar: Partial<Avatar>) {
       }
     }
     drawEquipment(ctx, avatar, direction);
+    drawWristwear(ctx, avatar, direction);
     if (avatar.instrument === 'microphone') {
       // Restore the palm over the handle so the microphone is visibly gripped.
       const handX = [329, 262, 182, 250][direction];
