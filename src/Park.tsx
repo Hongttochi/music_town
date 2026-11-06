@@ -42,7 +42,6 @@ export function Park(props: Props) {
   const useBench = useRef<() => void>(() => {});
   const coffeeBubble = useRef<HTMLButtonElement>(null);
   const [coffeeAction, setCoffeeAction] = useState<string | null>(null);
-  const [coffeeSelected, setCoffeeSelected] = useState<CoffeeId>('americano');
   const [coffeeMenuOpen, setCoffeeMenuOpen] = useState(false);
   const useCoffee = useRef<(order?: CoffeeId) => void>(() => {});
   useEffect(() => {
@@ -1022,7 +1021,6 @@ export function Park(props: Props) {
           onClose={() => setCoffeeMenuOpen(false)}
           onOrder={(id) => {
             setCoffeeMenuOpen(false);
-            setCoffeeSelected(id);
             useCoffee.current(id);
           }}
         />
@@ -1038,9 +1036,9 @@ export function Park(props: Props) {
           onClick={() => useCoffee.current()}
         >
           <img
-            src={`/icons/coffee/${coffeeSelected}.png`}
-            width={32}
-            height={32}
+            src="/icons/coffee/americano.png"
+            width={24}
+            height={24}
             alt=""
             aria-hidden="true"
           />

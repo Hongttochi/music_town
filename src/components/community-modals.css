@@ -409,6 +409,19 @@ dialog.delete-account-dialog {
   background: #a43b35;
 }
 
+.coffee-action.town-button {
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 4px;
+  border-radius: 12px;
+}
+.coffee-action::after {
+  width: 8px;
+  height: 8px;
+  bottom: -5px;
+  left: 12px;
+}
 .coffee-action.town-button:disabled {
   opacity: 1;
   cursor: wait;
