@@ -599,13 +599,8 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
             <ParticipantProfile
               person={selectedPerson}
               onReport={() => setPanel('report')}
-              fanStats={
-                <FanProfile
-                  userId={selectedPerson.id}
-                  own={selectedPerson.id === account.id}
-                  demo={account.demo}
-                />
-              }
+              own={selectedPerson.id === account.id}
+              demo={account.demo}
             />
           </>
         )}

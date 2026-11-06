@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { ActivityChart } from './ActivityChart';
 import { useEffect, useState } from 'react';
 import { useFanStats } from '../../hooks/useFanStats';
@@ -10,13 +11,43 @@ export function FanProfile({
   userId,
   own = false,
   demo = false,
+  children,
 }: {
   userId?: string;
   own?: boolean;
   demo?: boolean;
+  children?: (content: ReactNode, actions: ReactNode) => ReactNode;
 }) {
   const { stats, error, busy, act, refresh } = useFanStats(userId, demo);
-  return (
+  const actions = !own && !demo && userId && (
+    <div className="fan-actions">
+      <Button
+        variant="plain"
+        size="icon"
+        className="fan-action-icon"
+        disabled={!stats || busy}
+        aria-pressed={stats?.following ?? false}
+        aria-label={stats?.following ? '팔로우 취소' : '팔로우'}
+        title={stats?.following ? '팔로우 취소' : '팔로우'}
+        onClick={() => void act('follow', !stats?.following)}
+      >
+        <img src="/icons/profile-followers.png" width={28} height={28} alt="" />
+      </Button>
+      <Button
+        variant="plain"
+        size="icon"
+        className="fan-action-icon"
+        disabled={!stats || busy}
+        aria-pressed={stats?.hearted ?? false}
+        aria-label={stats?.hearted ? '하트 취소' : '하트 보내기'}
+        title={stats?.hearted ? '하트 취소' : '하트 보내기'}
+        onClick={() => void act('heart', !stats?.hearted)}
+      >
+        <img src="/icons/profile-received-heart.png" width={28} height={28} alt="" />
+      </Button>
+    </div>
+  );
+  const content = (
     <section className="fan-profile" aria-label="팬 활동">
       <dl className="fan-counts">
         <div>
@@ -34,34 +65,7 @@ export function FanProfile({
           </dd>
         </div>
       </dl>
-      {!own && !demo && userId && (
-        <div className="fan-actions">
-          <Button
-            variant="plain"
-            size="icon"
-            className="fan-action-icon"
-            disabled={!stats || busy}
-            aria-pressed={stats?.following ?? false}
-            aria-label={stats?.following ? '팔로우 취소' : '팔로우'}
-            title={stats?.following ? '팔로우 취소' : '팔로우'}
-            onClick={() => void act('follow', !stats?.following)}
-          >
-            <img src="/icons/profile-followers.png" width={28} height={28} alt="" />
-          </Button>
-          <Button
-            variant="plain"
-            size="icon"
-            className="fan-action-icon"
-            disabled={!stats || busy}
-            aria-pressed={stats?.hearted ?? false}
-            aria-label={stats?.hearted ? '하트 취소' : '하트 보내기'}
-            title={stats?.hearted ? '하트 취소' : '하트 보내기'}
-            onClick={() => void act('heart', !stats?.hearted)}
-          >
-            <img src="/icons/profile-received-heart.png" width={28} height={28} alt="" />
-          </Button>
-        </div>
-      )}
+      {!children && actions}
       <ActivityChart stats={stats} />
       {demo && <small>로그인 후 팬 정보를 볼 수 있어요.</small>}
       {error && (
@@ -74,6 +78,7 @@ export function FanProfile({
       )}
     </section>
   );
+  return children ? children(content, actions) : content;
 }
 export function FollowedProfiles({
   demo,

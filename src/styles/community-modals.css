@@ -437,33 +437,33 @@ dialog.delete-account-dialog {
 
 /* Compact park controls, including touch layouts. */
 .topbar .header-right {
-  padding: 4px 6px;
-  gap: 4px;
+  padding: 3px 4px;
+  gap: 2px;
   border-radius: 14px;
 }
 .topbar .header-right > .town-button {
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  min-height: 32px;
-  padding: 5px;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  min-height: 26px;
+  padding: 3px;
   border-radius: 10px;
 }
 .topbar .header-right img {
-  width: 20px;
-  height: 20px;
+  width: 17px;
+  height: 17px;
 }
 .town-button.stage-toggle {
-  min-height: 34px;
-  height: 34px;
-  padding: 5px 9px;
-  gap: 6px;
-  font-size: 10px;
+  min-height: 28px;
+  height: 28px;
+  padding: 3px 7px;
+  gap: 4px;
+  font-size: 9px;
   border-radius: 12px;
 }
 .town-button.stage-toggle > img {
-  width: 18px;
-  height: 18px;
+  width: 15px;
+  height: 15px;
 }
 .town-button.stage-toggle .pill {
   padding: 1px 5px;

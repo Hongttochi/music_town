@@ -206,3 +206,31 @@ dialog.profile-dialog[data-panel='participant'] > .profile-sheet {
     font-size: 17px;
   }
 }
+
+.participant-name-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.participant-name-actions .fan-actions {
+  gap: 2px;
+  margin: 0;
+}
+.participant-name-actions .fan-actions > .town-button.fan-action-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  min-height: 28px;
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.participant-name-actions .fan-action-icon img {
+  width: 20px;
+  height: 20px;
+}
