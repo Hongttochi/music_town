@@ -300,7 +300,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
         {enteringChannel !== null && (
           <ChannelEntryDialog
             channel={enteringChannel}
-            avatar={avatar}
+            avatar={memberProfile.completed ? avatar : undefined}
             ready={entrySceneReady}
             onComplete={() => {
               entryPending.current = false;

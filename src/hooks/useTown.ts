@@ -1,3 +1,4 @@
+import { clampParkPosition } from '../utils/parkBounds';
 import { errorCode, logEvent } from '../services/telemetry';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '../services/auth';
@@ -60,6 +61,8 @@ export function useTown(
     (action: string, channel?: number, stage?: number) => {
       const task = async () => {
         if (!supabase) throw new Error('로그인 연결을 확인해 주세요.');
+        // Recover coordinates left outside the supported area by an older client.
+        position.current = clampParkPosition(position.current);
         const { data, error: failure } = await supabase.rpc('town_action', {
           action,
           client: client.current,

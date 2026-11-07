@@ -189,3 +189,21 @@ dialog.town-panel[data-panel='channels'] {
 .park-directory .directory-row[data-entering='true'] {
   --channel-opacity: 1;
 }
+
+/* Match the compact menu headers, including short landscape screens. */
+dialog.town-panel[open][data-panel='channels'] {
+  padding: 10px 18px 14px;
+}
+dialog.town-panel[open][data-panel='channels'] .panel-heading {
+  min-height: 26px;
+  margin: 0 0 8px;
+  padding: 0 0 6px;
+  gap: 7px;
+}
+dialog.town-panel[open][data-panel='channels'] .panel-heading .town-button {
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  min-height: 26px;
+  padding: 4px;
+}

@@ -1,3 +1,4 @@
+import { clampParkPosition } from '../../utils/parkBounds';
 import { createSchool, SCHOOL_SPOT, overlapsSchool } from './school';
 import { PARK_PATHS } from './parkPaths';
 import { remoteMovementStep } from '../../utils/remoteMovement';
@@ -850,10 +851,10 @@ export function createParkScene({
       dx /= len;
       dz /= len;
     }
-    const next = {
-        x: Math.max(0, Math.min(1650, p.position.current.x + dx * 105 * dt)),
-        y: Math.max(150, Math.min(790, p.position.current.y + dz * 105 * dt)),
-      },
+    const next = clampParkPosition({
+        x: p.position.current.x + dx * 105 * dt,
+        y: p.position.current.y + dz * 105 * dt,
+      }),
       point = world(next);
     if (
       canCrossRiver(world(p.position.current), point) &&

@@ -180,3 +180,13 @@ dialog.town-panel.notice-board-dialog {
     padding: 16px 18px 10px;
   }
 }
+
+.notice-paper footer .town-brand {
+  flex: none;
+  margin: 0 0 0 auto;
+  align-self: flex-end;
+}
+.notice-paper footer .notice-friends {
+  flex: none;
+  margin-right: auto;
+}

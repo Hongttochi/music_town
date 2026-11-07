@@ -1,11 +1,11 @@
 .channel-entry {
   outline: none;
-  width: 280px;
+  width: 220px;
   max-width: calc(100vw - 32px);
   max-height: calc(100dvh - 24px);
-  padding: 20px;
+  padding: 16px;
   border: 1px solid #dce3cc;
-  border-radius: 24px;
+  border-radius: 18px;
   background: #fffdf2;
   color: #536447;
   text-align: center;
@@ -17,9 +17,9 @@
 }
 .channel-entry-art {
   position: relative;
-  width: 110px;
-  height: 110px;
-  margin: 0 auto 12px;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 9px;
   background: #eff3df;
   border-radius: 50%;
 }
@@ -40,44 +40,49 @@
   right: 6px;
   top: 8px;
   color: #b7a075;
-  font-size: 24px;
+  font-size: 18px;
 }
 .channel-entry-ground {
   position: absolute;
-  width: 44px;
-  height: 8px;
+  width: 32px;
+  height: 6px;
   background: #798c6933;
   border-radius: 50%;
   bottom: 5px;
-  left: 33px;
+  left: 24px;
 }
 .channel-entry h2 {
-  font-size: 14px;
+  font-size: 12px;
   margin: 0 0 8px;
 }
 .channel-entry p {
-  font-size: 11px;
+  font-size: 10px;
   color: #859075;
   margin: 0;
 }
-.channel-entry-dots {
-  display: flex;
-  justify-content: center;
-  gap: 5px;
-  margin-top: 14px;
-}
-.channel-entry-dots i {
-  width: 4px;
-  height: 4px;
-  background: #8fa574;
-  border-radius: 50%;
+.channel-entry-mori {
+  position: relative;
+  z-index: 1;
+  width: 48px;
+  height: 72px;
+  margin-top: 4px;
+  object-fit: contain;
   animation: entry-walk 700ms ease-in-out infinite alternate;
 }
-.channel-entry-dots i:nth-child(2) {
-  animation-delay: 150ms;
+.channel-entry-spinner {
+  display: block;
+  width: 14px;
+  height: 14px;
+  margin: 10px auto 0;
+  border: 2px solid #e1e8d6;
+  border-top-color: #819a65;
+  border-radius: 50%;
+  animation: entry-spin 900ms linear infinite;
 }
-.channel-entry-dots i:nth-child(3) {
-  animation-delay: 300ms;
+@keyframes entry-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 @keyframes entry-walk {
   to {
@@ -86,7 +91,8 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .channel-entry-art .modular-portrait,
-  .channel-entry-dots i {
+  .channel-entry-mori,
+  .channel-entry-spinner {
     animation: none;
   }
 }
