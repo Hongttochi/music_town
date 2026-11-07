@@ -18,3 +18,5 @@ Supabase SQL Editor에서 `supabase/migrations/202611060002_profile_fans.sql` �
 ## 팔로워·하트 보낸 사람 목록
 
 `supabase/migrations/202611070001_profile_fan_people.sql`을 기존 팬 정보 마이그레이션 다음에 적용합니다. 로그인한 사용자에게 완료된 공개 프로필만 50명씩 반환하며, 이메일 등 계정 정보와 팬 테이블 직접 접근 권한은 노출하지 않습니다. 프런트엔드만 배포하면 목록 조회가 실패하므로 DB 적용도 필요합니다.
+
+이미 `profile_fans` 테이블이 있다면 기존 `202611060002_profile_fans.sql`을 다시 실행하지 마세요. `relation "profile_fans" already exists` 오류는 기존 테이블이 있다는 뜻입니다. 테이블을 삭제하지 말고 새 `202611070001_profile_fan_people.sql`만 실행하세요. 새 함수 SQL은 재실행할 수 있습니다. SQL 편집기에 이전 실패 트랜잭션이 남았다면 먼저 `ROLLBACK;`을 실행하세요.

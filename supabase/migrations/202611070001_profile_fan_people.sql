@@ -1,6 +1,6 @@
 begin;
 -- Expose only completed public profiles, never auth account details or raw fan rows.
-create function public.profile_fan_people(target uuid, fan_kind text, page_offset integer default 0)
+create or replace function public.profile_fan_people(target uuid, fan_kind text, page_offset integer default 0)
 returns jsonb language plpgsql security definer set search_path='' as $$
 begin
   if auth.uid() is null then raise exception 'AUTH_REQUIRED'; end if;

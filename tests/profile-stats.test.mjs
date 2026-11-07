@@ -132,6 +132,14 @@ test('fan people separates kinds, paginates, hides incomplete profiles and rejec
     (await db.query('select public.profile_fan_people($1,$2,$3) as result', [b, kind, offset]))
       .rows[0].result;
   try {
+    await db.exec('reset role');
+    await db.exec(
+      await readFile(
+        new URL('../supabase/migrations/202611070001_profile_fan_people.sql', import.meta.url),
+        'utf8',
+      ),
+    );
+    await db.exec('set role authenticated');
     assert.deepEqual(await people('follow'), []);
     await stats(db, b, 'follow');
     await db.exec(`set request.jwt.claim.sub='${c}'`);
