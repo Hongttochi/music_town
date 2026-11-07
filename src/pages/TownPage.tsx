@@ -1,3 +1,4 @@
+import { ChannelEntryDialog } from '../components/park/ChannelEntryDialog';
 import { useParkTimeTransition } from '../hooks/useParkTimeTransition';
 import { TimeTransition } from '../components/park/TimeTransition';
 import { PerformanceControls } from '../components/park/PerformanceControls';
@@ -62,6 +63,10 @@ type Panel =
   | 'report'
   | null;
 export function TownPage({ account, initial }: { account: Account; initial: SavedProfile | null }) {
+  const [enteringChannel, setEnteringChannel] = useState<number | null>(null);
+  const entryPending = useRef(false);
+  const [entrySceneReady, setEntrySceneReady] = useState(false);
+  const [entryRevision, setEntryRevision] = useState(0);
   const [entered, setEntered] = useState(false);
   const storagePrefix = `mt-${account.id}`;
   const [showStages, setShowStages] = useState(false);
@@ -262,8 +267,16 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
     }
   };
   const changeChannel = async (id: number) => {
+    if (entryPending.current) return;
+    entryPending.current = true;
+    setEntrySceneReady(false);
+    setEnteringChannel(id);
     try {
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      );
       if (!account.demo) await town.act('enter', id);
+      setEntryRevision((value) => value + 1);
       setEntered(true);
       setChannel(id);
       setNear(null);
@@ -272,6 +285,8 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
       notify(`${String(id + 1).padStart(2, '0')}번 공원에 도착했어요.`);
     } catch (error) {
       setActionError((error as Error).message);
+      entryPending.current = false;
+      setEnteringChannel(null);
     }
   };
   const title = (_eyebrow: string, name: string) => (
@@ -282,11 +297,23 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
   return (
     <>
       <main id="app" className={entered ? '' : 'before-entry'}>
+        {enteringChannel !== null && (
+          <ChannelEntryDialog
+            channel={enteringChannel}
+            avatar={avatar}
+            ready={entrySceneReady}
+            onComplete={() => {
+              entryPending.current = false;
+              setEnteringChannel(null);
+            }}
+          />
+        )}
         <TimeTransition phase={timeTransition.phase} message={timeTransition.message} />
         {entered && (
           <>
             <Park
-              key={`${timeTransition.revision}|${channel}|${stages.map((s) => `${s.id}:${s.x}:${s.y}`).join('|')}`}
+              onReady={() => setEntrySceneReady(true)}
+              key={`${entryRevision}|${timeTransition.revision}|${channel}|${stages.map((s) => `${s.id}:${s.x}:${s.y}`).join('|')}`}
               night={night}
               timeTransition={timeTransition.active}
               focusNpc={timeTransition.focusNpc}

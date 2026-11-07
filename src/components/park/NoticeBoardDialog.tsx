@@ -1,6 +1,8 @@
+import { ModularPortrait } from '../avatar/ModularPortrait';
+import { defaultAvatar } from '../../data/model';
 import { X } from 'lucide-react';
 import { useEffect, useId, useRef } from 'react';
-import { Flaticon } from '../ui/Flaticon';
+import { Flaticon, Logo } from '../ui/Flaticon';
 import { notices } from '../../data/notices';
 import { Button } from '../ui/Button';
 import { DialogPanel } from '../ui/Panel';
@@ -36,9 +38,9 @@ export function NoticeBoardDialog({ onClose }: { onClose: () => void }) {
       }}
     >
       <header className="notice-board-heading">
-        <Flaticon name="blackboard" size={38} />
+        <Flaticon name="blackboard" size={24} />
         <div>
-          <span>MUSIC TOWN · 공지사항</span>
+          <span>공원의 작은 소식</span>
           <h2 id={title}>마을 게시판</h2>
         </div>
         <Button
@@ -61,7 +63,21 @@ export function NoticeBoardDialog({ onClose }: { onClose: () => void }) {
             {notice.paragraphs.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}
-            <footer>MUSIC TOWN</footer>
+            <footer>
+              <div className="notice-friends" aria-hidden="true">
+                <ModularPortrait avatar={{ ...defaultAvatar, instrument: 'guitar' }} />
+                <ModularPortrait
+                  avatar={{
+                    ...defaultAvatar,
+                    hair: 6,
+                    hairColor: '#d87593',
+                    earwear: 'headset',
+                    shirt: '#96b7a1',
+                  }}
+                />
+              </div>
+              <Logo />
+            </footer>
           </article>
         ))}
       </div>

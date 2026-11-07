@@ -2,11 +2,11 @@ dialog.town-panel[data-panel='channels'] {
   width: 440px;
   max-width: 92vw;
   padding: 24px 26px;
-  border: 6px solid #ba966b;
-  border-radius: 8px;
-  background: repeating-linear-gradient(2deg, transparent 0 25px, #ac805208 26px 27px), #e9d5b3;
+  border: 1px solid #d9dfc5;
+  border-radius: 22px;
+  background: #fffdf1;
   box-shadow:
-    0 5px 0 #97734e,
+    0 3px 0 #a5b28a30,
     0 16px 40px #49372026;
 }
 .town-panel[data-panel='channels'] .panel-heading {
@@ -46,12 +46,12 @@ dialog.town-panel[data-panel='channels'] {
   width: 100%;
   min-height: 49px;
   padding: 7px 10px;
-  background: linear-gradient(0deg, #d9b98c22, transparent), #f5e6c9;
-  border: 1px solid #c6a87c;
-  border-radius: 4px;
+  background: #f4f6e9;
+  border: 1px solid #e1e7d4;
+  border-radius: 14px;
   text-align: left;
   color: #67533c;
-  box-shadow: 0 2px 0 #b38e6033;
+  box-shadow: none;
 }
 .town-button.directory-row + .directory-row {
   margin-top: 6px;
@@ -61,10 +61,14 @@ dialog.town-panel[data-panel='channels'] {
   background: #ede6c5;
 }
 .directory-number {
-  font-size: 19px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: -1px;
-  color: #a17d4c;
+  color: #758b5c;
+  background: #e7edd8;
+  border-radius: 10px;
+  padding: 6px;
+  text-align: center;
   font-variant-numeric: tabular-nums;
 }
 .directory-name {
@@ -140,7 +144,7 @@ dialog.town-panel[data-panel='channels'] {
     padding: 4px 8px;
   }
   .directory-number {
-    font-size: 16px;
+    font-size: 12px;
   }
   .directory-footnote {
     margin: 8px 3px 0;

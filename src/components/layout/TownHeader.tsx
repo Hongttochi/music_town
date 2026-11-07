@@ -1,3 +1,4 @@
+import './town-header.css';
 import { Button } from '../ui/Button';
 import { ProfileIcon } from '../profile/ProfileIcon';
 import { Flaticon } from '../ui/Flaticon';

@@ -26,6 +26,12 @@ async function fixture() {
       'utf8',
     ),
   );
+  await db.exec(
+    await readFile(
+      new URL('../supabase/migrations/202611070001_profile_fan_people.sql', import.meta.url),
+      'utf8',
+    ),
+  );
   await db.exec(`set role authenticated; set request.jwt.claim.sub='${a}';`);
   return db;
 }
@@ -115,6 +121,50 @@ test('expired sessions never credit the offline gap and KST midnight splits days
     value = await stats(db, a);
     assert.equal(value.days.at(-2).onlineSeconds, 30);
     assert.equal(value.days.at(-1).onlineSeconds, 30);
+  } finally {
+    await db.close();
+  }
+});
+
+test('fan people separates kinds, paginates, hides incomplete profiles and rejects anonymous calls', async () => {
+  const db = await fixture();
+  const people = async (kind, offset = 0) =>
+    (await db.query('select public.profile_fan_people($1,$2,$3) as result', [b, kind, offset]))
+      .rows[0].result;
+  try {
+    assert.deepEqual(await people('follow'), []);
+    await stats(db, b, 'follow');
+    await db.exec(`set request.jwt.claim.sub='${c}'`);
+    await stats(db, b, 'heart');
+    assert.deepEqual(
+      (await people('follow')).map((p) => p.id),
+      [a],
+    );
+    assert.deepEqual(
+      (await people('heart')).map((p) => p.id),
+      [c],
+    );
+    assert.deepEqual(await people('follow', 1), []);
+    assert.deepEqual(Object.keys((await people('heart'))[0]).sort(), [
+      'avatar',
+      'bio',
+      'id',
+      'instagram',
+      'role',
+      'soundcloud',
+      'x',
+      'y',
+    ]);
+    await assert.rejects(people('invalid'), /INVALID_ARGUMENT/);
+    await assert.rejects(people('heart', -1), /INVALID_ARGUMENT/);
+    await db.exec(
+      `reset role; update public.member_profiles set completed=false where id='${c}'; set role authenticated;`,
+    );
+    assert.deepEqual(await people('heart'), []);
+    await db.exec("set request.jwt.claim.sub=''");
+    await assert.rejects(people('heart'), /AUTH_REQUIRED/);
+    await db.exec('reset role; set role anon;');
+    await assert.rejects(people('follow'), /permission denied/);
   } finally {
     await db.close();
   }

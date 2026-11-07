@@ -100,7 +100,8 @@ export function createSchool(scene: T.Scene) {
   scene.add(entranceLight);
   let lastMinute = -1;
   return {
-    update(time: number) {
+    npcPosition: rabbit.sprite.position,
+    update(time: number, paused = false) {
       const minute = Math.floor(Date.now() / 60000);
       if (minute !== lastMinute) {
         lastMinute = minute;
@@ -110,7 +111,7 @@ export function createSchool(scene: T.Scene) {
         hourHand.rotation.z =
           (-(((date.getUTCHours() + 9) % 12) + date.getUTCMinutes() / 60) * Math.PI) / 6;
       }
-      rabbit.update(time);
+      rabbit.update(time, paused);
     },
     dispose() {
       rabbit.dispose();

@@ -1,4 +1,4 @@
-import { createSchool, SCHOOL_SPOT, SCHOOL_NPC_SPOT, overlapsSchool } from './school';
+import { createSchool, SCHOOL_SPOT, overlapsSchool } from './school';
 import { PARK_PATHS } from './parkPaths';
 import { remoteMovementStep } from '../../utils/remoteMovement';
 import type { useSoundEffects } from '../../hooks/useSoundEffects';
@@ -68,6 +68,7 @@ export function createParkScene({
     renderer = new T.WebGLRenderer({ canvas: el, antialias: true });
   } catch {
     setError(true);
+    latest.current.onReady?.();
     return;
   }
   const touchDevice = matchMedia('(pointer: coarse)').matches;
@@ -289,7 +290,8 @@ export function createParkScene({
   }
   const school = createSchool(scene);
   obstacles.push({ x: SCHOOL_SPOT.x, z: SCHOOL_SPOT.z, r: 3.2 });
-  obstacles.push({ x: SCHOOL_NPC_SPOT.x, z: SCHOOL_NPC_SPOT.z, r: 0.45 });
+  const npcObstacle = { x: school.npcPosition.x, z: school.npcPosition.z, r: 0.45 };
+  obstacles.push(npcObstacle);
   const campfire = createCampfire(scene);
   obstacles.push({ x: CAMPFIRE_SPOT.x, z: CAMPFIRE_SPOT.z, r: CAMPFIRE_RADIUS });
   const noticeBoard = createNoticeBoard(scene);
@@ -659,13 +661,16 @@ export function createParkScene({
     cameraFocusGoal = new T.Vector3();
   const visitors = new Map<string, { group: T.Group; appearance: string; performing: boolean }>();
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let readyReported = false;
   let entranceReady = false,
     entranceStart: number | null = null;
   void loadAvatarLayers()
     .then(() => {
       entranceReady = true;
     })
-    .catch(() => {});
+    .catch(() => {
+      entranceReady = true;
+    });
   const entranceMaterial = new T.MeshBasicMaterial({
     color: '#fff2c3',
     transparent: true,
@@ -783,7 +788,14 @@ export function createParkScene({
       stopCoffeeSound = sound.current('coffeemachineEnd');
     }
     if (coffeePhase === 'drinking' && coffeeElapsed >= 3600) resetCoffee();
-    school.update(time);
+    school.update(
+      time,
+      !!p.timeTransition ||
+        !!document.querySelector('dialog[open]') ||
+        world(p.position.current).distanceTo(school.npcPosition) < 3,
+    );
+    npcObstacle.x = school.npcPosition.x;
+    npcObstacle.z = school.npcPosition.z;
     coffeeShop.update(coffeePhase, coffeeElapsed / 2300, orderedCoffee);
     player.userData.coffee = orderedCoffee;
     player.userData.coffeePreparing = coffeePhase === 'brewing' || coffeePhase === 'ready';
@@ -795,7 +807,7 @@ export function createParkScene({
       p.performing === null &&
       !seatedBench &&
       coffeePhase === 'idle' &&
-      world(p.position.current).distanceTo(SCHOOL_NPC_SPOT) < 3;
+      world(p.position.current).distanceTo(school.npcPosition) < 3;
     if (nearNpc !== npcShown) {
       npcShown = nearNpc;
       setNearNpc(nearNpc);
@@ -839,7 +851,7 @@ export function createParkScene({
       dz /= len;
     }
     const next = {
-        x: Math.max(240, Math.min(1650, p.position.current.x + dx * 105 * dt)),
+        x: Math.max(0, Math.min(1650, p.position.current.x + dx * 105 * dt)),
         y: Math.max(150, Math.min(790, p.position.current.y + dz * 105 * dt)),
       },
       point = world(next);
@@ -928,7 +940,7 @@ export function createParkScene({
       stageZoom = 2.1;
     }
     if (p.focusNpc) {
-      cameraFocusGoal.copy(SCHOOL_NPC_SPOT);
+      cameraFocusGoal.copy(school.npcPosition);
       stageZoom = 2.3;
     }
     const smoothing = reducedMotion ? 1 : 1 - Math.exp(-dt * 4.5);
@@ -954,7 +966,7 @@ export function createParkScene({
     camera.lookAt(target);
     camera.updateMatrixWorld();
     if (npcBubble.current) {
-      const anchor = SCHOOL_NPC_SPOT.clone();
+      const anchor = school.npcPosition.clone();
       anchor.y = 3.1;
       anchor.project(camera);
       npcBubble.current.style.left = `${(anchor.x * 0.5 + 0.5) * el.clientWidth}px`;
@@ -1068,6 +1080,10 @@ export function createParkScene({
     }
     imageCharacters.update(player, walking, time);
     renderer.render(scene, camera);
+    if (entranceReady && !readyReported) {
+      readyReported = true;
+      latest.current.onReady?.();
+    }
     frame = requestAnimationFrame(animate);
   }
   frame = requestAnimationFrame(animate);

@@ -29,8 +29,11 @@ export function CoffeeOrderDialog({
         onClose();
       }}
     >
+      <div className="coffee-menu-brand">
+        PARK COFFEE <span>산책길의 작은 카페</span>
+      </div>
       <div id={title}>
-        <PanelHeading title="어떤 커피 마실까요?" onClose={onClose} />
+        <PanelHeading title="오늘의 커피" onClose={onClose} />
       </div>
       <div className="coffee-menu" role="group" aria-label="커피 메뉴">
         {coffeeMenu.map((drink) => (
@@ -49,15 +52,19 @@ export function CoffeeOrderDialog({
               alt=""
               aria-hidden="true"
             />
-            <span>
+            <span className="coffee-menu-description">
               <strong>{drink.name}</strong>
               <small>{drink.detail}</small>
+            </span>
+            <span className="coffee-selection-mark" aria-hidden="true">
+              {selected === drink.id ? '✓' : ''}
             </span>
           </Button>
         ))}
       </div>
       <div className="coffee-order-actions">
-        <Button variant="secondary" data-sound="cancel" onClick={onClose}>
+        <small>공원에서 즐기는 무료 한 잔</small>
+        <Button variant="ghost" data-sound="cancel" onClick={onClose}>
           취소
         </Button>
         <Button

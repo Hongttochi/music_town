@@ -52,8 +52,8 @@ export function ParkMinimap({
       role="img"
       aria-label={`공원 지도 · 나와 다른 참가자 ${participants.length}명`}
     >
-      <svg viewBox="-24 -16 64 32" aria-hidden="true">
-        <rect x={-24} y={-16} width={64} height={32} rx={3} fill="#c4d6a5" />
+      <svg viewBox="-30 -16 70 32" aria-hidden="true">
+        <rect x={-30} y={-16} width={70} height={32} rx={3} fill="#c4d6a5" />
         <path d={`M${RIVER.left},-16V16H${RIVER.right}V-16Z`} fill="#91c6c4" />
         <g fill="none" stroke="#eee3c8" strokeLinecap="round" strokeLinejoin="round">
           {paths.map((p, i) => (

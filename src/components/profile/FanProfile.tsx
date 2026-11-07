@@ -1,3 +1,4 @@
+import { FanPeopleDialog } from './FanPeopleDialog';
 import type { ReactNode } from 'react';
 import { ActivityChart } from './ActivityChart';
 import { useEffect, useState } from 'react';
@@ -18,6 +19,7 @@ export function FanProfile({
   demo?: boolean;
   children?: (content: ReactNode, actions: ReactNode) => ReactNode;
 }) {
+  const [peopleKind, setPeopleKind] = useState<'follow' | 'heart' | null>(null);
   const { stats, error, busy, act, refresh } = useFanStats(userId, demo);
   const actions = !own && !demo && userId && (
     <div className="fan-actions">
@@ -53,15 +55,29 @@ export function FanProfile({
         <div>
           <dt>팔로워</dt>
           <dd>
-            <img src="/icons/profile-followers.png" width={20} height={20} alt="" />
-            <span>{stats ? stats.followers.toLocaleString('ko-KR') : '—'}</span>
+            <button
+              type="button"
+              disabled={demo || !userId}
+              aria-label="팔로워 목록 보기"
+              onClick={() => setPeopleKind('follow')}
+            >
+              <img src="/icons/profile-followers.png" width={20} height={20} alt="" />
+              <span>{stats ? stats.followers.toLocaleString('ko-KR') : '—'}</span>
+            </button>
           </dd>
         </div>
         <div>
           <dt>받은 하트</dt>
           <dd>
-            <img src="/icons/profile-received-heart.png" width={20} height={20} alt="" />
-            <span>{stats ? stats.hearts.toLocaleString('ko-KR') : '—'}</span>
+            <button
+              type="button"
+              disabled={demo || !userId}
+              aria-label="하트를 보낸 사람들 보기"
+              onClick={() => setPeopleKind('heart')}
+            >
+              <img src="/icons/profile-received-heart.png" width={20} height={20} alt="" />
+              <span>{stats ? stats.hearts.toLocaleString('ko-KR') : '—'}</span>
+            </button>
           </dd>
         </div>
       </dl>
@@ -78,7 +94,19 @@ export function FanProfile({
       )}
     </section>
   );
-  return children ? children(content, actions) : content;
+  return (
+    <>
+      {children ? children(content, actions) : content}
+      {peopleKind && userId && (
+        <FanPeopleDialog
+          key={`${userId}:${peopleKind}`}
+          userId={userId}
+          kind={peopleKind}
+          onClose={() => setPeopleKind(null)}
+        />
+      )}
+    </>
+  );
 }
 export function FollowedProfiles({
   demo,

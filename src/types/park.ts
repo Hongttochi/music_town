@@ -2,6 +2,7 @@ import type { Avatar, Stage } from '../data/model';
 import type { Participant } from '../hooks/useTown';
 export type Position = { x: number; y: number };
 export type ParkProps = {
+  onReady?: () => void;
   night?: boolean;
   timeTransition?: boolean;
   focusNpc?: boolean;

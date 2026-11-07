@@ -1,0 +1,77 @@
+dialog.town-panel.fan-people-dialog {
+  width: 360px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 24px);
+  padding: 14px 18px;
+  border-radius: 18px;
+  overflow-y: auto;
+}
+.fan-person {
+  display: flex;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e9dd;
+  align-items: flex-start;
+}
+.fan-person .modular-portrait {
+  width: 42px;
+  height: 48px;
+  flex: none;
+  background: #eff2e6;
+  border-radius: 12px;
+}
+.fan-person canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.fan-person-details {
+  min-width: 0;
+  flex: 1;
+}
+.fan-person-details strong {
+  display: block;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.fan-person-details small {
+  font-size: 10px;
+  color: #859078;
+}
+.fan-person-details p {
+  font-size: 11px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 6px 0;
+}
+.fan-person-details .profile-social-links {
+  align-items: flex-start;
+  margin-top: 6px;
+}
+.fan-people-list > p {
+  font-size: 11px;
+  padding: 16px 0;
+  color: #7e8974;
+}
+.fan-counts dd > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  padding: 3px 0;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 5px;
+}
+.fan-counts dd > button:not(:disabled):hover {
+  background: #edf1e3;
+}
+.fan-counts dd > button:focus-visible {
+  outline: 2px solid #81996c;
+  outline-offset: 3px;
+}
+.fan-counts dd > button:disabled {
+  cursor: default;
+}
