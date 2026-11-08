@@ -11,6 +11,9 @@ export function useParkScene(props: ParkProps) {
     latest = useRef(props);
   latest.current = props;
   const [error, setError] = useState(false);
+  const barBubble = useRef<HTMLButtonElement>(null);
+  const useBar = useRef<() => void>(() => {});
+  const [barAction, setBarAction] = useState<'enter' | 'exit' | 'closed' | null>(null);
   const benchBubble = useRef<HTMLButtonElement>(null);
   const [benchAction, setBenchAction] = useState<'sit' | null>(null);
   const useBench = useRef<() => void>(() => {});
@@ -37,6 +40,9 @@ export function useParkScene(props: ParkProps) {
         el: canvas.current!,
         latest,
         sound,
+        barBubble,
+        useBar,
+        setBarAction,
         benchBubble,
         noticeBubble,
         npcBubble,
@@ -54,6 +60,9 @@ export function useParkScene(props: ParkProps) {
   );
   return {
     canvas,
+    barBubble,
+    useBar,
+    barAction,
     npcBubble,
     nearNpc,
     guideOpen,

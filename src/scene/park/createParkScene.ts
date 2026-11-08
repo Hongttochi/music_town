@@ -1,3 +1,11 @@
+import {
+  createNightBar,
+  BAR_SPOT,
+  BAR_ENTRANCE,
+  BAR_INSIDE,
+  isInsideBar,
+  overlapsBar,
+} from './nightBar';
 import { clampParkPosition } from '../../utils/parkBounds';
 import { createSchool, SCHOOL_SPOT, overlapsSchool } from './school';
 import { PARK_PATHS } from './parkPaths';
@@ -30,6 +38,9 @@ const world = (p: Position) => new T.Vector3((p.x - 700) / 25, 0, (p.y - 450) / 
 const STAGE_RADIUS = 2.2;
 const STAGE_SURFACE_HEIGHT = 0.24;
 type ParkSceneBindings = {
+  barBubble: React.RefObject<HTMLButtonElement | null>;
+  useBar: React.MutableRefObject<() => void>;
+  setBarAction: (value: 'enter' | 'exit' | 'closed' | null) => void;
   el: HTMLCanvasElement;
   latest: React.MutableRefObject<ParkProps>;
   sound: React.MutableRefObject<ReturnType<typeof useSoundEffects>>;
@@ -62,6 +73,9 @@ export function createParkScene({
   setNearNoticeBoard,
   setCoffeeMenuOpen,
   setCoffeeAction,
+  barBubble,
+  useBar,
+  setBarAction,
 }: ParkSceneBindings) {
   void preloadCoffeeIcons();
   let renderer: T.WebGLRenderer;
@@ -204,6 +218,7 @@ export function createParkScene({
   );
   const obstacles: { x: number; z: number; r: number }[] = [];
   function tree(x: number, z: number, s = 1) {
+    if (Math.abs(x - BAR_SPOT.x) < 4.5 && Math.abs(z - BAR_SPOT.z) < 4.5) return;
     if (Math.abs(x - SCHOOL_SPOT.x) < 4.5 && Math.abs(z - SCHOOL_SPOT.z) < 5) return;
     if (walkways.some((p) => Math.hypot(x - p.x, z - p.z) < p.width + s)) return;
     // Keep trunks and their broad sprite canopies clear of the river.
@@ -289,6 +304,24 @@ export function createParkScene({
     riverStone(RIVER.left - 0.2, z);
     riverStone(RIVER.right + 0.2, z);
   }
+  const bar = createNightBar(scene);
+  let shownBarAction: 'enter' | 'exit' | 'closed' | null = null;
+  useBar.current = () => {
+    const p = latest.current;
+    if (
+      !(p.night ?? isParkNight()) ||
+      p.timeTransition ||
+      p.performing !== null ||
+      document.querySelector('dialog[open]')
+    )
+      return;
+    const point = world(p.position.current);
+    const inside = isInsideBar(point);
+    if (!inside && point.distanceTo(BAR_ENTRANCE) > 2.3) return;
+    const destination = inside ? BAR_ENTRANCE : BAR_INSIDE;
+    p.position.current = { x: destination.x * 25 + 700, y: destination.z * 25 + 450 };
+    p.onMove({ ...p.position.current });
+  };
   const school = createSchool(scene);
   obstacles.push({ x: SCHOOL_SPOT.x, z: SCHOOL_SPOT.z, r: 3.2 });
   const npcObstacle = { x: school.npcPosition.x, z: school.npcPosition.z, r: 0.45 };
@@ -388,7 +421,7 @@ export function createParkScene({
   [
     [27, 8],
     [35, 12],
-    [31, -7],
+    [36, -11],
   ].forEach(([x, z]) => scenery.prop(3, x, z, 1.1));
 
   const stageMeshes: T.Object3D[] = [];
@@ -789,6 +822,28 @@ export function createParkScene({
       stopCoffeeSound = sound.current('coffeemachineEnd');
     }
     if (coffeePhase === 'drinking' && coffeeElapsed >= 3600) resetCoffee();
+    const barNight = p.night ?? isParkNight();
+    let insideBar = isInsideBar(world(p.position.current));
+    if (!barNight && insideBar) {
+      p.position.current = { x: BAR_ENTRANCE.x * 25 + 700, y: BAR_ENTRANCE.z * 25 + 450 };
+      p.onMove({ ...p.position.current });
+      insideBar = false;
+    }
+    bar.update(barNight, insideBar);
+    const barAction =
+      p.performing === null && !seatedBench && coffeePhase === 'idle' && !p.timeTransition
+        ? insideBar
+          ? 'exit'
+          : world(p.position.current).distanceTo(BAR_ENTRANCE) < 2.3
+            ? barNight
+              ? 'enter'
+              : 'closed'
+            : null
+        : null;
+    if (barAction !== shownBarAction) {
+      shownBarAction = barAction;
+      setBarAction(barAction);
+    }
     school.update(
       time,
       !!p.timeTransition ||
@@ -860,6 +915,7 @@ export function createParkScene({
       canCrossRiver(world(p.position.current), point) &&
       !overlapsCoffeeMachine(point, PLAYER_RADIUS) &&
       !overlapsSchool(point, PLAYER_RADIUS) &&
+      !overlapsBar(point, PLAYER_RADIUS, barNight) &&
       !obstacles.some((o) => Math.hypot(point.x - o.x, point.z - o.z) < o.r + PLAYER_RADIUS)
     )
       p.position.current = next;
@@ -940,6 +996,10 @@ export function createParkScene({
       cameraFocusGoal.copy(COFFEE_SPOT).lerp(player.position, 0.4);
       stageZoom = 2.1;
     }
+    if (insideBar) {
+      cameraFocusGoal.copy(BAR_SPOT);
+      stageZoom = 1.6;
+    }
     if (p.focusNpc) {
       cameraFocusGoal.copy(school.npcPosition);
       stageZoom = 2.3;
@@ -966,6 +1026,20 @@ export function createParkScene({
     );
     camera.lookAt(target);
     camera.updateMatrixWorld();
+    if (barBubble.current) {
+      const anchor = (insideBar ? BAR_INSIDE : BAR_ENTRANCE).clone();
+      anchor.y = insideBar ? 2 : 3.8;
+      anchor.project(camera);
+      barBubble.current.style.left = `${(anchor.x * 0.5 + 0.5) * el.clientWidth}px`;
+      barBubble.current.style.top = `${(-anchor.y * 0.5 + 0.5) * el.clientHeight}px`;
+      barBubble.current.style.visibility =
+        Math.abs(anchor.x) < 0.95 &&
+        Math.abs(anchor.y) < 0.9 &&
+        Math.abs(anchor.z) < 1 &&
+        !document.querySelector('dialog[open]')
+          ? 'visible'
+          : 'hidden';
+    }
     if (npcBubble.current) {
       const anchor = school.npcPosition.clone();
       anchor.y = 3.1;
@@ -1093,6 +1167,8 @@ export function createParkScene({
     stopCoffeeSound();
     useCoffee.current = () => {};
     bridgeRailMaterial.dispose();
+    bar.dispose();
+    useBar.current = () => {};
     school.dispose();
     coffeeShop.dispose();
     noticeBoard.dispose();

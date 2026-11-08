@@ -1,3 +1,4 @@
+import { BAR_SPOT } from '../../scene/park/nightBar';
 import { SCHOOL_SPOT } from '../../scene/park/school';
 import { useEffect, useRef, type MutableRefObject } from 'react';
 import { CatmullRomCurve3, Vector3 } from 'three';
@@ -67,6 +68,14 @@ export function ParkMinimap({
           height={BRIDGE.width}
           rx={0.25}
           fill="#bd9767"
+        />
+        <rect
+          x={BAR_SPOT.x - 3}
+          y={BAR_SPOT.z - 2.5}
+          width={6}
+          height={5}
+          rx={0.4}
+          fill="#684638"
         />
         <rect
           x={SCHOOL_SPOT.x - 2.5}

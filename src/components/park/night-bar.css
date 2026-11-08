@@ -1,0 +1,27 @@
+.town-button.bench-action.bar-action {
+  width: auto;
+  min-width: 44px;
+  height: auto;
+  min-height: 36px;
+  padding: 7px 9px;
+  gap: 5px;
+  border-radius: 14px;
+  color: #765d43;
+  display: flex;
+  align-items: center;
+}
+.bench-action.bar-action span {
+  font-size: 10px;
+  white-space: nowrap;
+}
+.town-button.bench-action.bar-action:disabled {
+  opacity: 0.9;
+  cursor: default;
+}
+
+.town-button.bench-action.bar-action > svg {
+  flex: none;
+}
+.town-button.bench-action.bar-action::after {
+  left: calc(50% - 4px);
+}
