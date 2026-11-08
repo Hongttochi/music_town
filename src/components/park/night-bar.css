@@ -109,54 +109,225 @@ dialog.bar-dialogue::backdrop {
   outline-offset: 2px;
 }
 dialog.town-panel.bar-drink-menu {
-  width: 350px;
+  width: 520px;
   max-width: calc(100vw - 24px);
   max-height: calc(100dvh - 24px);
   margin: auto;
   inset: 0;
-  padding: 12px 16px;
-  background: #f3e7ce;
-  border-radius: 16px;
+  padding: 0;
+  border: 1px solid #b9a485;
+  border-radius: 5px 9px 9px 5px;
+  background: #f0e0c7;
+  color: #423b32;
+  box-shadow:
+    0 5px 0 #c3ac8a,
+    0 14px 40px #131e2455;
+  overflow: auto;
+}
+.bar-menu-close {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #e5d5b9;
+  cursor: pointer;
+}
+.bar-menu-close:hover {
+  background: #ffffff18;
+}
+.bar-menu-book {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.bar-menu-page {
+  position: relative;
+  padding: 0 14px 7px;
+  background: linear-gradient(90deg, #f8ecd5, #f4e6cd 85%, #dfc9aa);
+}
+.bar-menu-page + .bar-menu-page {
+  background: linear-gradient(90deg, #d4bfa0, #f1dfc3 9%, #f7e8cf);
+  border-left: 1px solid #bda78c;
+}
+.bar-menu-page header {
+  margin: 0 -14px 7px;
+  padding: 12px 14px 10px;
+  color: #f4e3c3;
+  background: #23383b;
+}
+.bar-menu-page header small {
+  font-size: 8px;
+  letter-spacing: 2px;
+}
+.bar-menu-page h2 {
+  margin: 3px 0 0;
+  font:
+    italic 22px/1.1 Georgia,
+    serif;
+  color: inherit;
 }
 .bar-drink-options {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  gap: 4px;
 }
-.bar-drink-options > .town-button {
+.bar-drink-options > button {
   display: flex;
-  gap: 8px;
   align-items: center;
-  padding: 10px 8px;
-  border-radius: 8px;
+  gap: 10px;
+  width: 100%;
+  min-height: 75px;
+  padding: 6px 4px;
+  border: 0;
+  border-bottom: 1px solid #b6a18680;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
   text-align: left;
-  box-shadow: none;
+  cursor: pointer;
+  transition: background 150ms;
 }
-.bar-drink-options > button > span:first-child {
-  font-size: 26px;
+.bar-drink-options > button:hover {
+  background: #a1866020;
 }
-.bar-drink-options strong {
+.bar-drink-options > button[aria-pressed='true'] {
+  background: #a1866018;
+}
+.bar-menu-illustration {
+  font-size: 31px;
+  width: 39px;
+  flex: none;
+  text-align: center;
+  filter: drop-shadow(1px 3px 2px #5b39252b);
+}
+.bar-menu-description {
+  min-width: 0;
+}
+.bar-menu-description em {
   display: block;
-  font-size: 11px;
+  font:
+    italic 14px Georgia,
+    serif;
+  color: #583c2d;
 }
-.bar-drink-options small {
+.bar-menu-description strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+}
+.bar-menu-description small {
+  display: block;
+  margin-top: 3px;
+  font-size: 8px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #81725c;
+}
+.bar-menu-selection {
   display: block;
   margin-top: 4px;
-  font-size: 9px;
-  font-weight: 400;
+  font-size: 8px;
+  color: #637649;
+  min-height: 11px;
 }
-.bar-drink-options [aria-pressed='true'] {
-  background: #e5dfc1;
-  border-color: #a1a77d;
+.bar-menu-page-number {
+  display: block;
+  text-align: center;
+  margin-top: 7px;
+  font:
+    9px Georgia,
+    serif;
+  color: #9a866a;
 }
 .bar-drink-footer {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
-  margin-top: 10px;
+  gap: 12px;
+  padding: 7px 14px;
+  border-top: 1px solid #c8b497;
 }
-.bar-drink-footer .town-button {
-  min-height: 30px;
-  padding: 5px 18px;
-  border-radius: 15px;
+.bar-drink-footer > span {
+  font-size: 10px;
+  color: #786548;
+}
+.bar-drink-footer > button {
+  min-height: 28px;
+  padding: 5px 14px;
+  border: 0;
+  border-radius: 4px;
+  color: #f6ead2;
+  background: #31494a;
   font-size: 11px;
+  cursor: pointer;
+}
+.bar-drink-footer > button:hover {
+  background: #435f59;
+}
+.bar-drink-menu button:focus-visible {
+  outline: 2px solid #a98a50;
+  outline-offset: 1px;
+}
+@media (max-width: 450px) {
+  .bar-menu-page {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .bar-menu-page header {
+    margin-left: -8px;
+    margin-right: -8px;
+    padding-left: 9px;
+  }
+  .bar-menu-page h2 {
+    font-size: 18px;
+  }
+  .bar-drink-options > button {
+    gap: 5px;
+  }
+  .bar-menu-illustration {
+    width: 28px;
+    font-size: 25px;
+  }
+  .bar-menu-description em {
+    font-size: 12px;
+  }
+}
+/* Keep the order action visible in short landscape viewports. */
+dialog.town-panel.bar-drink-menu[open] {
+  padding: 0;
+}
+.bar-drink-footer {
+  position: sticky;
+  bottom: 0;
+  background: #f0e0c7;
+}
+@media (max-height: 420px) {
+  .bar-menu-page header {
+    padding-top: 7px;
+    padding-bottom: 7px;
+    margin-bottom: 3px;
+  }
+  .bar-menu-page h2 {
+    font-size: 20px;
+  }
+  .bar-drink-options > button {
+    min-height: 64px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+  }
+  .bar-menu-selection {
+    margin-top: 2px;
+  }
+  .bar-menu-page-number {
+    margin-top: 3px;
+  }
+  .bar-drink-footer {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
 }

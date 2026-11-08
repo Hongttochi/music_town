@@ -7,6 +7,7 @@ import {
   BAR_SPOT,
   BAR_HOST,
   BAR_SEATS,
+  BAR_COUNTER_SEATS,
   BAR_ENTRANCE,
   BAR_INSIDE,
   isInsideBar,
@@ -331,7 +332,8 @@ export function createParkScene({
   };
   useBarDrink.current = (id) => {
     const p = latest.current;
-    if (!(p.night ?? isParkNight()) || !seatedBench || !BAR_SEATS.includes(seatedBench)) return;
+    if (!(p.night ?? isParkNight()) || !seatedBench || !BAR_COUNTER_SEATS.includes(seatedBench))
+      return;
     bar.serve(id);
     barSipStarted = performance.now();
     sound.current('drink');
@@ -513,7 +515,7 @@ export function createParkScene({
     const p = latest.current;
     if (document.querySelector('dialog[open]') || p.performing !== null) return;
     if (seatedBench) {
-      if (BAR_SEATS.includes(seatedBench)) setBarMenuOpen(true);
+      if (BAR_COUNTER_SEATS.includes(seatedBench)) setBarMenuOpen(true);
       return;
     }
     if (nearbyBench && world(p.position.current).distanceTo(nearbyBench) < 2.5) {
@@ -523,7 +525,7 @@ export function createParkScene({
         return;
       }
       sound.current('sitdown');
-      if (BAR_SEATS.includes(nearbyBench)) setBarMenuOpen(true);
+      if (BAR_COUNTER_SEATS.includes(nearbyBench)) setBarMenuOpen(true);
       standingPosition = { ...p.position.current };
       const seat = seatPosition(seatedBench);
       p.position.current = { x: seat.x * 25 + 700, y: seat.z * 25 + 450 };
@@ -1081,7 +1083,7 @@ export function createParkScene({
       coffeePhase === 'idle' &&
       nearbyBench &&
       (!BAR_SEATS.includes(nearbyBench) || (barNight && insideBar)) &&
-      (!seatedBench || BAR_SEATS.includes(seatedBench))
+      !seatedBench
         ? 'sit'
         : null;
     if (action !== shownBenchAction) {
@@ -1247,7 +1249,7 @@ export function createParkScene({
           ? 'visible'
           : 'hidden';
     }
-    const bubbleBench = seatedBench && !BAR_SEATS.includes(seatedBench) ? null : nearbyBench;
+    const bubbleBench = seatedBench ? null : nearbyBench;
     if (benchBubble.current) {
       if (bubbleBench && !document.querySelector('dialog[open]')) {
         const anchor = bubbleBench.clone();

@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
+import { X } from 'lucide-react';
 import { barDrinks, type BarDrinkId } from '../../data/bar';
-import { DialogPanel, PanelHeading } from '../ui/Panel';
-import { Button } from '../ui/Button';
+import { DialogPanel } from '../ui/Panel';
+
+const englishNames = {
+  beer: 'Draft Beer',
+  wine: 'Red Wine',
+  whisky: 'Whisky',
+  mocktail: 'Moonlight Ade',
+};
 export function BarDrinkDialog({
   onClose,
   onOrder,
@@ -26,28 +33,52 @@ export function BarDrinkDialog({
         onClose();
       }}
     >
-      <PanelHeading title="MOONLIGHT BAR · 한 잔 고르기" onClose={onClose} />
-      <div className="bar-drink-options">
-        {barDrinks.map((drink) => (
-          <Button
-            key={drink.id}
-            variant="choice"
-            aria-pressed={selected === drink.id}
-            onClick={() => setSelected(drink.id)}
+      <button className="bar-menu-close" aria-label="메뉴 닫기" onClick={onClose}>
+        <X size={16} />
+      </button>
+      <div className="bar-menu-book">
+        {[barDrinks.slice(0, 2), barDrinks.slice(2)].map((drinks, page) => (
+          <section
+            className="bar-menu-page"
+            key={page}
+            aria-label={page === 0 ? '클래식 메뉴' : '스페셜 메뉴'}
           >
-            <span aria-hidden="true">{drink.icon}</span>
-            <span>
-              <strong>{drink.name}</strong>
-              <small>{drink.detail}</small>
-            </span>
-          </Button>
+            <header>
+              <small>MOONLIGHT BAR</small>
+              <h2>{page === 0 ? 'The Classics' : 'After Dark'}</h2>
+            </header>
+            <div className="bar-drink-options">
+              {drinks.map((drink) => (
+                <button
+                  key={drink.id}
+                  type="button"
+                  aria-pressed={selected === drink.id}
+                  onClick={() => setSelected(drink.id)}
+                >
+                  <span className="bar-menu-illustration" aria-hidden="true">
+                    {drink.icon}
+                  </span>
+                  <span className="bar-menu-description">
+                    <em>{englishNames[drink.id]}</em>
+                    <strong>{drink.name}</strong>
+                    <small>{drink.detail}</small>
+                    <span className="bar-menu-selection" aria-hidden="true">
+                      {selected === drink.id ? '✓ 선택한 한 잔' : '\u00a0'}
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </div>
+            <span className="bar-menu-page-number">— {String(page + 1).padStart(2, '0')} —</span>
+          </section>
         ))}
       </div>
-      <div className="bar-drink-footer">
-        <Button variant="primary" onClick={() => onOrder(selected)}>
-          마시기
-        </Button>
-      </div>
+      <footer className="bar-drink-footer">
+        <span>{barDrinks.find((drink) => drink.id === selected)?.name}</span>
+        <button type="button" onClick={() => onOrder(selected)}>
+          마시기 <span aria-hidden="true">→</span>
+        </button>
+      </footer>
     </DialogPanel>
   );
 }

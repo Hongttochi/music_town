@@ -5,10 +5,12 @@ export const BAR_SPOT = new T.Vector3(32, 0, -6.5);
 export const BAR_ENTRANCE = new T.Vector3(32, 0, 2.7);
 export const BAR_INSIDE = new T.Vector3(32, 0, -3);
 export const BAR_HOST = new T.Vector3(35.5, 0, 1.7);
-export const BAR_SEATS = [
-  ...[27.5, 28.9, 30.3, 31.7].map((x) => new T.Vector3(x, 0, -7.1)),
-  ...[-4.5, -2.8].flatMap((z) => [27.5, 29, 30.5].map((x) => new T.Vector3(x, 0, z))),
-];
+export const BAR_COUNTER_SEATS = [27.8, 29.7, 31.6].map((x) => new T.Vector3(x, 0, -7.1));
+export const BAR_LOUNGE_SEATS = [28.4, 35.6].flatMap((x) =>
+  [-6.0, -4.3, -2.6].map((z) => new T.Vector3(x, 0, z)),
+);
+export const BAR_TABLES = [27.1, 36.9].map((x) => new T.Vector3(x, 0, -4.3));
+export const BAR_SEATS = [...BAR_COUNTER_SEATS, ...BAR_LOUNGE_SEATS];
 export function isInsideBar(point: { x: number; z: number }) {
   return Math.abs(point.x - BAR_SPOT.x) < 5.8 && Math.abs(point.z - BAR_SPOT.z) < 4.8;
 }
@@ -27,6 +29,13 @@ export function overlapsBar(point: { x: number; z: number }, radius: number, nig
     return true;
   if (Math.hypot(point.x - 34, point.z + 9.8) < 0.55 + radius) return true;
   if (Math.abs(point.x - 35.1) < 0.5 + radius && Math.abs(point.z + 8.3) < 0.25 + radius)
+    return true;
+  if (
+    BAR_TABLES.some(
+      (table) =>
+        Math.abs(point.x - table.x) < 0.45 + radius && Math.abs(point.z - table.z) < 2.3 + radius,
+    )
+  )
     return true;
   return BAR_SEATS.some((seat) => Math.hypot(point.x - seat.x, point.z - seat.z) < 0.3 + radius);
 }
@@ -90,6 +99,13 @@ export function createNightBar(scene: T.Scene) {
     const bottle = makeMaterial(bottleColors[i % 3]);
     box(-4.8 + i * 0.5, 2.28, -4.74, 0.18, 0.4, 0.18, bottle);
     box(-4.8 + i * 0.5, 2.54, -4.74, 0.09, 0.16, 0.09, bottle);
+  }
+  for (const table of BAR_TABLES) {
+    const x = table.x - BAR_SPOT.x,
+      z = table.z - BAR_SPOT.z;
+    box(x, 1.05, z, 0.9, 0.14, 4.6, wood);
+    for (const offset of [-1.6, 1.6]) box(x, 0.5, z + offset, 0.14, 1, 0.14, roofMat);
+    box(x, 1.14, z, 0.56, 0.02, 3.9, cream);
   }
   const stoolTops: T.Mesh[] = [];
   for (const seat of BAR_SEATS) {

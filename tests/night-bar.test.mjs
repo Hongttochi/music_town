@@ -66,8 +66,8 @@ test('closed bar reserves the front apron to keep avatar heads out of the facade
   assert.equal(overlapsBar({ x: 32, z: -2.8 }, 0.35, true), false);
 });
 
-test('expanded bar has ten seats, an open audience aisle and accessible stage', () => {
-  assert.equal(BAR_SEATS.length, 10);
+test('expanded bar has separated lounge and counter seats, an open audience aisle and accessible stage', () => {
+  assert.equal(BAR_SEATS.length, 9);
   for (const seat of BAR_SEATS) {
     assert.equal(isInsideBar(seat), true);
     const safe = clampParkPosition({ x: seat.x * 25 + 700, y: seat.z * 25 + 450 });
