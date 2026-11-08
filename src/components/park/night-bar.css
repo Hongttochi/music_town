@@ -331,3 +331,27 @@ dialog.town-panel.bar-drink-menu[open] {
     padding-bottom: 5px;
   }
 }
+
+.bar-drink-options > button {
+  position: relative;
+  padding-right: 25px;
+}
+.bar-menu-check {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border: 1px solid #9b8b70;
+  border-radius: 3px;
+  color: #f9efd9;
+  font-size: 11px;
+  line-height: 1;
+}
+.bar-drink-options > button[aria-pressed='true'] .bar-menu-check {
+  background: #52684f;
+  border-color: #52684f;
+}

@@ -27,8 +27,8 @@ export function overlapsBar(point: { x: number; z: number }, radius: number, nig
   if (z > 4.8 - radius && x > 1.4 - radius) return true;
   if (point.x > 26.5 - radius && point.x < 32.5 + radius && Math.abs(point.z + 8.3) < 0.55 + radius)
     return true;
-  if (Math.hypot(point.x - 34, point.z + 9.8) < 0.55 + radius) return true;
-  if (Math.abs(point.x - 35.1) < 0.5 + radius && Math.abs(point.z + 8.3) < 0.25 + radius)
+  if (Math.hypot(point.x - 35.5, point.z + 9.8) < 0.55 + radius) return true;
+  if (Math.abs(point.x - 36.6) < 0.5 + radius && Math.abs(point.z + 8.3) < 0.25 + radius)
     return true;
   if (
     BAR_TABLES.some(
@@ -123,17 +123,17 @@ export function createNightBar(scene: T.Scene) {
     group.add(mesh);
     return mesh;
   }
-  const kick = cylinder(2, 0.55, -3.3, 0.44, 0.5, drum);
+  const kick = cylinder(3.5, 0.55, -3.3, 0.44, 0.5, drum);
   kick.rotation.x = Math.PI / 2;
-  for (const x of [1.5, 2.5]) {
+  for (const x of [3, 4]) {
     cylinder(x, 1, -3.4, 0.25, 0.3, drum);
     cylinder(x, 0.65, -3.8, 0.025, 1.3, metal);
     cylinder(x, 1.3, -3.8, 0.38, 0.035, metal);
   }
-  box(3.1, 0.65, -2.3, 0.55, 1.3, 0.45, roofMat);
-  box(3.1, 1.2, -1.8, 1, 0.15, 0.4, wood);
-  for (let i = 0; i < 9; i++) box(2.7 + i * 0.1, 1.3, -1.78, 0.085, 0.05, 0.35, cream);
-  box(3.1, 0.6, -1.8, 0.1, 1.2, 0.1, metal);
+  box(4.6, 0.65, -2.3, 0.55, 1.3, 0.45, roofMat);
+  box(4.6, 1.2, -1.8, 1, 0.15, 0.4, wood);
+  for (let i = 0; i < 9; i++) box(4.2 + i * 0.1, 1.3, -1.78, 0.085, 0.05, 0.35, cream);
+  box(4.6, 0.6, -1.8, 0.1, 1.2, 0.1, metal);
   const glass = new T.Group();
   scene.add(glass);
   glass.visible = false;

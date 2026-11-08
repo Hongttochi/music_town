@@ -171,3 +171,29 @@ test('expanded bar closing relocates visitors from the added floor area', async 
     await db.close();
   }
 });
+
+test('bar performance starts on the relocated stage and preserves the active performer', async () => {
+  const db = await fixture();
+  try {
+    await setNight(db, true);
+    const migration = await readFile(
+      new URL('../supabase/migrations/202611080004_bar_stage_spacing.sql', import.meta.url),
+      'utf8',
+    );
+    await db.exec(migration);
+    await db.exec(
+      `insert into public.town_queue(channel_id,stage_id,user_id) values(0,6,'${a}'); select public.town_advance();`,
+    );
+    await db.exec(migration);
+    assert.deepEqual(
+      (await db.query(`select x,y from public.town_sessions where user_id='${a}'`)).rows[0],
+      { x: 1587.5, y: 235 },
+    );
+    assert.equal(
+      (await db.query('select count(*) from public.town_performances')).rows[0].count,
+      1,
+    );
+  } finally {
+    await db.close();
+  }
+});

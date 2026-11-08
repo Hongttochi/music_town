@@ -8,6 +8,7 @@ import {
   BAR_HOST,
   BAR_SEATS,
   BAR_COUNTER_SEATS,
+  BAR_LOUNGE_SEATS,
   BAR_ENTRANCE,
   BAR_INSIDE,
   isInsideBar,
@@ -325,6 +326,7 @@ export function createParkScene({
   let barApproachHandled = false;
   let barNoticeShown = false;
   let barSipStarted: number | null = null;
+  let orderedBarDrink: BarDrinkId = 'beer';
   dismissBarNotice.current = () => {
     barTalkUntil = 0;
     barNoticeShown = false;
@@ -334,7 +336,7 @@ export function createParkScene({
     const p = latest.current;
     if (!(p.night ?? isParkNight()) || !seatedBench || !BAR_COUNTER_SEATS.includes(seatedBench))
       return;
-    bar.serve(id);
+    orderedBarDrink = id;
     barSipStarted = performance.now();
     sound.current('drink');
   };
@@ -848,6 +850,12 @@ export function createParkScene({
       visitor.group.position.x += deltaX * movement.fraction;
       visitor.group.position.z += deltaZ * movement.fraction;
       visitor.group.position.y = surfaceHeight(visitor.group.position);
+      visitor.group.userData.inFrontOfBarCounter =
+        isInsideBar(visitor.group.position) &&
+        visitor.group.position.x < 32.8 &&
+        visitor.group.position.z > -7.9 &&
+        visitor.group.position.z < -5;
+
       p.mapPositions?.current.set(person.id, {
         x: visitor.group.position.x * 25 + 700,
         y: visitor.group.position.z * 25 + 450,
@@ -858,7 +866,16 @@ export function createParkScene({
         arrived &&
         !performing &&
         benches.some((bench) => destination.distanceTo(seatPosition(bench)) < 0.1);
-      if (visitor.group.userData.seated) visitor.group.rotation.y = 0;
+      if (visitor.group.userData.seated) {
+        const lounge = BAR_LOUNGE_SEATS.find((seat) => destination.distanceTo(seat) < 0.1);
+        visitor.group.rotation.y = lounge
+          ? lounge.x < BAR_SPOT.x
+            ? -Math.PI / 2
+            : Math.PI / 2
+          : BAR_COUNTER_SEATS.some((seat) => destination.distanceTo(seat) < 0.1)
+            ? Math.PI
+            : 0;
+      }
     }
     if (key !== avatarKey) {
       scene.remove(player);
@@ -994,7 +1011,9 @@ export function createParkScene({
     npcObstacle.z = school.npcPosition.z;
     coffeeShop.update(coffeePhase, coffeeElapsed / 2300, orderedCoffee);
     player.userData.coffee = orderedCoffee;
-    player.userData.coffeePreparing = coffeePhase === 'brewing' || coffeePhase === 'ready';
+    player.userData.barDrink = barSipStarted !== null ? orderedBarDrink : undefined;
+    player.userData.coffeePreparing =
+      coffeePhase === 'brewing' || coffeePhase === 'ready' || barSipStarted !== null;
     player.userData.drinking =
       coffeePhase === 'drinking'
         ? Math.sin(Math.min(1, coffeeElapsed / 3600) * Math.PI)
@@ -1093,13 +1112,19 @@ export function createParkScene({
     player.userData.seated = seatedBench !== null;
     player.position.copy(world(p.position.current));
     player.position.y = surfaceHeight(player.position);
+    player.userData.inFrontOfBarCounter =
+      insideBar && player.position.x < 32.8 && player.position.z > -7.9 && player.position.z < -5;
     const crossingBridge =
       isOnBridge(player.position) ||
       [...visitors.values()].some((v) => isOnBridge(v.group.position));
     bridgeRailMaterial.opacity +=
       ((crossingBridge ? 0.25 : 1) - bridgeRailMaterial.opacity) * (1 - Math.exp(-dt * 10));
     // Stage performers face the audience, regardless of their approach direction.
-    if (p.performing !== null || seatedBench || coffeePhase === 'drinking') player.rotation.y = 0;
+    if (seatedBench && BAR_LOUNGE_SEATS.includes(seatedBench))
+      player.rotation.y = seatedBench.x < BAR_SPOT.x ? -Math.PI / 2 : Math.PI / 2;
+    else if (seatedBench && BAR_COUNTER_SEATS.includes(seatedBench)) player.rotation.y = Math.PI;
+    else if (p.performing !== null || seatedBench || coffeePhase === 'drinking')
+      player.rotation.y = 0;
     else if (dx || dz) player.rotation.y = Math.atan2(dx, dz);
     const walking = !!(dx || dz);
     (player.userData.limbs as T.Object3D[]).forEach((l, i) => {
@@ -1310,17 +1335,17 @@ export function createParkScene({
           ? 'block'
           : 'none';
     });
-    bar.glass.visible =
-      barSipStarted !== null && seatedBench !== null && BAR_SEATS.includes(seatedBench) && barNight;
-    if (bar.glass.visible && barSipStarted !== null) {
-      const lift = Math.sin(Math.min(1, (time - barSipStarted) / 3200) * Math.PI);
-      bar.glass.position.set(
-        player.position.x + 0.35,
-        player.position.y + 1.25 + lift * 0.55,
-        player.position.z + 0.25,
-      );
-      bar.glass.rotation.z = -lift * 0.5;
-      if (time - barSipStarted > 3200) barSipStarted = null;
+    bar.glass.visible = false;
+    if (barSipStarted !== null) {
+      if (!barNight || !seatedBench || !BAR_COUNTER_SEATS.includes(seatedBench)) {
+        barSipStarted = null;
+      } else if (!imageCharacters.barDrinkingReady(player, orderedBarDrink)) {
+        barSipStarted = time;
+      } else {
+        const progress = Math.min(1, (time - barSipStarted) / 3200);
+        player.userData.drinking = Math.sin(progress * Math.PI);
+        if (progress >= 1) barSipStarted = null;
+      }
     }
     const react = p.reaction,
       bubble = document.getElementById('player-reaction');

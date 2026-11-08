@@ -1,3 +1,4 @@
+import type { BarDrinkId } from '../../data/bar';
 import { type CoffeeId } from '../../data/coffeeMenu';
 import * as THREE from 'three';
 import { drawDrinkingPose } from './drinkingAvatar';
@@ -22,6 +23,7 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
     drinkSource?: HTMLCanvasElement;
     preparedFrames?: number;
     coffee?: CoffeeId;
+    barDrink?: BarDrinkId;
   }>();
   let source: Awaited<ReturnType<typeof loadAvatarLayers>> | null = null;
   loadAvatarLayers()
@@ -75,6 +77,9 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
         continue;
       }
       actor.sprite.visible = ready;
+      const foreground = actor.group.userData.inFrontOfBarCounter === true;
+      actor.sprite.material.depthTest = !foreground;
+      actor.sprite.renderOrder = foreground ? 10 : 0;
       const seated = actor.group.userData.seated === true;
       if (actor.standingImage && actor.seated !== seated) {
         if (seated && !actor.seatedImage) {
@@ -86,7 +91,8 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
       }
       const drinking = actor.group.userData.drinking as number | undefined;
       const coffee = (actor.group.userData.coffee ?? 'americano') as CoffeeId;
-      if (actor.coffee !== coffee) {
+      const barDrink = actor.group.userData.barDrink as BarDrinkId | undefined;
+      if (actor.coffee !== coffee || actor.barDrink !== barDrink) {
         actor.sprite.material.map = actor.texture;
         actor.drinkTexture?.dispose();
         actor.drinkTexture = undefined;
@@ -94,6 +100,7 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
         actor.drinkSource = undefined;
         actor.preparedFrames = 0;
         actor.coffee = coffee;
+        actor.barDrink = barDrink;
       }
       // Prepare one front-facing pose per frame while the machine brews.
       // A single atlas is uploaded once; drinking only changes UV coordinates.
@@ -108,13 +115,21 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
           actor.drinkAtlas.width = 2048;
           actor.drinkAtlas.height = 1024;
           actor.drinkSource = composeAvatar(source, { ...actor.avatar, instrument: 'none' });
+          if (barDrink) {
+            const seatedBack = composeSeatedAvatar(actor.drinkSource);
+            actor.drinkSource = document.createElement('canvas');
+            actor.drinkSource.width = actor.drinkSource.height = 512;
+            actor.drinkSource
+              .getContext('2d')!
+              .drawImage(seatedBack, 1024, 0, 512, 512, 0, 0, 512, 512);
+          }
         } else {
           const frame = actor.preparedFrames ?? 0;
           const ctx = actor.drinkAtlas.getContext('2d')!;
           ctx.save();
           ctx.translate((frame % 8) * 256, Math.floor(frame / 8) * 256);
           ctx.scale(0.5, 0.5);
-          drawDrinkingPose(ctx, actor.drinkSource!, frame / 31, coffee);
+          drawDrinkingPose(ctx, actor.drinkSource!, frame / 31, coffee, barDrink);
           ctx.restore();
           actor.preparedFrames = frame + 1;
           if (actor.preparedFrames === 32) {
@@ -169,5 +184,10 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
       if (actor.group === group) return actor.coffee === coffee && !!actor.drinkTexture;
     return false;
   }
-  return { create, update, dispose, drinkingReady };
+  function barDrinkingReady(group: THREE.Group, drink: BarDrinkId) {
+    for (const actor of actors)
+      if (actor.group === group) return actor.barDrink === drink && !!actor.drinkTexture;
+    return false;
+  }
+  return { create, update, dispose, drinkingReady, barDrinkingReady };
 }

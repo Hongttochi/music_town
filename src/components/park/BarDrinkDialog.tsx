@@ -62,9 +62,9 @@ export function BarDrinkDialog({
                     <em>{englishNames[drink.id]}</em>
                     <strong>{drink.name}</strong>
                     <small>{drink.detail}</small>
-                    <span className="bar-menu-selection" aria-hidden="true">
-                      {selected === drink.id ? '✓ 선택한 한 잔' : '\u00a0'}
-                    </span>
+                  </span>
+                  <span className="bar-menu-check" aria-hidden="true">
+                    {selected === drink.id ? '✓' : ''}
                   </span>
                 </button>
               ))}
@@ -74,7 +74,6 @@ export function BarDrinkDialog({
         ))}
       </div>
       <footer className="bar-drink-footer">
-        <span>{barDrinks.find((drink) => drink.id === selected)?.name}</span>
         <button type="button" onClick={() => onOrder(selected)}>
           마시기 <span aria-hidden="true">→</span>
         </button>

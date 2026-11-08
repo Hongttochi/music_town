@@ -41,8 +41,8 @@ test('daytime locks the doorway while night allows passage without opening side 
   assert.equal(overlapsBar({ x: BAR_SPOT.x + 5.9, z: BAR_SPOT.z }, 0.35, true), true);
   assert.equal(overlapsBar({ x: BAR_SPOT.x, z: BAR_SPOT.z - 4.9 }, 0.35, true), true);
   assert.equal(overlapsBar({ x: 29.5, z: -8.3 }, 0.35, true), true);
-  assert.equal(overlapsBar({ x: 34, z: -9.8 }, 0.35, true), true);
-  assert.equal(overlapsBar({ x: 34, z: -8.6 }, 0.35, true), false);
+  assert.equal(overlapsBar({ x: 35.5, z: -9.8 }, 0.35, true), true);
+  assert.equal(overlapsBar({ x: 35.5, z: -8.6 }, 0.35, true), false);
 });
 test('arrival and exit are clear, stay within supported coordinates and avoid the riverside stage', () => {
   assert.equal(isInsideBar(BAR_INSIDE), true);
