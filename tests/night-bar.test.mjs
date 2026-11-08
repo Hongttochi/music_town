@@ -18,7 +18,7 @@ function load(file) {
   );
   return context.exports;
 }
-const { BAR_SPOT, BAR_ENTRANCE, BAR_INSIDE, overlapsBar, isInsideBar } = load(
+const { BAR_SPOT, BAR_ENTRANCE, BAR_INSIDE, BAR_SEATS, overlapsBar, isInsideBar } = load(
   '../src/scene/park/nightBar.ts',
 );
 const { isParkNight } = load('../src/utils/time.ts');
@@ -35,11 +35,11 @@ test('bar uses the existing Korean night schedule at both boundaries', () => {
   }
 });
 test('daytime locks the doorway while night allows passage without opening side walls', () => {
-  const doorway = { x: BAR_SPOT.x, z: BAR_SPOT.z + 3.4 };
+  const doorway = { x: BAR_SPOT.x, z: BAR_SPOT.z + 4.9 };
   assert.equal(overlapsBar(doorway, 0.35, false), true);
   assert.equal(overlapsBar(doorway, 0.35, true), false);
-  assert.equal(overlapsBar({ x: BAR_SPOT.x + 3.9, z: BAR_SPOT.z }, 0.35, true), true);
-  assert.equal(overlapsBar({ x: BAR_SPOT.x, z: BAR_SPOT.z - 3.4 }, 0.35, true), true);
+  assert.equal(overlapsBar({ x: BAR_SPOT.x + 5.9, z: BAR_SPOT.z }, 0.35, true), true);
+  assert.equal(overlapsBar({ x: BAR_SPOT.x, z: BAR_SPOT.z - 4.9 }, 0.35, true), true);
   assert.equal(overlapsBar({ x: 29.5, z: -8.3 }, 0.35, true), true);
   assert.equal(overlapsBar({ x: 34, z: -9.8 }, 0.35, true), true);
   assert.equal(overlapsBar({ x: 34, z: -8.6 }, 0.35, true), false);
@@ -59,9 +59,25 @@ test('arrival and exit are clear, stay within supported coordinates and avoid th
 });
 
 test('closed bar reserves the front apron to keep avatar heads out of the facade', () => {
-  for (const z of [-3.8, -2.8, -1.1]) {
+  for (const z of [-2, -1, 1]) {
     assert.equal(overlapsBar({ x: 32, z }, 0.35, false), true);
   }
   assert.equal(overlapsBar(BAR_ENTRANCE, 0.35, false), false);
   assert.equal(overlapsBar({ x: 32, z: -2.8 }, 0.35, true), false);
+});
+
+test('expanded bar has ten seats, an open audience aisle and accessible stage', () => {
+  assert.equal(BAR_SEATS.length, 10);
+  for (const seat of BAR_SEATS) {
+    assert.equal(isInsideBar(seat), true);
+    const safe = clampParkPosition({ x: seat.x * 25 + 700, y: seat.z * 25 + 450 });
+    assert.equal(safe.x, seat.x * 25 + 700);
+    assert.equal(safe.y, seat.z * 25 + 450);
+  }
+  for (let z = -2.2; z >= -8.6; z -= 0.2) {
+    assert.equal(overlapsBar({ x: 34, z }, 0.35, true), false, `stage aisle z=${z}`);
+  }
+  for (let z = -3; z <= 3; z += 0.1) {
+    assert.equal(overlapsBar({ x: 32, z }, 0.35, true), false, `exit z=${z}`);
+  }
 });

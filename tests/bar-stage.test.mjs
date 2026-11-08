@@ -150,3 +150,24 @@ test('moving the riverside stage preserves performances and queues and moves its
     await db.close();
   }
 });
+
+test('expanded bar closing relocates visitors from the added floor area', async () => {
+  const db = await fixture();
+  try {
+    const migration = await readFile(
+      new URL('../supabase/migrations/202611080003_expanded_bar.sql', import.meta.url),
+      'utf8',
+    );
+    await db.exec(migration);
+    await db.exec(migration);
+    await setNight(db, false);
+    await db.exec(`update public.town_sessions set x=1387.5,y=380 where user_id='${a}';
+      select public.town_advance();`);
+    assert.deepEqual(
+      (await db.query(`select x,y from public.town_sessions where user_id='${a}'`)).rows[0],
+      { x: 1500, y: 517.5 },
+    );
+  } finally {
+    await db.close();
+  }
+});

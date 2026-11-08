@@ -1,26 +1,30 @@
 import { barDrinks, type BarDrinkId } from '../../data/bar';
 import * as T from 'three';
 
-export const BAR_SPOT = new T.Vector3(32, 0, -7.5);
-export const BAR_ENTRANCE = new T.Vector3(32, 0, 0.2);
-export const BAR_INSIDE = new T.Vector3(32, 0, -5.6);
-export const BAR_HOST = new T.Vector3(34.8, 0, -0.8);
-export const BAR_SEATS = [new T.Vector3(29, 0, -7.1), new T.Vector3(30.4, 0, -7.1)];
+export const BAR_SPOT = new T.Vector3(32, 0, -6.5);
+export const BAR_ENTRANCE = new T.Vector3(32, 0, 2.7);
+export const BAR_INSIDE = new T.Vector3(32, 0, -3);
+export const BAR_HOST = new T.Vector3(35.5, 0, 1.7);
+export const BAR_SEATS = [
+  ...[27.5, 28.9, 30.3, 31.7].map((x) => new T.Vector3(x, 0, -7.1)),
+  ...[-4.5, -2.8].flatMap((z) => [27.5, 29, 30.5].map((x) => new T.Vector3(x, 0, z))),
+];
 export function isInsideBar(point: { x: number; z: number }) {
-  return Math.abs(point.x - BAR_SPOT.x) < 3.8 && Math.abs(point.z - BAR_SPOT.z) < 3.3;
+  return Math.abs(point.x - BAR_SPOT.x) < 5.8 && Math.abs(point.z - BAR_SPOT.z) < 4.8;
 }
 export function overlapsBar(point: { x: number; z: number }, radius: number, night: boolean) {
   const x = Math.abs(point.x - BAR_SPOT.x),
     z = point.z - BAR_SPOT.z;
   // Camera-facing avatars lean behind their feet: reserve the front apron while closed
   // so heads cannot intersect the facade even when their feet are outside the wall.
-  if (!night) return x < 4.3 + radius && z > -3.8 - radius && z < 6.5 + radius;
-  if (x >= 4 + radius || Math.abs(z) >= 3.5 + radius) return false;
+  if (!night) return x < 6.3 + radius && z > -5.3 - radius && z < 8 + radius;
+  if (x >= 6 + radius || Math.abs(z) >= 5 + radius) return false;
 
-  // Solid side/back walls, with a 1.8-unit doorway on the south facade.
-  if (x > 3.8 - radius || z < -3.3 + radius) return true;
-  if (z > 3.3 - radius && x > 0.9 - radius) return true;
-  if (point.x < 31.2 + radius && point.z < -7.9 + radius) return true;
+  // Solid side/back walls, with a 2.8-unit doorway on the south facade.
+  if (x > 5.8 - radius || z < -4.8 + radius) return true;
+  if (z > 4.8 - radius && x > 1.4 - radius) return true;
+  if (point.x > 26.5 - radius && point.x < 32.5 + radius && Math.abs(point.z + 8.3) < 0.55 + radius)
+    return true;
   if (Math.hypot(point.x - 34, point.z + 9.8) < 0.55 + radius) return true;
   if (Math.abs(point.x - 35.1) < 0.5 + radius && Math.abs(point.z + 8.3) < 0.25 + radius)
     return true;
@@ -61,31 +65,31 @@ export function createNightBar(scene: T.Scene) {
     group.add(mesh);
     return mesh;
   };
-  box(0, 0.02, 0, 8, 0.06, 7, wood);
-  for (let z = -3.3; z < 3.5; z += 0.4) box(0, 0.055, z, 7.8, 0.015, 0.018, cream);
-  box(-3.9, 1.6, 0, 0.2, 3.2, 7, cream);
-  box(3.9, 1.6, 0, 0.2, 3.2, 7, cream);
-  box(0, 1.6, -3.4, 8, 3.2, 0.2, cream);
+  box(0, 0.02, 0, 12, 0.06, 10, wood);
+  for (let z = -4.8; z < 5; z += 0.4) box(0, 0.055, z, 11.8, 0.015, 0.018, cream);
+  box(-5.9, 1.6, 0, 0.2, 3.2, 10, cream);
+  box(5.9, 1.6, 0, 0.2, 3.2, 10, cream);
+  box(0, 1.6, -4.9, 12, 3.2, 0.2, cream);
   const front = new T.Group();
   group.add(front);
-  for (const x of [-2.45, 2.45]) {
-    const wall = box(x, 1.6, 3.4, 3.1, 3.2, 0.2, cream);
+  for (const x of [-3.7, 3.7]) {
+    const wall = box(x, 1.6, 4.9, 4.6, 3.2, 0.2, cream);
     front.add(wall);
-    const frame = box(x, 1.8, 3.54, 1.3, 1.3, 0.12, wood);
+    const frame = box(x, 1.8, 5.04, 1.3, 1.3, 0.12, wood);
     front.add(frame);
-    const window = box(x, 1.8, 3.62, 1.1, 1.1, 0.06, amber);
+    const window = box(x, 1.8, 5.12, 1.1, 1.1, 0.06, amber);
     front.add(window);
   }
-  const door = box(0, 1.2, 3.45, 1.75, 2.4, 0.12, wood);
-  const roof = box(0, 3.35, 0, 8.6, 0.4, 7.6, roofMat);
-  box(-2.3, 0.7, -0.8, 2.4, 1.4, 0.8, wood);
-  box(-2.3, 1.46, -0.8, 2.7, 0.12, 1, cream);
-  box(-2.3, 2, -3.25, 2.7, 0.12, 0.4, wood);
+  const door = box(0, 1.2, 4.95, 2.75, 2.4, 0.12, wood);
+  const roof = box(0, 3.35, 0, 12.6, 0.4, 10.6, roofMat);
+  box(-2.5, 0.7, -1.8, 5.7, 1.4, 0.8, wood);
+  box(-2.5, 1.46, -1.8, 6, 0.12, 1, cream);
+  box(-2.5, 2, -4.75, 5.7, 0.12, 0.4, wood);
   const bottleColors = ['#6d967e', '#b98665', '#d7b76b'];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 10; i++) {
     const bottle = makeMaterial(bottleColors[i % 3]);
-    box(-3.3 + i * 0.5, 2.28, -3.24, 0.18, 0.4, 0.18, bottle);
-    box(-3.3 + i * 0.5, 2.54, -3.24, 0.09, 0.16, 0.09, bottle);
+    box(-4.8 + i * 0.5, 2.28, -4.74, 0.18, 0.4, 0.18, bottle);
+    box(-4.8 + i * 0.5, 2.54, -4.74, 0.09, 0.16, 0.09, bottle);
   }
   const stoolTops: T.Mesh[] = [];
   for (const seat of BAR_SEATS) {
@@ -103,17 +107,17 @@ export function createNightBar(scene: T.Scene) {
     group.add(mesh);
     return mesh;
   }
-  const kick = cylinder(2, 0.55, -2.3, 0.44, 0.5, drum);
+  const kick = cylinder(2, 0.55, -3.3, 0.44, 0.5, drum);
   kick.rotation.x = Math.PI / 2;
   for (const x of [1.5, 2.5]) {
-    cylinder(x, 1, -2.4, 0.25, 0.3, drum);
-    cylinder(x, 0.65, -2.8, 0.025, 1.3, metal);
-    cylinder(x, 1.3, -2.8, 0.38, 0.035, metal);
+    cylinder(x, 1, -3.4, 0.25, 0.3, drum);
+    cylinder(x, 0.65, -3.8, 0.025, 1.3, metal);
+    cylinder(x, 1.3, -3.8, 0.38, 0.035, metal);
   }
-  box(3.1, 0.65, -1.3, 0.55, 1.3, 0.45, roofMat);
-  box(3.1, 1.2, -0.8, 1, 0.15, 0.4, wood);
-  for (let i = 0; i < 9; i++) box(2.7 + i * 0.1, 1.3, -0.78, 0.085, 0.05, 0.35, cream);
-  box(3.1, 0.6, -0.8, 0.1, 1.2, 0.1, metal);
+  box(3.1, 0.65, -2.3, 0.55, 1.3, 0.45, roofMat);
+  box(3.1, 1.2, -1.8, 1, 0.15, 0.4, wood);
+  for (let i = 0; i < 9; i++) box(2.7 + i * 0.1, 1.3, -1.78, 0.085, 0.05, 0.35, cream);
+  box(3.1, 0.6, -1.8, 0.1, 1.2, 0.1, metal);
   const glass = new T.Group();
   scene.add(glass);
   glass.visible = false;
@@ -149,9 +153,9 @@ export function createNightBar(scene: T.Scene) {
   texture.colorSpace = T.SRGBColorSpace;
   const signMaterial = new T.MeshBasicMaterial({ map: texture });
   materials.push(signMaterial);
-  const sign = box(0, 2.78, 3.72, 3.8, 0.65, 0.06, signMaterial);
+  const sign = box(0, 2.78, 5.22, 3.8, 0.65, 0.06, signMaterial);
   front.add(sign);
-  const light = new T.PointLight('#ffc17c', 0, 10, 2);
+  const light = new T.PointLight('#ffc17c', 0, 16, 2);
   light.position.set(0, 2.8, 0.8);
   group.add(light);
   return {
@@ -170,7 +174,7 @@ export function createNightBar(scene: T.Scene) {
       door.visible = !night;
       roof.visible = !inside;
       front.visible = !inside;
-      light.intensity = night ? 12 : 0;
+      light.intensity = night ? 22 : 0;
       amber.emissiveIntensity = night ? 1.2 : 0;
     },
     dispose() {

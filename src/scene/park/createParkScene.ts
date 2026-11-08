@@ -232,7 +232,7 @@ export function createParkScene({
   );
   const obstacles: { x: number; z: number; r: number }[] = [];
   function tree(x: number, z: number, s = 1) {
-    if (Math.abs(x - BAR_SPOT.x) < 5.5 && Math.abs(z - BAR_SPOT.z) < 5.5) return;
+    if (Math.abs(x - BAR_SPOT.x) < 9 && Math.abs(z - BAR_SPOT.z) < 9) return;
     if (Math.abs(x - SCHOOL_SPOT.x) < 4.5 && Math.abs(z - SCHOOL_SPOT.z) < 5) return;
     if (walkways.some((p) => Math.hypot(x - p.x, z - p.z) < p.width + s)) return;
     // Keep trunks and their broad sprite canopies clear of the river.
@@ -456,7 +456,7 @@ export function createParkScene({
   [
     [27, 8],
     [35, 12],
-    [36, -11],
+    [39, -15],
   ].forEach(([x, z]) => scenery.prop(3, x, z, 1.1));
 
   const stageMeshes: T.Object3D[] = [];
@@ -480,6 +480,7 @@ export function createParkScene({
         if (walkways.some((p) => Math.hypot(x - p.x, z - p.z) < p.width + 1.4)) continue;
         if (stageCenters.some((center) => Math.hypot(x - center.x, z - center.z) < 5)) continue;
         if (obstacles.some((o) => Math.hypot(x - o.x, z - o.z) < o.r + 2)) continue;
+        if (overlapsBar({ x, z }, 2, false)) continue;
         if (benches.some((bench) => Math.hypot(x - bench.x, z - bench.z) < 4)) continue;
         chosen = new T.Vector3(x, 0, z);
         break;
@@ -537,7 +538,7 @@ export function createParkScene({
             const center = world(stage);
             return (
               Math.hypot(position.x - center.x, position.z - center.z) <=
-              (stage.id === BAR_STAGE_ID ? 1.2 : STAGE_RADIUS)
+              (stage.id === BAR_STAGE_ID ? 1.7 : STAGE_RADIUS)
             );
           })
         ? STAGE_SURFACE_HEIGHT
@@ -607,7 +608,7 @@ export function createParkScene({
   latest.current.liveStages.forEach((s) => {
     if (s.id === BAR_STAGE_ID) {
       const point = world(s);
-      const pad = cyl(point.x, 0.12, point.z, 1.2, 1.2, 0.24, '#816b60');
+      const pad = cyl(point.x, 0.12, point.z, 1.7, 1.7, 0.24, '#816b60');
       pad.userData.stage = s.id;
       stageMeshes.push(pad);
       cyl(point.x - 0.6, 1, point.z + 0.2, 0.03, 0.03, 1.7, '#525557');
@@ -952,7 +953,7 @@ export function createParkScene({
     }
     if (barNight && !document.querySelector('dialog[open]')) bartenderTime += dt;
     bartender.visible = barNight;
-    bartender.position.x = 29.5 + Math.sin(bartenderTime * 0.65) * 0.65;
+    bartender.position.x = 29.5 + Math.sin(bartenderTime * 0.65) * 1.8;
     bartender.position.y = Math.abs(Math.sin(bartenderTime * 6)) * 0.025;
 
     bartender.userData.walking = barNight;
@@ -969,7 +970,7 @@ export function createParkScene({
     const barAction =
       p.performing === null && !seatedBench && coffeePhase === 'idle' && !p.timeTransition
         ? insideBar
-          ? 'exit'
+          ? null
           : world(p.position.current).distanceTo(BAR_ENTRANCE) < 2.3 ||
               (!barNight && world(p.position.current).distanceTo(host.position) < 2.3)
             ? barNight
@@ -1062,7 +1063,19 @@ export function createParkScene({
     }
     nearbyBench =
       p.performing === null
-        ? (benches.find((bench) => world(p.position.current).distanceTo(bench) < 2.5) ?? null)
+        ? (benches
+            .filter(
+              (bench) =>
+                world(p.position.current).distanceTo(bench) < 2.5 &&
+                (!BAR_SEATS.includes(bench) || (barNight && insideBar)) &&
+                !p.participants.some(
+                  (person) => world(person).distanceTo(seatPosition(bench)) < 0.5,
+                ),
+            )
+            .sort(
+              (a, b) =>
+                world(p.position.current).distanceTo(a) - world(p.position.current).distanceTo(b),
+            )[0] ?? null)
         : null;
     const action =
       coffeePhase === 'idle' &&
@@ -1141,7 +1154,7 @@ export function createParkScene({
     }
     if (insideBar) {
       cameraFocusGoal.copy(BAR_SPOT);
-      stageZoom = 1.6;
+      stageZoom = 1.15;
     }
     if (time < barTalkUntil) {
       cameraFocusGoal.copy(host.position);
