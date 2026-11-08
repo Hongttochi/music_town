@@ -81,8 +81,12 @@ test('expanded bar has separated lounge and counter seats, an open audience aisl
   }
 });
 
-test('night doorway reveals the room before the avatar reaches the facade', () => {
+test('exterior stays closed visually and the solid facade keeps avatar clearance', () => {
   assert.equal(isAtBarDoorway(BAR_ENTRANCE), true);
+  assert.equal(isInsideBar(BAR_ENTRANCE), false);
+  assert.equal(isInsideBar({ x: 32, z: -1.3 }), false);
+  assert.equal(isInsideBar({ x: 32, z: -1.8 }), true);
+  for (const x of [28, 30, 34, 36]) assert.equal(overlapsBar({ x, z: 0 }, 0.35, true), true);
   assert.equal(isAtBarDoorway({ x: 32, z: -1.3 }), true);
   assert.equal(isAtBarDoorway({ x: 35, z: -1.3 }), false);
   assert.equal(overlapsBar({ x: 35, z: -1.5 }, 0.35, true), true);

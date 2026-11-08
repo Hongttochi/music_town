@@ -858,10 +858,11 @@ export function createParkScene({
       visitor.group.position.z += deltaZ * movement.fraction;
       visitor.group.position.y = surfaceHeight(visitor.group.position);
       visitor.group.userData.inFrontOfBarCounter =
-        isInsideBar(visitor.group.position) &&
-        visitor.group.position.x < 32.8 &&
-        visitor.group.position.z > -7.9 &&
-        visitor.group.position.z < -5;
+        isAtBarDoorway(visitor.group.position) ||
+        (isInsideBar(visitor.group.position) &&
+          visitor.group.position.x < 32.8 &&
+          visitor.group.position.z > -7.9 &&
+          visitor.group.position.z < -5);
 
       p.mapPositions?.current.set(person.id, {
         x: visitor.group.position.x * 25 + 700,
@@ -951,6 +952,17 @@ export function createParkScene({
       p.position.current = { x: BAR_ENTRANCE.x * 25 + 700, y: BAR_ENTRANCE.z * 25 + 450 };
       p.onMove({ ...p.position.current });
     }
+    const outsidePoint = world(p.position.current);
+    if (
+      barNight &&
+      !isInsideBar(outsidePoint) &&
+      outsidePoint.z > BAR_SPOT.z + 4.8 &&
+      Math.abs(outsidePoint.x - BAR_SPOT.x) > 1.05 &&
+      overlapsBar(outsidePoint, PLAYER_RADIUS, true)
+    ) {
+      p.position.current = { ...p.position.current, y: BAR_ENTRANCE.z * 25 + 450 };
+      p.onMove({ ...p.position.current });
+    }
     const entranceDistance = world(p.position.current).distanceTo(BAR_ENTRANCE);
     if (entranceDistance > 4.5) barApproachHandled = false;
     if (
@@ -989,7 +1001,7 @@ export function createParkScene({
       insideBar = false;
       standUp(false);
     }
-    bar.update(barNight, insideBar || (barNight && isAtBarDoorway(world(p.position.current))));
+    bar.update(barNight, insideBar);
     bar.setOccupied([world(p.position.current), ...p.participants.map(world)]);
     const barAction =
       p.performing === null && !seatedBench && coffeePhase === 'idle' && !p.timeTransition
@@ -1120,7 +1132,8 @@ export function createParkScene({
     player.position.copy(world(p.position.current));
     player.position.y = surfaceHeight(player.position);
     player.userData.inFrontOfBarCounter =
-      insideBar && player.position.x < 32.8 && player.position.z > -7.9 && player.position.z < -5;
+      (barNight && isAtBarDoorway(player.position)) ||
+      (insideBar && player.position.x < 32.8 && player.position.z > -7.9 && player.position.z < -5);
     const crossingBridge =
       isOnBridge(player.position) ||
       [...visitors.values()].some((v) => isOnBridge(v.group.position));

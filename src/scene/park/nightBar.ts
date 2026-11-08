@@ -14,10 +14,10 @@ export const BAR_SEATS = [...BAR_COUNTER_SEATS, ...BAR_LOUNGE_SEATS];
 export function isInsideBar(point: { x: number; z: number }) {
   return Math.abs(point.x - BAR_SPOT.x) < 5.8 && Math.abs(point.z - BAR_SPOT.z) < 4.8;
 }
-/** Reveal the open doorway before the avatar's head reaches the front facade. */
+/** The exterior door lane; it never controls roof visibility. */
 export function isAtBarDoorway(point: { x: number; z: number }) {
   const front = BAR_SPOT.z + 5;
-  return Math.abs(point.x - BAR_SPOT.x) < 1.8 && point.z > front - 1 && point.z < front + 4.8;
+  return Math.abs(point.x - BAR_SPOT.x) <= 1.05 && point.z >= front - 0.2 && point.z < front + 4.8;
 }
 export function overlapsBar(point: { x: number; z: number }, radius: number, night: boolean) {
   const x = Math.abs(point.x - BAR_SPOT.x),
@@ -25,6 +25,8 @@ export function overlapsBar(point: { x: number; z: number }, radius: number, nig
   // Camera-facing avatars lean behind their feet: reserve the front apron while closed
   // so heads cannot intersect the facade even when their feet are outside the wall.
   if (!night) return x < 6.3 + radius && z > -5.3 - radius && z < 8 + radius;
+  // Keep camera-facing heads clear of the solid facade, leaving only the door lane open.
+  if (x < 6.3 + radius && x > 1.4 - radius && z >= 5 - radius && z < 8 + radius) return true;
   if (x >= 6 + radius || Math.abs(z) >= 5 + radius) return false;
 
   // Solid side/back walls, with a 2.8-unit doorway on the south facade.
