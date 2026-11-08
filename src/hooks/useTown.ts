@@ -1,3 +1,4 @@
+import { BAR_STAGE_ID, barStage } from '../data/bar';
 import { clampParkPosition } from '../utils/parkBounds';
 import { errorCode, logEvent } from '../services/telemetry';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -34,7 +35,7 @@ const emptyTown: TownState = {
   participants: [],
 };
 const messages: Record<string, string> = {
-  BAR_CLOSED: '달빛 바 무대는 저녁 7시부터 아침 6시까지 열려요.',
+  BAR_CLOSED: '문나잇 바 무대는 저녁 7시부터 아침 6시까지 열려요.',
   INVALID_POSITION: '이동 가능한 공원 범위를 벗어났어요. 안쪽으로 이동해 주세요.',
   CHANNEL_FULL: '이 공원은 가득 찼어요. 다른 공원을 골라 주세요.',
   MUSICIAN_REQUIRED: '뮤지션으로 등록한 뒤 무대에 올라갈 수 있어요.',
@@ -186,6 +187,7 @@ export function useTown(
     const musician = state.participants.find((p) => p.id === performance?.user_id);
     return {
       ...stage,
+      name: stage.id === BAR_STAGE_ID ? barStage.name : stage.name,
       artist: musician?.avatar.name || '',
       bio: musician?.bio || '',
       genre: musician ? '라이브 버스킹' : '빈 자리',

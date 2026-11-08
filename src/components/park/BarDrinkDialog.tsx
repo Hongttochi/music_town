@@ -27,7 +27,7 @@ export function BarDrinkDialog({
     <DialogPanel
       ref={ref}
       className="bar-drink-menu"
-      aria-label="달빛 바 메뉴"
+      aria-label="문나잇 바 메뉴"
       onCancel={(e) => {
         e.preventDefault();
         onClose();
@@ -44,7 +44,7 @@ export function BarDrinkDialog({
             aria-label={page === 0 ? '클래식 메뉴' : '스페셜 메뉴'}
           >
             <header>
-              <small>MOONLIGHT BAR</small>
+              <small>MOONNIGHT BAR</small>
               <h2>{page === 0 ? 'The Classics' : 'After Dark'}</h2>
             </header>
             <div className="bar-drink-options">

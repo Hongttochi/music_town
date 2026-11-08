@@ -122,13 +122,13 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
             actor.drinkArmSource.width = actor.drinkArmSource.height = 512;
             actor.drinkArmSource
               .getContext('2d')!
-              .drawImage(actor.drinkSource, 1024, 0, 512, 512, 0, 0, 512, 512);
-            const seatedBack = composeSeatedAvatar(actor.drinkSource);
+              .drawImage(actor.drinkSource, 0, 0, 512, 512, 0, 0, 512, 512);
+            const seatedFront = composeSeatedAvatar(actor.drinkSource);
             actor.drinkSource = document.createElement('canvas');
             actor.drinkSource.width = actor.drinkSource.height = 512;
             actor.drinkSource
               .getContext('2d')!
-              .drawImage(seatedBack, 1024, 0, 512, 512, 0, 0, 512, 512);
+              .drawImage(seatedFront, 0, 0, 512, 512, 0, 0, 512, 512);
           }
         } else {
           const frame = actor.preparedFrames ?? 0;

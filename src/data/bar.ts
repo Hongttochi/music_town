@@ -2,7 +2,7 @@ import type { Stage } from './model';
 export const BAR_STAGE_ID = 6;
 export const barStage: Stage = {
   id: BAR_STAGE_ID,
-  name: '달빛 바 라이브',
+  name: '문나잇 바 라이브',
   x: 1587.5,
   y: 235,
   artist: '',

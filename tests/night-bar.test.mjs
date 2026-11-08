@@ -18,9 +18,8 @@ function load(file) {
   );
   return context.exports;
 }
-const { BAR_SPOT, BAR_ENTRANCE, BAR_INSIDE, BAR_SEATS, overlapsBar, isInsideBar } = load(
-  '../src/scene/park/nightBar.ts',
-);
+const { BAR_SPOT, BAR_ENTRANCE, BAR_INSIDE, BAR_SEATS, overlapsBar, isInsideBar, isAtBarDoorway } =
+  load('../src/scene/park/nightBar.ts');
 const { isParkNight } = load('../src/utils/time.ts');
 const { clampParkPosition } = load('../src/utils/parkBounds.ts');
 
@@ -80,4 +79,11 @@ test('expanded bar has separated lounge and counter seats, an open audience aisl
   for (let z = -3; z <= 3; z += 0.1) {
     assert.equal(overlapsBar({ x: 32, z }, 0.35, true), false, `exit z=${z}`);
   }
+});
+
+test('night doorway reveals the room before the avatar reaches the facade', () => {
+  assert.equal(isAtBarDoorway(BAR_ENTRANCE), true);
+  assert.equal(isAtBarDoorway({ x: 32, z: -1.3 }), true);
+  assert.equal(isAtBarDoorway({ x: 35, z: -1.3 }), false);
+  assert.equal(overlapsBar({ x: 35, z: -1.5 }, 0.35, true), true);
 });

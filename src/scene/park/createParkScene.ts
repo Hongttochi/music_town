@@ -5,6 +5,7 @@ import { BAR_STAGE_ID, type BarDrinkId } from '../../data/bar';
 import {
   createNightBar,
   BAR_SPOT,
+  isAtBarDoorway,
   BAR_HOST,
   BAR_SEATS,
   BAR_COUNTER_SEATS,
@@ -52,7 +53,7 @@ type ParkSceneBindings = {
   dismissBarNotice: React.MutableRefObject<() => void>;
   barBubble: React.RefObject<HTMLButtonElement | null>;
   useBar: React.MutableRefObject<() => void>;
-  setBarAction: (value: 'enter' | 'exit' | 'closed' | null) => void;
+  setBarAction: (value: 'enter' | 'exit' | 'closed' | 'talk' | null) => void;
   el: HTMLCanvasElement;
   latest: React.MutableRefObject<ParkProps>;
   sound: React.MutableRefObject<ReturnType<typeof useSoundEffects>>;
@@ -323,6 +324,7 @@ export function createParkScene({
   const bar = createNightBar(scene);
   let barTalkUntil = 0;
   let barTalkStarted = 0;
+  let barTalkNight = false;
   let barApproachHandled = false;
   let barNoticeShown = false;
   let barSipStarted: number | null = null;
@@ -342,13 +344,18 @@ export function createParkScene({
   };
   const hostObstacle = { x: BAR_HOST.x, z: BAR_HOST.z, r: 0.4 };
   obstacles.push(hostObstacle);
-  let shownBarAction: 'enter' | 'exit' | 'closed' | null = null;
+  let shownBarAction: 'enter' | 'exit' | 'closed' | 'talk' | null = null;
   useBar.current = () => {
     const p = latest.current;
     if (p.timeTransition || p.performing !== null || document.querySelector('dialog[open]')) return;
     const point = world(p.position.current);
     const inside = isInsideBar(point);
-    if (!(p.night ?? isParkNight())) {
+    const night = p.night ?? isParkNight();
+    if (
+      !night ||
+      (!inside && point.distanceTo(host.position) < 2.3 && point.distanceTo(BAR_ENTRANCE) >= 2.3)
+    ) {
+      barTalkNight = night;
       if (Math.min(point.distanceTo(BAR_ENTRANCE), point.distanceTo(host.position)) > 2.3) return;
       barApproachHandled = true;
       barTalkUntil = Infinity;
@@ -872,9 +879,7 @@ export function createParkScene({
           ? lounge.x < BAR_SPOT.x
             ? -Math.PI / 2
             : Math.PI / 2
-          : BAR_COUNTER_SEATS.some((seat) => destination.distanceTo(seat) < 0.1)
-            ? Math.PI
-            : 0;
+          : 0;
       }
     }
     if (key !== avatarKey) {
@@ -964,7 +969,7 @@ export function createParkScene({
       dz = 0;
     }
 
-    if (barTalkUntil && (time >= barTalkUntil || barNight || p.timeTransition))
+    if (barTalkUntil && (time >= barTalkUntil || barNight !== barTalkNight || p.timeTransition))
       dismissBarNotice.current();
     if (barTalkUntil && !barNoticeShown && time - barTalkStarted >= 650) {
       barNoticeShown = true;
@@ -984,16 +989,18 @@ export function createParkScene({
       insideBar = false;
       standUp(false);
     }
-    bar.update(barNight, insideBar);
+    bar.update(barNight, insideBar || (barNight && isAtBarDoorway(world(p.position.current))));
     bar.setOccupied([world(p.position.current), ...p.participants.map(world)]);
     const barAction =
       p.performing === null && !seatedBench && coffeePhase === 'idle' && !p.timeTransition
         ? insideBar
           ? null
           : world(p.position.current).distanceTo(BAR_ENTRANCE) < 2.3 ||
-              (!barNight && world(p.position.current).distanceTo(host.position) < 2.3)
+              world(p.position.current).distanceTo(host.position) < 2.3
             ? barNight
-              ? 'enter'
+              ? world(p.position.current).distanceTo(BAR_ENTRANCE) < 2.3
+                ? 'enter'
+                : 'talk'
               : 'closed'
             : null
         : null;
@@ -1122,7 +1129,6 @@ export function createParkScene({
     // Stage performers face the audience, regardless of their approach direction.
     if (seatedBench && BAR_LOUNGE_SEATS.includes(seatedBench))
       player.rotation.y = seatedBench.x < BAR_SPOT.x ? -Math.PI / 2 : Math.PI / 2;
-    else if (seatedBench && BAR_COUNTER_SEATS.includes(seatedBench)) player.rotation.y = Math.PI;
     else if (p.performing !== null || seatedBench || coffeePhase === 'drinking')
       player.rotation.y = 0;
     else if (dx || dz) player.rotation.y = Math.atan2(dx, dz);
@@ -1214,7 +1220,13 @@ export function createParkScene({
     camera.lookAt(target);
     camera.updateMatrixWorld();
     if (barBubble.current) {
-      const anchor = (insideBar ? BAR_INSIDE : barNight ? BAR_ENTRANCE : host.position).clone();
+      const anchor = (
+        insideBar
+          ? BAR_INSIDE
+          : barNight && shownBarAction !== 'talk'
+            ? BAR_ENTRANCE
+            : host.position
+      ).clone();
       anchor.y = insideBar ? 2 : 3.8;
       anchor.project(camera);
       barBubble.current.style.left = `${(anchor.x * 0.5 + 0.5) * el.clientWidth}px`;

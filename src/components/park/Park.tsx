@@ -1,6 +1,7 @@
+import { isParkNight } from '../../utils/time';
 import { BarDialogue } from './BarDialogue';
 import { BarDrinkDialog } from './BarDrinkDialog';
-import { Wine, Moon } from 'lucide-react';
+import { Moon } from 'lucide-react';
 import './night-bar.css';
 import { ParkGuideDialog } from './ParkGuideDialog';
 import { useParkScene } from '../../hooks/useParkScene';
@@ -54,13 +55,32 @@ export function Park(props: ParkProps) {
           className="bench-action bar-action"
           style={{ visibility: 'hidden' }}
           onClick={() => useBar.current()}
-          aria-label={barAction === 'closed' ? '바 입장 안내 듣기' : '달빛 바 입장'}
+          aria-label={
+            barAction === 'talk'
+              ? '루나와 대화하기'
+              : barAction === 'closed'
+                ? '바 입장 안내 듣기'
+                : '문나잇 바 입장'
+          }
         >
-          {barAction === 'closed' ? <Moon size={18} /> : <Wine size={18} />}
-          <span>{barAction === 'closed' ? '19:00–06:00' : '달빛 바'}</span>
+          {barAction === 'talk' ? (
+            <Flaticon name="chat" size={18} />
+          ) : barAction === 'closed' ? (
+            <Moon size={18} />
+          ) : (
+            <Flaticon name="wine-glass" size={18} />
+          )}
+          <span>
+            {barAction === 'talk' ? '루나' : barAction === 'closed' ? '19:00–06:00' : '문나잇 바'}
+          </span>
         </Button>
       )}
-      {barNotice && <BarDialogue onClose={() => dismissBarNotice.current()} />}
+      {barNotice && (
+        <BarDialogue
+          night={props.night ?? isParkNight()}
+          onClose={() => dismissBarNotice.current()}
+        />
+      )}
       {barMenuOpen && (
         <BarDrinkDialog
           onClose={() => setBarMenuOpen(false)}

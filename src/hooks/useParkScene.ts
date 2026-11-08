@@ -18,7 +18,7 @@ export function useParkScene(props: ParkProps) {
   const useBarDrink = useRef<(id: BarDrinkId) => void>(() => {});
   const dismissBarNotice = useRef<() => void>(() => {});
   const useBar = useRef<() => void>(() => {});
-  const [barAction, setBarAction] = useState<'enter' | 'exit' | 'closed' | null>(null);
+  const [barAction, setBarAction] = useState<'enter' | 'exit' | 'closed' | 'talk' | null>(null);
   const benchBubble = useRef<HTMLButtonElement>(null);
   const [benchAction, setBenchAction] = useState<'sit' | null>(null);
   const useBench = useRef<() => void>(() => {});

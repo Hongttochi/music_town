@@ -245,7 +245,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
   };
   const openStage = (s: Stage) => {
     if (s.id === BAR_STAGE_ID && !timeTransition.night) {
-      notify('달빛 바 무대는 저녁 7시부터 아침 6시까지 열려요.');
+      notify('문나잇 바 무대는 저녁 7시부터 아침 6시까지 열려요.');
       return;
     }
     setSelected(s);
@@ -261,7 +261,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
   };
   const join = async (s: Stage) => {
     if (s.id === BAR_STAGE_ID && !timeTransition.night) {
-      notify('아직 달빛 바 공연 시간이 아니에요.');
+      notify('아직 문나잇 바 공연 시간이 아니에요.');
       return;
     }
     if (account.demo) {

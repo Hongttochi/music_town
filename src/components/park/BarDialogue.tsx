@@ -1,11 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import dogImage from '../../assets/npc/bar-dog.webp';
 
-const lines = [
+const dayLines = [
   '아직 문 열 시간이 아니에요. 지금은 저녁 손님을 맞을 준비를 하고 있어요.',
-  '저녁 7시에 다시 만나요! 달빛 바는 아침 6시까지 열려 있어요.',
+  '저녁 7시에 다시 만나요! 문나잇 바는 아침 6시까지 열려 있어요.',
 ];
-export function BarDialogue({ onClose }: { onClose: () => void }) {
+const nightLines = [
+  '안녕하세요! 문나잇 바에서 재즈 공연이 열리는 것 같은데요?!',
+  '한번 들러보세요! 음악을 듣거나 무대에 올라 직접 공연할 수도 있어요.',
+];
+export function BarDialogue({ onClose, night = false }: { onClose: () => void; night?: boolean }) {
+  const lines = night ? nightLines : dayLines;
   const dialog = useRef<HTMLDialogElement>(null);
   const [page, setPage] = useState(0);
   const [letters, setLetters] = useState(0);
@@ -44,7 +49,7 @@ export function BarDialogue({ onClose }: { onClose: () => void }) {
       <div className="bar-dialogue-speaker">
         <img src={dogImage} alt="정장을 입은 강아지 루나" />
         <span id="bar-speaker" className="bar-dialogue-name">
-          루나 <small>달빛 바 안내</small>
+          루나 <small>문나잇 바 안내</small>
         </span>
       </div>
       <div className="bar-dialogue-body">

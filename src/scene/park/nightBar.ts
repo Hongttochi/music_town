@@ -14,6 +14,11 @@ export const BAR_SEATS = [...BAR_COUNTER_SEATS, ...BAR_LOUNGE_SEATS];
 export function isInsideBar(point: { x: number; z: number }) {
   return Math.abs(point.x - BAR_SPOT.x) < 5.8 && Math.abs(point.z - BAR_SPOT.z) < 4.8;
 }
+/** Reveal the open doorway before the avatar's head reaches the front facade. */
+export function isAtBarDoorway(point: { x: number; z: number }) {
+  const front = BAR_SPOT.z + 5;
+  return Math.abs(point.x - BAR_SPOT.x) < 1.8 && point.z > front - 1 && point.z < front + 4.8;
+}
 export function overlapsBar(point: { x: number; z: number }, radius: number, night: boolean) {
   const x = Math.abs(point.x - BAR_SPOT.x),
     z = point.z - BAR_SPOT.z;
@@ -162,7 +167,7 @@ export function createNightBar(scene: T.Scene) {
   ctx.fillStyle = '#ffe5ac';
   ctx.textAlign = 'center';
   ctx.font = 'bold 40px sans-serif';
-  ctx.fillText('MOONLIGHT BAR', 256, 58);
+  ctx.fillText('MOONNIGHT BAR', 256, 58);
   ctx.font = '22px sans-serif';
   ctx.fillText('19:00 — 06:00', 256, 100);
   const texture = new T.CanvasTexture(signCanvas);

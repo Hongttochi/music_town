@@ -1,4 +1,5 @@
 export type IconName =
+  | 'wine-glass'
   | 'chat'
   | 'music'
   | 'bench'
