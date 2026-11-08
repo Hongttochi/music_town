@@ -41,17 +41,18 @@ export function BarDialogue({ onClose }: { onClose: () => void }) {
         onClose();
       }}
     >
-      <span id="bar-speaker" className="bar-dialogue-name">
-        루나 <small>달빛 바 안내</small>
-      </span>
-      <img src={dogImage} alt="정장을 입은 강아지 루나" />
+      <div className="bar-dialogue-speaker">
+        <img src={dogImage} alt="정장을 입은 강아지 루나" />
+        <span id="bar-speaker" className="bar-dialogue-name">
+          루나 <small>달빛 바 안내</small>
+        </span>
+      </div>
       <div className="bar-dialogue-body">
         <p aria-label={text}>
           <span aria-hidden="true">{text.slice(0, letters)}</span>
         </p>
         <button type="button" onClick={next}>
-          {!complete ? '대사 보기' : page === lines.length - 1 ? '알겠어요' : '다음'}{' '}
-          <span aria-hidden="true">▸</span>
+          {page === lines.length - 1 ? '알겠어요' : '다음'} <span aria-hidden="true">▸</span>
         </button>
       </div>
     </dialog>
