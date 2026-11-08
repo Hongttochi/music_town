@@ -93,6 +93,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
     if (timeTransition.active) setPanel(null);
   }, [timeTransition.active]);
   const [toast, setToast] = useState('');
+  const [toastKind, setToastKind] = useState<'notice' | 'performance'>('notice');
   const [actionError, setActionError] = useState('');
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -107,7 +108,8 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
   const mapPositions = useRef(new Map<string, Position>());
   const motion = useRef<Position>({ x: 0, y: 0 });
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const notify = (text: string) => {
+  const notify = (text: string, kind: 'notice' | 'performance' = 'notice') => {
+    setToastKind(kind);
     setToast(text);
     clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(''), 3500);
@@ -389,7 +391,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
                 try {
                   await town.act('finish');
                   position.current.y += 70;
-                  notify('공연을 마쳤어요. 수고했어요!');
+                  notify('당신의 음악으로 공원이 더 따뜻해졌어요.', 'performance');
                 } catch (error) {
                   setActionError((error as Error).message);
                 }
@@ -684,8 +686,24 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
           }}
         />
       )}
-      <div id="toast" role="status" className={toast ? 'visible' : ''}>
-        {toast}
+      <div
+        id="toast"
+        role="status"
+        className={`${toast ? 'visible' : ''}${toastKind === 'performance' ? ' performance-toast' : ''}`}
+      >
+        {toastKind === 'performance' ? (
+          <>
+            <span className="performance-toast-icon" aria-hidden="true">
+              <Flaticon name="clap" size={28} />
+            </span>
+            <span className="performance-toast-copy">
+              <strong>멋진 공연, 고마워요!</strong>
+              <span>{toast}</span>
+            </span>
+          </>
+        ) : (
+          toast
+        )}
       </div>
     </>
   );

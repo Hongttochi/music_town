@@ -1016,3 +1016,48 @@ dialog .town-button.notice-board-close {
   background: transparent;
   box-shadow: none;
 }
+
+/* A small encore card for the performer after leaving the stage. */
+#toast.performance-toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+  padding: 13px 18px 13px 13px;
+  border: 1px solid #e3d7b8;
+  border-radius: 18px 18px 18px 6px;
+  background: linear-gradient(115deg, #fffaf0, #f6f3e4);
+  box-shadow:
+    0 5px 0 #677b4820,
+    0 10px 26px #263b2920;
+  text-align: left;
+}
+.performance-toast-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 46px;
+  height: 46px;
+  border: 1px solid #e5dbb7;
+  border-radius: 50%;
+  background: #f1e8cb;
+}
+.performance-toast-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.performance-toast-copy strong {
+  color: #40573f;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.performance-toast-copy > span {
+  color: #7b8069;
+  font-size: 10px;
+  line-height: 1.5;
+  word-break: keep-all;
+}
