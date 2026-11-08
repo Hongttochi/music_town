@@ -140,9 +140,9 @@ export function PerformanceControls({
               <Volume2 size={20} />
             </Button>
           )}
-          {(microphone.error || voice.error) && (
+          {voice.error && (
             <p className="performance-error" role="alert">
-              {microphone.error || voice.error}
+              {voice.error}
             </p>
           )}
         </div>
