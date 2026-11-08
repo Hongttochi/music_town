@@ -6,7 +6,10 @@ import vm from 'node:vm';
 import ts from 'typescript';
 const require = createRequire(import.meta.url);
 function load(file) {
-  const context = { exports: {}, require };
+  const context = {
+    exports: {},
+    require: (id) => (id === '../../data/bar' ? load('../src/data/bar.ts') : require(id)),
+  };
   vm.runInNewContext(
     ts.transpileModule(readFileSync(new URL(file, import.meta.url), 'utf8'), {
       compilerOptions: { module: ts.ModuleKind.CommonJS },
@@ -32,12 +35,14 @@ test('bar uses the existing Korean night schedule at both boundaries', () => {
   }
 });
 test('daytime locks the doorway while night allows passage without opening side walls', () => {
-  const doorway = { x: BAR_SPOT.x, z: BAR_SPOT.z + 2.4 };
+  const doorway = { x: BAR_SPOT.x, z: BAR_SPOT.z + 3.4 };
   assert.equal(overlapsBar(doorway, 0.35, false), true);
   assert.equal(overlapsBar(doorway, 0.35, true), false);
-  assert.equal(overlapsBar({ x: BAR_SPOT.x + 2.9, z: BAR_SPOT.z }, 0.35, true), true);
-  assert.equal(overlapsBar({ x: BAR_SPOT.x, z: BAR_SPOT.z - 2.4 }, 0.35, true), true);
-  assert.equal(overlapsBar({ x: BAR_SPOT.x, z: BAR_SPOT.z - 1.4 }, 0.35, true), true);
+  assert.equal(overlapsBar({ x: BAR_SPOT.x + 3.9, z: BAR_SPOT.z }, 0.35, true), true);
+  assert.equal(overlapsBar({ x: BAR_SPOT.x, z: BAR_SPOT.z - 3.4 }, 0.35, true), true);
+  assert.equal(overlapsBar({ x: 29.5, z: -8.3 }, 0.35, true), true);
+  assert.equal(overlapsBar({ x: 34, z: -9.8 }, 0.35, true), true);
+  assert.equal(overlapsBar({ x: 34, z: -8.6 }, 0.35, true), false);
 });
 test('arrival and exit are clear, stay within supported coordinates and avoid the riverside stage', () => {
   assert.equal(isInsideBar(BAR_INSIDE), true);

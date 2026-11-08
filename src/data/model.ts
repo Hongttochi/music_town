@@ -1,3 +1,4 @@
+import { barStage } from './bar';
 export type Avatar = {
   name: string;
   profileIcon?: string;
@@ -42,6 +43,8 @@ export type Stage = {
   color: string;
 };
 export const stages: Stage[] = [
+  // The bar shares the existing stage/voice system.
+
   {
     id: 0,
     name: '느티나무 아래',
@@ -114,6 +117,7 @@ export const stages: Stage[] = [
     y: 450,
     color: '#b2bd98',
   },
+  barStage,
 ];
 export const populations = [18, 24, 12, 30, 9];
 export const defaultAvatar: Avatar = {

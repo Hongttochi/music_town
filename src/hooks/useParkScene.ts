@@ -1,3 +1,4 @@
+import type { BarDrinkId } from '../data/bar';
 import { useEffect, useRef, useState } from 'react';
 import { useSoundEffects } from './useSoundEffects';
 import type { CoffeeId } from '../data/coffeeMenu';
@@ -12,6 +13,10 @@ export function useParkScene(props: ParkProps) {
   latest.current = props;
   const [error, setError] = useState(false);
   const barBubble = useRef<HTMLButtonElement>(null);
+  const [barNotice, setBarNotice] = useState(false);
+  const [barMenuOpen, setBarMenuOpen] = useState(false);
+  const useBarDrink = useRef<(id: BarDrinkId) => void>(() => {});
+  const dismissBarNotice = useRef<() => void>(() => {});
   const useBar = useRef<() => void>(() => {});
   const [barAction, setBarAction] = useState<'enter' | 'exit' | 'closed' | null>(null);
   const benchBubble = useRef<HTMLButtonElement>(null);
@@ -28,6 +33,8 @@ export function useParkScene(props: ParkProps) {
   const [coffeeMenuOpen, setCoffeeMenuOpen] = useState(false);
   useEffect(() => {
     if (props.timeTransition) {
+      setBarMenuOpen(false);
+      setBarNotice(false);
       setGuideOpen(false);
       setNoticeBoardOpen(false);
       setCoffeeMenuOpen(false);
@@ -41,6 +48,10 @@ export function useParkScene(props: ParkProps) {
         latest,
         sound,
         barBubble,
+        setBarNotice,
+        setBarMenuOpen,
+        useBarDrink,
+        dismissBarNotice,
         useBar,
         setBarAction,
         benchBubble,
@@ -59,6 +70,11 @@ export function useParkScene(props: ParkProps) {
     [],
   );
   return {
+    barNotice,
+    barMenuOpen,
+    setBarMenuOpen,
+    useBarDrink,
+    dismissBarNotice,
     canvas,
     barBubble,
     useBar,

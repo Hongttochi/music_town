@@ -57,3 +57,9 @@ Vercel 서버 환경에 `SUPABASE_SECRET_KEY`를 설정하고 재배포해야 �
 검증: `node --test tests/delete-account.test.mjs`는 본인 인증, 위조 대상 ID 무시, 확인 누락, 만료 세션, 서버 설정 누락, 서버 오류를 검사합니다. 실제 운영 계정 삭제는 실행하지 않습니다.
 
 참고: https://supabase.com/docs/reference/javascript/auth-admin-deleteuser · https://supabase.com/docs/guides/auth/managing-user-data
+
+## 달빛 바 공연 무대
+
+운영 DB에는 `supabase/migrations/202611080001_bar_stage.sql`만 추가 실행합니다. 기존 멀티플레이 SQL을 다시 실행하면 활동 통계용 `town_action` 래퍼를 덮어쓸 수 있으므로 다시 실행하지 않습니다.
+
+새 SQL은 6번 무대(화면의 07번)를 등록하고, 기존 공연·대기열·음성 시스템을 사용합니다. 한국 시간 19:00~06:00에만 서버에서 신청을 허용하며 아침에는 바 공연과 대기를 정리합니다. 기존 무대의 FIFO 승계와 접속 만료 처리는 유지합니다. 바 공연의 종료 시각도 오전 6시를 넘지 않게 제한됩니다. 운영 DB 적용 전에는 로그인한 사용자의 무대 목록에 바 무대가 나오지 않습니다.

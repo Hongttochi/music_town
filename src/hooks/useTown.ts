@@ -34,6 +34,8 @@ const emptyTown: TownState = {
   participants: [],
 };
 const messages: Record<string, string> = {
+  BAR_CLOSED: '달빛 바 무대는 저녁 7시부터 아침 6시까지 열려요.',
+  INVALID_POSITION: '이동 가능한 공원 범위를 벗어났어요. 안쪽으로 이동해 주세요.',
   CHANNEL_FULL: '이 공원은 가득 찼어요. 다른 공원을 골라 주세요.',
   MUSICIAN_REQUIRED: '뮤지션으로 등록한 뒤 무대에 올라갈 수 있어요.',
   SESSION_EXPIRED: '공원 연결이 종료됐어요. 채널을 다시 선택해 주세요.',

@@ -1,3 +1,4 @@
+import { BarDrinkDialog } from './BarDrinkDialog';
 import { Wine, LogOut, Moon } from 'lucide-react';
 import './night-bar.css';
 import { ParkGuideDialog } from './ParkGuideDialog';
@@ -15,6 +16,11 @@ export function Park(props: ParkProps) {
     barBubble,
     useBar,
     barAction,
+    barNotice,
+    barMenuOpen,
+    setBarMenuOpen,
+    useBarDrink,
+    dismissBarNotice,
     npcBubble,
     nearNpc,
     guideOpen,
@@ -46,11 +52,10 @@ export function Park(props: ParkProps) {
           ref={barBubble}
           className="bench-action bar-action"
           style={{ visibility: 'hidden' }}
-          disabled={barAction === 'closed'}
           onClick={() => useBar.current()}
           aria-label={
             barAction === 'closed'
-              ? '바 영업시간: 밤 7시부터 아침 6시'
+              ? '바 입장 안내 듣기'
               : barAction === 'exit'
                 ? '바에서 나가기'
                 : '달빛 바 입장'
@@ -67,6 +72,28 @@ export function Park(props: ParkProps) {
             {barAction === 'closed' ? '19:00–06:00' : barAction === 'exit' ? '나가기' : '달빛 바'}
           </span>
         </Button>
+      )}
+      {barNotice && (
+        <section className="bar-npc-notice" role="status">
+          <small>루나 · 달빛 바 안내</small>
+          <p>
+            아직 문 열 시간이 아니에요.
+            <br />
+            저녁 7시에 다시 만나요!
+          </p>
+          <Button variant="ghost" onClick={() => dismissBarNotice.current()}>
+            알겠어요
+          </Button>
+        </section>
+      )}
+      {barMenuOpen && (
+        <BarDrinkDialog
+          onClose={() => setBarMenuOpen(false)}
+          onOrder={(id) => {
+            useBarDrink.current(id);
+            setBarMenuOpen(false);
+          }}
+        />
       )}
       {guideOpen && <ParkGuideDialog onClose={() => setGuideOpen(false)} />}
       {nearNpc && !error && props.performing === null && (

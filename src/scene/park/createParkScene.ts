@@ -1,6 +1,9 @@
+import { BAR_STAGE_ID, type BarDrinkId } from '../../data/bar';
 import {
   createNightBar,
   BAR_SPOT,
+  BAR_HOST,
+  BAR_SEATS,
   BAR_ENTRANCE,
   BAR_INSIDE,
   isInsideBar,
@@ -38,6 +41,10 @@ const world = (p: Position) => new T.Vector3((p.x - 700) / 25, 0, (p.y - 450) / 
 const STAGE_RADIUS = 2.2;
 const STAGE_SURFACE_HEIGHT = 0.24;
 type ParkSceneBindings = {
+  setBarNotice: (value: boolean) => void;
+  setBarMenuOpen: (value: boolean) => void;
+  useBarDrink: React.MutableRefObject<(id: BarDrinkId) => void>;
+  dismissBarNotice: React.MutableRefObject<() => void>;
   barBubble: React.RefObject<HTMLButtonElement | null>;
   useBar: React.MutableRefObject<() => void>;
   setBarAction: (value: 'enter' | 'exit' | 'closed' | null) => void;
@@ -74,6 +81,10 @@ export function createParkScene({
   setCoffeeMenuOpen,
   setCoffeeAction,
   barBubble,
+  setBarNotice,
+  setBarMenuOpen,
+  useBarDrink,
+  dismissBarNotice,
   useBar,
   setBarAction,
 }: ParkSceneBindings) {
@@ -218,7 +229,7 @@ export function createParkScene({
   );
   const obstacles: { x: number; z: number; r: number }[] = [];
   function tree(x: number, z: number, s = 1) {
-    if (Math.abs(x - BAR_SPOT.x) < 4.5 && Math.abs(z - BAR_SPOT.z) < 4.5) return;
+    if (Math.abs(x - BAR_SPOT.x) < 5.5 && Math.abs(z - BAR_SPOT.z) < 5.5) return;
     if (Math.abs(x - SCHOOL_SPOT.x) < 4.5 && Math.abs(z - SCHOOL_SPOT.z) < 5) return;
     if (walkways.some((p) => Math.hypot(x - p.x, z - p.z) < p.width + s)) return;
     // Keep trunks and their broad sprite canopies clear of the river.
@@ -305,18 +316,33 @@ export function createParkScene({
     riverStone(RIVER.right + 0.2, z);
   }
   const bar = createNightBar(scene);
+  let barTalkUntil = 0;
+  let barSipStarted: number | null = null;
+  dismissBarNotice.current = () => {
+    barTalkUntil = 0;
+    setBarNotice(false);
+  };
+  useBarDrink.current = (id) => {
+    const p = latest.current;
+    if (!(p.night ?? isParkNight()) || !seatedBench || !BAR_SEATS.includes(seatedBench)) return;
+    bar.serve(id);
+    barSipStarted = performance.now();
+    sound.current('drink');
+  };
+  obstacles.push({ x: BAR_HOST.x, z: BAR_HOST.z, r: 0.4 });
   let shownBarAction: 'enter' | 'exit' | 'closed' | null = null;
   useBar.current = () => {
     const p = latest.current;
-    if (
-      !(p.night ?? isParkNight()) ||
-      p.timeTransition ||
-      p.performing !== null ||
-      document.querySelector('dialog[open]')
-    )
-      return;
+    if (p.timeTransition || p.performing !== null || document.querySelector('dialog[open]')) return;
     const point = world(p.position.current);
     const inside = isInsideBar(point);
+    if (!(p.night ?? isParkNight())) {
+      if (point.distanceTo(BAR_ENTRANCE) > 2.3) return;
+      barTalkUntil = performance.now() + 5000;
+      setBarNotice(true);
+      p.motion.current = { x: 0, y: 0 };
+      return;
+    }
     if (!inside && point.distanceTo(BAR_ENTRANCE) > 2.3) return;
     const destination = inside ? BAR_ENTRANCE : BAR_INSIDE;
     p.position.current = { x: destination.x * 25 + 700, y: destination.z * 25 + 450 };
@@ -455,27 +481,39 @@ export function createParkScene({
       benches.push(chosen);
     }
   }
+  benches.push(...BAR_SEATS);
   let nearbyBench: T.Vector3 | null = null;
   let seatedBench: T.Vector3 | null = null;
   let seatZoom = 0;
   let standingPosition: Position | null = null;
   let shownBenchAction: 'sit' | null = null;
-  const seatPosition = (bench: T.Vector3) => new T.Vector3(bench.x - 0.2, 0, bench.z + 0.25);
+  const seatPosition = (bench: T.Vector3) =>
+    BAR_SEATS.includes(bench) ? bench.clone() : new T.Vector3(bench.x - 0.2, 0, bench.z + 0.25);
   const standUp = (restorePosition: boolean) => {
     if (restorePosition && standingPosition) {
       latest.current.position.current = { ...standingPosition };
       latest.current.onMove({ ...standingPosition });
     }
+    barSipStarted = null;
+    setBarMenuOpen(false);
     seatedBench = null;
     standingPosition = null;
   };
   useBench.current = () => {
     const p = latest.current;
     if (document.querySelector('dialog[open]') || p.performing !== null) return;
-    if (seatedBench) return;
+    if (seatedBench) {
+      if (BAR_SEATS.includes(seatedBench)) setBarMenuOpen(true);
+      return;
+    }
     if (nearbyBench && world(p.position.current).distanceTo(nearbyBench) < 2.5) {
       seatedBench = nearbyBench;
+      if (BAR_SEATS.includes(nearbyBench) && !(p.night ?? isParkNight())) {
+        seatedBench = null;
+        return;
+      }
       sound.current('sitdown');
+      if (BAR_SEATS.includes(nearbyBench)) setBarMenuOpen(true);
       standingPosition = { ...p.position.current };
       const seat = seatPosition(seatedBench);
       p.position.current = { x: seat.x * 25 + 700, y: seat.z * 25 + 450 };
@@ -486,9 +524,13 @@ export function createParkScene({
   const surfaceHeight = (position: T.Vector3) =>
     isOnBridge(position)
       ? BRIDGE.surfaceHeight
-      : stageCenters.some(
-            (center) => Math.hypot(position.x - center.x, position.z - center.z) <= STAGE_RADIUS,
-          )
+      : latest.current.liveStages.some((stage) => {
+            const center = world(stage);
+            return (
+              Math.hypot(position.x - center.x, position.z - center.z) <=
+              (stage.id === BAR_STAGE_ID ? 1.2 : STAGE_RADIUS)
+            );
+          })
         ? STAGE_SURFACE_HEIGHT
         : 0;
   // Shared soft glow for lantern halos and the pools of light beneath them.
@@ -554,6 +596,15 @@ export function createParkScene({
     obstacles.push({ x, z, r: 0.35 });
   }
   latest.current.liveStages.forEach((s) => {
+    if (s.id === BAR_STAGE_ID) {
+      const point = world(s);
+      const pad = cyl(point.x, 0.12, point.z, 1.2, 1.2, 0.24, '#816b60');
+      pad.userData.stage = s.id;
+      stageMeshes.push(pad);
+      cyl(point.x - 0.6, 1, point.z + 0.2, 0.03, 0.03, 1.7, '#525557');
+      ball(point.x - 0.6, 1.85, point.z + 0.2, 0.09, 0.13, 0.09, '#303638');
+      return;
+    }
     const p = world(s),
       pad = cyl(p.x, 0.1, p.z, STAGE_RADIUS, 2.25, 0.2, '#d6b786');
     streetlamp(p.x - 2.8, p.z - 1.7);
@@ -579,6 +630,33 @@ export function createParkScene({
   function character(a: Avatar) {
     return imageCharacters.create(a === latest.current.avatar ? a : npcAppearance(villagerIndex++));
   }
+  const host = imageCharacters.create({
+    ...latest.current.avatar,
+    name: '루나',
+    shirt: '#686078',
+    bag: 'none',
+    hair: 6,
+    hairColor: '#b8abc4',
+    clothingStyle: 'suit',
+    instrument: 'none',
+    earwear: 'none',
+  });
+  host.position.copy(BAR_HOST);
+  scene.add(host);
+  const bartender = imageCharacters.create({
+    ...latest.current.avatar,
+    name: '레오',
+    bag: 'none',
+    hair: 3,
+    hairColor: '#67402a',
+    clothingStyle: 'suit',
+    shirt: '#373c47',
+    instrument: 'none',
+    earwear: 'none',
+  });
+  bartender.position.set(29.5, 0, -9.5);
+  scene.add(bartender);
+  let bartenderTime = 0;
   let player = character(latest.current.avatar);
   scene.add(player);
   let avatarKey = JSON.stringify(latest.current.avatar);
@@ -683,7 +761,13 @@ export function createParkScene({
     const hit = raycaster.intersectObjects(stageMeshes)[0];
     if (hit) {
       const stage = latest.current.liveStages.find((s) => s.id === hit.object.userData.stage);
-      if (stage) latest.current.onStage(stage);
+      if (
+        stage &&
+        (stage.id !== BAR_STAGE_ID ||
+          ((latest.current.night ?? isParkNight()) &&
+            isInsideBar(world(latest.current.position.current))))
+      )
+        latest.current.onStage(stage);
     }
   };
   el.addEventListener('click', click);
@@ -798,7 +882,12 @@ export function createParkScene({
         p.motion.current.y +
         Number(keys.has('s') || keys.has('ArrowDown')) -
         Number(keys.has('w') || keys.has('ArrowUp'));
-    if (document.querySelector('dialog[open]') || p.performing !== null || p.timeTransition) {
+    if (
+      document.querySelector('dialog[open]') ||
+      p.performing !== null ||
+      p.timeTransition ||
+      time < barTalkUntil
+    ) {
       dx = 0;
       dz = 0;
     }
@@ -823,13 +912,24 @@ export function createParkScene({
     }
     if (coffeePhase === 'drinking' && coffeeElapsed >= 3600) resetCoffee();
     const barNight = p.night ?? isParkNight();
+    if (barTalkUntil && (time >= barTalkUntil || barNight || p.timeTransition))
+      dismissBarNotice.current();
+    if (barNight && !document.querySelector('dialog[open]')) bartenderTime += dt;
+    bartender.visible = barNight;
+    bartender.position.x = 29.5 + Math.sin(bartenderTime * 0.65) * 0.65;
+    bartender.position.y = Math.abs(Math.sin(bartenderTime * 6)) * 0.025;
+    bartender.rotation.y = Math.cos(bartenderTime * 0.65) > 0 ? Math.PI / 2 : -Math.PI / 2;
+    bartender.userData.walking = barNight;
+
     let insideBar = isInsideBar(world(p.position.current));
     if (!barNight && insideBar) {
       p.position.current = { x: BAR_ENTRANCE.x * 25 + 700, y: BAR_ENTRANCE.z * 25 + 450 };
       p.onMove({ ...p.position.current });
       insideBar = false;
+      standUp(false);
     }
     bar.update(barNight, insideBar);
+    bar.setOccupied([world(p.position.current), ...p.participants.map(world)]);
     const barAction =
       p.performing === null && !seatedBench && coffeePhase === 'idle' && !p.timeTransition
         ? insideBar
@@ -927,7 +1027,13 @@ export function createParkScene({
       p.performing === null
         ? (benches.find((bench) => world(p.position.current).distanceTo(bench) < 2.5) ?? null)
         : null;
-    const action = coffeePhase === 'idle' && !seatedBench && nearbyBench ? 'sit' : null;
+    const action =
+      coffeePhase === 'idle' &&
+      nearbyBench &&
+      (!BAR_SEATS.includes(nearbyBench) || (barNight && insideBar)) &&
+      (!seatedBench || BAR_SEATS.includes(seatedBench))
+        ? 'sit'
+        : null;
     if (action !== shownBenchAction) {
       shownBenchAction = action;
       setBenchAction(action);
@@ -999,6 +1105,10 @@ export function createParkScene({
     if (insideBar) {
       cameraFocusGoal.copy(BAR_SPOT);
       stageZoom = 1.6;
+    }
+    if (time < barTalkUntil) {
+      cameraFocusGoal.copy(BAR_HOST);
+      stageZoom = 2.2;
     }
     if (p.focusNpc) {
       cameraFocusGoal.copy(school.npcPosition);
@@ -1083,7 +1193,7 @@ export function createParkScene({
           ? 'visible'
           : 'hidden';
     }
-    const bubbleBench = seatedBench ? null : nearbyBench;
+    const bubbleBench = seatedBench && !BAR_SEATS.includes(seatedBench) ? null : nearbyBench;
     if (benchBubble.current) {
       if (bubbleBench && !document.querySelector('dialog[open]')) {
         const anchor = bubbleBench.clone();
@@ -1124,6 +1234,14 @@ export function createParkScene({
     p.liveStages.forEach((s) => {
       const label = document.getElementById(`label-${s.id}`);
       if (!label) return;
+      if (time < barTalkUntil) {
+        label.style.display = 'none';
+        return;
+      }
+      if (s.id === BAR_STAGE_ID && (!barNight || !insideBar)) {
+        label.style.display = 'none';
+        return;
+      }
       const v = world(s);
       v.y = 3;
       v.project(camera);
@@ -1136,6 +1254,18 @@ export function createParkScene({
           ? 'block'
           : 'none';
     });
+    bar.glass.visible =
+      barSipStarted !== null && seatedBench !== null && BAR_SEATS.includes(seatedBench) && barNight;
+    if (bar.glass.visible && barSipStarted !== null) {
+      const lift = Math.sin(Math.min(1, (time - barSipStarted) / 3200) * Math.PI);
+      bar.glass.position.set(
+        player.position.x + 0.35,
+        player.position.y + 1.25 + lift * 0.55,
+        player.position.z + 0.25,
+      );
+      bar.glass.rotation.z = -lift * 0.5;
+      if (time - barSipStarted > 3200) barSipStarted = null;
+    }
     const react = p.reaction,
       bubble = document.getElementById('player-reaction');
     if (bubble && react) {
@@ -1169,6 +1299,8 @@ export function createParkScene({
     bridgeRailMaterial.dispose();
     bar.dispose();
     useBar.current = () => {};
+    useBarDrink.current = () => {};
+    dismissBarNotice.current = () => {};
     school.dispose();
     coffeeShop.dispose();
     noticeBoard.dispose();

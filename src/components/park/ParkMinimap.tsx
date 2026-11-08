@@ -70,10 +70,10 @@ export function ParkMinimap({
           fill="#bd9767"
         />
         <rect
-          x={BAR_SPOT.x - 3}
-          y={BAR_SPOT.z - 2.5}
-          width={6}
-          height={5}
+          x={BAR_SPOT.x - 4}
+          y={BAR_SPOT.z - 3.5}
+          width={8}
+          height={7}
           rx={0.4}
           fill="#684638"
         />
