@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import moriPortrait from '../../assets/npc/school-rabbit.webp';
 import type { TimeTransitionPhase } from '../../hooks/useParkTimeTransition';
 import './time-transition.css';
 export function TimeTransition({
@@ -14,7 +15,12 @@ export function TimeTransition({
     <div className="time-transition" data-phase={phase} role="status" aria-live="polite">
       {phase === 'talk' && (
         <div className="time-transition-speech">
-          <small>모리</small>
+          <div className="time-transition-speaker">
+            <img src={moriPortrait} alt="" />
+            <span>
+              모리<small>공원 안내</small>
+            </span>
+          </div>
           <p>{message}</p>
         </div>
       )}

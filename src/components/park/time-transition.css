@@ -17,24 +17,47 @@
 .time-transition-speech {
   position: absolute;
   left: 50%;
-  bottom: 14%;
+  bottom: max(16px, env(safe-area-inset-bottom));
   transform: translateX(-50%);
-  width: max-content;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 460px;
   max-width: calc(100% - 36px);
   padding: 12px 18px;
-  border-radius: 16px;
-  background: #fff9e9;
-  color: #536348;
-  box-shadow: 0 4px 20px #17241425;
+  border: 2px solid #c7b58d;
+  border-radius: 12px 22px 12px 22px;
+  background: #fff8e9;
+  color: #475943;
+  box-shadow: 0 6px 0 #a7956c40;
 }
-.time-transition-speech small {
-  font-size: 10px;
+.time-transition-speaker {
+  flex: 0 0 66px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.time-transition-speaker img {
+  width: 50px;
+  height: 70px;
+  object-fit: contain;
+}
+.time-transition-speaker small {
+  display: block;
+  font-size: 8px;
+  font-weight: 400;
   color: #8b947b;
 }
 .time-transition-speech p {
-  margin: 5px 0 0;
-  font-size: 13px;
-  line-height: 1.6;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.75;
 }
 @media (prefers-reduced-motion: reduce) {
   .time-transition-hole {

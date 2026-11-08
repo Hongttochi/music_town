@@ -29,7 +29,7 @@ export function useParkTimeTransition(entered: boolean) {
       const hour = koreanHour();
       const minutes = new Date().getUTCMinutes();
       setMessage(
-        `헉, 벌써 ${hour % 12 || 12}시${minutes ? ` ${minutes}분` : ''}네! ${next ? '해가 질 시간이야!' : '해 뜰 시간이야!'}`,
+        `어머, 벌써 ${hour % 12 || 12}시${minutes ? ` ${minutes}분이` : ''}네요! ${next ? '곧 밤이 찾아와요.' : '곧 해가 떠요.'}`,
       );
       stops.push(latest.current('timeChange'));
       setPhase('zoom');
