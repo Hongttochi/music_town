@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import { StageEffectsDialog } from './StageEffectsDialog';
 import { Button } from '../ui/Button';
 import { Flaticon } from '../ui/Flaticon';
 import type { SoundEffect } from '../../data/sounds';
@@ -30,6 +32,10 @@ export function PerformanceControls({
   onFinish,
   onReaction,
 }: Props) {
+  const [effectsOpen, setEffectsOpen] = useState(false);
+  useEffect(() => {
+    if (performing === null) setEffectsOpen(false);
+  }, [performing]);
   return (
     <div className={`bottom-center${performing !== null ? ' performing-controls' : ''}`}>
       {queue !== null && performing === null && (
@@ -42,13 +48,15 @@ export function PerformanceControls({
         <div className="performance-toolbar">
           <div className="performance-summary" role="status">
             <strong>
-              {voice.status === 'live'
-                ? '● LIVE · 송출 중'
-                : voice.status === 'connecting' || voice.status === 'reconnecting'
-                  ? '음성 연결 중…'
-                  : voice.status === 'error'
-                    ? '음성 연결 필요'
-                    : '마이크 송출 대기'}
+              {microphone.effectsPaused
+                ? '마이크 소리 시작 필요'
+                : voice.status === 'live'
+                  ? '● LIVE · 송출 중'
+                  : voice.status === 'connecting' || voice.status === 'reconnecting'
+                    ? '음성 연결 중…'
+                    : voice.status === 'error'
+                      ? '음성 연결 필요'
+                      : '마이크 송출 대기'}
             </strong>
             <span>
               {endsAt ? Math.max(0, Math.ceil((Date.parse(endsAt) - now.getTime()) / 1000)) : 0}초
@@ -66,6 +74,17 @@ export function PerformanceControls({
                 ? '권한 확인 중…'
                 : '마이크 켜기'}
           </Button>
+          <Button
+            onClick={() => {
+              microphone.resumeEffects();
+              setEffectsOpen(true);
+            }}
+          >
+            음향 설정
+          </Button>
+          {microphone.effectsPaused && (
+            <Button onClick={microphone.resumeEffects}>마이크 소리 시작</Button>
+          )}
           <Button onClick={onFinish}>공연 종료</Button>
           {voice.status === 'error' && <Button onClick={voice.retry}>다시 연결</Button>}
           {voice.blocked && <Button onClick={() => void voice.startAudio()}>소리 켜기</Button>}
@@ -75,6 +94,13 @@ export function PerformanceControls({
             </p>
           )}
         </div>
+      )}
+      {performing !== null && effectsOpen && (
+        <StageEffectsDialog
+          settings={microphone.effects}
+          onChange={microphone.changeEffects}
+          onClose={() => setEffectsOpen(false)}
+        />
       )}
       {performing === null && (
         <div className="reaction-bar">

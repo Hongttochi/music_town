@@ -1,8 +1,39 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import {
+  createStageEffects,
+  defaultStageEffects,
+  normalizeStageEffects,
+  type StageEffects,
+} from '../audio/stageEffects';
 
 type MicState = 'off' | 'requesting' | 'on' | 'error';
 
 export function useStageMicrophone(active: boolean, stageId: number | null) {
+  const [effects, setEffects] = useState<StageEffects>(() => {
+    try {
+      return normalizeStageEffects(
+        JSON.parse(localStorage.getItem('mt-stage-effects') || '{}') || {},
+      );
+    } catch {
+      return defaultStageEffects;
+    }
+  });
+  const effectsRef = useRef(effects);
+  const processor = useRef<ReturnType<typeof createStageEffects> | null>(null);
+  const contextRef = useRef<AudioContext | null>(null);
+  const [effectsPaused, setEffectsPaused] = useState(false);
+  const changeEffects = (value: StageEffects) => {
+    const settings = normalizeStageEffects(value);
+    effectsRef.current = settings;
+    setEffects(settings);
+    processor.current?.update(settings);
+    try {
+      localStorage.setItem('mt-stage-effects', JSON.stringify(settings));
+    } catch {
+      /* Private storage may be unavailable. */
+    }
+    void contextRef.current?.resume().catch(() => setEffectsPaused(true));
+  };
   const [state, setState] = useState<MicState>('off');
   const [error, setError] = useState('');
   const [attempt, setAttempt] = useState(0);
@@ -16,7 +47,16 @@ export function useStageMicrophone(active: boolean, stageId: number | null) {
   useEffect(() => {
     let cancelled = false;
     let stream: MediaStream | undefined;
-    const stop = () => stream?.getTracks().forEach((track) => track.stop());
+    let context: AudioContext | undefined;
+    let graph: ReturnType<typeof createStageEffects> | undefined;
+    const stop = () => {
+      stream?.getTracks().forEach((track) => track.stop());
+      if (context) context.onstatechange = null;
+      graph?.dispose();
+      if (context && context.state !== 'closed') void context.close().catch(() => {});
+      if (processor.current === graph) processor.current = null;
+      if (contextRef.current === context) contextRef.current = null;
+    };
     if (!active || !enabled) {
       setMediaStream(null);
       setState('off');
@@ -24,6 +64,7 @@ export function useStageMicrophone(active: boolean, stageId: number | null) {
       return;
     }
 
+    setEffectsPaused(false);
     setState('requesting');
     setMediaStream(null);
     setError('');
@@ -52,8 +93,22 @@ export function useStageMicrophone(active: boolean, stageId: number | null) {
             setError('마이크 연결이 끊겼어요. 연결을 확인하고 다시 켜 주세요.');
           };
         });
+        context = new AudioContext({ latencyHint: 'interactive' });
+        graph = createStageEffects(context, stream, effectsRef.current);
+        processor.current = graph;
+        contextRef.current = context;
+        context.onstatechange = () => {
+          if (cancelled) return;
+          setEffectsPaused(context!.state !== 'running');
+          setMediaStream(context!.state === 'running' ? graph!.stream : null);
+        };
+        // A suspended context must not be presented as live silent audio.
+        setEffectsPaused(context.state !== 'running');
         setState('on');
-        setMediaStream(stream);
+        setMediaStream(context.state === 'running' ? graph.stream : null);
+        void context.resume().catch(() => {
+          if (!cancelled) setEffectsPaused(true);
+        });
       } catch (failure) {
         stop();
         if (cancelled) return;
@@ -89,6 +144,12 @@ export function useStageMicrophone(active: boolean, stageId: number | null) {
   }, [active, stageId, enabled, attempt]);
 
   return {
+    effects,
+    changeEffects,
+    effectsPaused: active && enabled && effectsPaused,
+    resumeEffects: () => {
+      void contextRef.current?.resume().catch(() => setEffectsPaused(true));
+    },
     stream: active && enabled ? mediaStream : null,
     state: active ? state : 'off',
     error,

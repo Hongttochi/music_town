@@ -1,0 +1,56 @@
+dialog.town-panel.stage-effects-dialog[open] {
+  width: 330px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 24px);
+  padding: 12px 16px;
+  border-radius: 14px;
+  overflow: auto;
+}
+.stage-effects-dialog .panel-heading {
+  margin-bottom: 8px;
+}
+.stage-effects-note {
+  font-size: 10px;
+  color: #818774;
+  margin: 0 0 10px;
+}
+.stage-effect-presets {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.stage-effect-presets .town-button {
+  flex: 1;
+  min-height: 28px;
+  padding: 4px 6px;
+  font-size: 10px;
+  border-radius: 6px;
+  box-shadow: none;
+}
+.stage-effect-presets [aria-pressed='true'] {
+  background: #dce5cb;
+  border-color: #819767;
+}
+.stage-effect-slider {
+  display: block;
+  margin-top: 8px;
+}
+.stage-effect-slider > span {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+.stage-effect-slider output {
+  font-variant-numeric: tabular-nums;
+  color: #70845d;
+}
+.stage-effect-slider input {
+  width: 100%;
+  height: 22px;
+  margin: 3px 0 0;
+  accent-color: #758e59;
+  cursor: pointer;
+}
+.stage-effect-presets .town-button[aria-pressed='false'] {
+  background: transparent;
+}
