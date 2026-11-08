@@ -4,7 +4,7 @@ import * as T from 'three';
 export const BAR_SPOT = new T.Vector3(32, 0, -7.5);
 export const BAR_ENTRANCE = new T.Vector3(32, 0, -2.8);
 export const BAR_INSIDE = new T.Vector3(32, 0, -5.6);
-export const BAR_HOST = new T.Vector3(34.8, 0, -2.7);
+export const BAR_HOST = new T.Vector3(34.8, 0, -0.8);
 export const BAR_SEATS = [new T.Vector3(29, 0, -7.1), new T.Vector3(30.4, 0, -7.1)];
 export function isInsideBar(point: { x: number; z: number }) {
   return Math.abs(point.x - BAR_SPOT.x) < 3.8 && Math.abs(point.z - BAR_SPOT.z) < 3.3;

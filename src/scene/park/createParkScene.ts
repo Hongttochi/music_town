@@ -1,3 +1,6 @@
+import { createBarNpc } from '../avatar/barNpc';
+import dogImage from '../../assets/npc/bar-dog.webp';
+import catImage from '../../assets/npc/bar-cat.webp';
 import { BAR_STAGE_ID, type BarDrinkId } from '../../data/bar';
 import {
   createNightBar,
@@ -317,9 +320,12 @@ export function createParkScene({
   }
   const bar = createNightBar(scene);
   let barTalkUntil = 0;
+  let barTalkStarted = 0;
+  let barNoticeShown = false;
   let barSipStarted: number | null = null;
   dismissBarNotice.current = () => {
     barTalkUntil = 0;
+    barNoticeShown = false;
     setBarNotice(false);
   };
   useBarDrink.current = (id) => {
@@ -337,9 +343,9 @@ export function createParkScene({
     const point = world(p.position.current);
     const inside = isInsideBar(point);
     if (!(p.night ?? isParkNight())) {
-      if (point.distanceTo(BAR_ENTRANCE) > 2.3) return;
-      barTalkUntil = performance.now() + 5000;
-      setBarNotice(true);
+      if (Math.min(point.distanceTo(BAR_ENTRANCE), point.distanceTo(BAR_HOST)) > 2.3) return;
+      barTalkUntil = Infinity;
+      barTalkStarted = performance.now();
       p.motion.current = { x: 0, y: 0 };
       return;
     }
@@ -630,30 +636,12 @@ export function createParkScene({
   function character(a: Avatar) {
     return imageCharacters.create(a === latest.current.avatar ? a : npcAppearance(villagerIndex++));
   }
-  const host = imageCharacters.create({
-    ...latest.current.avatar,
-    name: '루나',
-    shirt: '#686078',
-    bag: 'none',
-    hair: 6,
-    hairColor: '#b8abc4',
-    clothingStyle: 'suit',
-    instrument: 'none',
-    earwear: 'none',
-  });
+  const hostNpc = createBarNpc(dogImage, 'luna-dog-host');
+  const host = hostNpc.group;
   host.position.copy(BAR_HOST);
   scene.add(host);
-  const bartender = imageCharacters.create({
-    ...latest.current.avatar,
-    name: '레오',
-    bag: 'none',
-    hair: 3,
-    hairColor: '#67402a',
-    clothingStyle: 'suit',
-    shirt: '#373c47',
-    instrument: 'none',
-    earwear: 'none',
-  });
+  const bartenderNpc = createBarNpc(catImage, 'leo-cat-bartender');
+  const bartender = bartenderNpc.group;
   bartender.position.set(29.5, 0, -9.5);
   scene.add(bartender);
   let bartenderTime = 0;
@@ -914,11 +902,15 @@ export function createParkScene({
     const barNight = p.night ?? isParkNight();
     if (barTalkUntil && (time >= barTalkUntil || barNight || p.timeTransition))
       dismissBarNotice.current();
+    if (barTalkUntil && !barNoticeShown && time - barTalkStarted >= 650) {
+      barNoticeShown = true;
+      setBarNotice(true);
+    }
     if (barNight && !document.querySelector('dialog[open]')) bartenderTime += dt;
     bartender.visible = barNight;
     bartender.position.x = 29.5 + Math.sin(bartenderTime * 0.65) * 0.65;
     bartender.position.y = Math.abs(Math.sin(bartenderTime * 6)) * 0.025;
-    bartender.rotation.y = Math.cos(bartenderTime * 0.65) > 0 ? Math.PI / 2 : -Math.PI / 2;
+
     bartender.userData.walking = barNight;
 
     let insideBar = isInsideBar(world(p.position.current));
@@ -934,7 +926,8 @@ export function createParkScene({
       p.performing === null && !seatedBench && coffeePhase === 'idle' && !p.timeTransition
         ? insideBar
           ? 'exit'
-          : world(p.position.current).distanceTo(BAR_ENTRANCE) < 2.3
+          : world(p.position.current).distanceTo(BAR_ENTRANCE) < 2.3 ||
+              (!barNight && world(p.position.current).distanceTo(BAR_HOST) < 2.3)
             ? barNight
               ? 'enter'
               : 'closed'
@@ -1137,7 +1130,7 @@ export function createParkScene({
     camera.lookAt(target);
     camera.updateMatrixWorld();
     if (barBubble.current) {
-      const anchor = (insideBar ? BAR_INSIDE : BAR_ENTRANCE).clone();
+      const anchor = (insideBar ? BAR_INSIDE : barNight ? BAR_ENTRANCE : BAR_HOST).clone();
       anchor.y = insideBar ? 2 : 3.8;
       anchor.project(camera);
       barBubble.current.style.left = `${(anchor.x * 0.5 + 0.5) * el.clientWidth}px`;
@@ -1146,6 +1139,7 @@ export function createParkScene({
         Math.abs(anchor.x) < 0.95 &&
         Math.abs(anchor.y) < 0.9 &&
         Math.abs(anchor.z) < 1 &&
+        !barTalkUntil &&
         !document.querySelector('dialog[open]')
           ? 'visible'
           : 'hidden';
@@ -1160,6 +1154,7 @@ export function createParkScene({
         Math.abs(anchor.x) < 0.95 &&
         Math.abs(anchor.y) < 0.9 &&
         Math.abs(anchor.z) < 1 &&
+        !barTalkUntil &&
         !document.querySelector('dialog[open]')
           ? 'visible'
           : 'hidden';
@@ -1174,6 +1169,7 @@ export function createParkScene({
         Math.abs(anchor.x) < 0.95 &&
         Math.abs(anchor.y) < 0.9 &&
         Math.abs(anchor.z) < 1 &&
+        !barTalkUntil &&
         !document.querySelector('dialog[open]')
           ? 'visible'
           : 'hidden';
@@ -1189,6 +1185,7 @@ export function createParkScene({
         Math.abs(anchor.x) < 0.95 &&
         Math.abs(anchor.y) < 0.9 &&
         Math.abs(anchor.z) < 1 &&
+        !barTalkUntil &&
         !document.querySelector('dialog[open]')
           ? 'visible'
           : 'hidden';
@@ -1298,6 +1295,8 @@ export function createParkScene({
     useCoffee.current = () => {};
     bridgeRailMaterial.dispose();
     bar.dispose();
+    hostNpc.dispose();
+    bartenderNpc.dispose();
     useBar.current = () => {};
     useBarDrink.current = () => {};
     dismissBarNotice.current = () => {};

@@ -25,34 +25,81 @@
 .town-button.bench-action.bar-action::after {
   left: calc(50% - 4px);
 }
-.bar-npc-notice {
-  position: absolute;
-  z-index: 20;
-  left: 50%;
-  bottom: 12%;
-  transform: translateX(-50%);
-  width: 240px;
-  max-width: calc(100vw - 24px);
-  padding: 14px 18px;
-  border: 1px solid #dac8a7;
-  border-radius: 16px;
+dialog.bar-dialogue {
+  position: fixed;
+  inset: auto 0 max(16px, env(safe-area-inset-bottom)) 0;
+  margin: 0 auto;
+  width: min(460px, calc(100vw - 32px));
+  max-height: calc(100dvh - 40px);
+  padding: 22px 18px 12px;
+  border: 2px solid #c7b58d;
+  border-radius: 12px 22px 12px 22px;
   background: #fff8e9;
-  box-shadow: 0 8px 32px #30291c33;
-  text-align: center;
+  color: #475943;
+  box-shadow:
+    0 5px 0 #77644424,
+    0 12px 30px #30291c24;
+  overflow: visible;
 }
-.bar-npc-notice small {
-  font-size: 10px;
-  color: #9b8060;
+dialog.bar-dialogue[open] {
+  display: flex;
+  gap: 16px;
+  align-items: center;
 }
-.bar-npc-notice p {
+dialog.bar-dialogue::backdrop {
+  background: transparent;
+}
+.bar-dialogue-name {
+  position: absolute;
+  top: -14px;
+  left: 22px;
+  padding: 5px 14px;
+  border-radius: 8px;
+  background: #486252;
+  color: #fff8e9;
   font-size: 12px;
-  line-height: 1.6;
-  margin: 8px 0;
+  font-weight: 700;
 }
-.bar-npc-notice .town-button {
-  min-height: 28px;
-  padding: 4px 12px;
+.bar-dialogue-name small {
+  margin-left: 7px;
+  font-size: 9px;
+  font-weight: 400;
+  color: #e0dac4;
+}
+.bar-dialogue > img {
+  width: 55px;
+  height: 78px;
+  object-fit: contain;
+  flex: none;
+}
+.bar-dialogue-body {
+  flex: 1;
+  min-width: 0;
+}
+.bar-dialogue-body p {
+  min-height: 42px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.75;
+}
+.bar-dialogue-body button {
+  display: block;
+  margin: 6px 0 0 auto;
+  border: 0;
+  background: transparent;
+  color: #65744e;
+  font: inherit;
   font-size: 11px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.bar-dialogue-body button:hover {
+  background: #e9e8d5;
+}
+.bar-dialogue-body button:focus-visible {
+  outline: 2px solid #879967;
+  outline-offset: 2px;
 }
 dialog.town-panel.bar-drink-menu {
   width: 350px;

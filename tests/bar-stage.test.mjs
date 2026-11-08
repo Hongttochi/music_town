@@ -120,3 +120,33 @@ test('night preserves FIFO and dawn clears bar performance/queue and moves visit
     await db.close();
   }
 });
+
+test('moving the riverside stage preserves performances and queues and moves its performer', async () => {
+  const db = await fixture();
+  try {
+    await db.exec(`insert into public.town_stages values(5,'다리 건너 강바람 무대',1500,450);
+      insert into public.town_performances(channel_id,stage_id,user_id) values(0,5,'${a}');
+      insert into public.town_queue(channel_id,stage_id,user_id) values(0,5,'${b}');`);
+    const migration = await readFile(
+      new URL('../supabase/migrations/202611080002_riverside_stage_spacing.sql', import.meta.url),
+      'utf8',
+    );
+    await db.exec(migration);
+    await db.exec(migration);
+    assert.deepEqual(
+      (await db.query(`select x,y from public.town_sessions where user_id='${a}'`)).rows[0],
+      { x: 1500, y: 625 },
+    );
+    assert.deepEqual(
+      (await db.query(`select x,y from public.town_sessions where user_id='${b}'`)).rows[0],
+      { x: 650, y: 470 },
+    );
+    assert.equal(
+      (await db.query('select count(*) from public.town_performances')).rows[0].count,
+      1,
+    );
+    assert.equal((await db.query('select count(*) from public.town_queue')).rows[0].count, 1);
+  } finally {
+    await db.close();
+  }
+});

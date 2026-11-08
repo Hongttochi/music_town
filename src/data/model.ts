@@ -114,7 +114,7 @@ export const stages: Stage[] = [
     followers: 0,
     listeners: 0,
     x: 1500,
-    y: 450,
+    y: 625,
     color: '#b2bd98',
   },
   barStage,

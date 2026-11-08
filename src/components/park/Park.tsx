@@ -1,3 +1,4 @@
+import { BarDialogue } from './BarDialogue';
 import { BarDrinkDialog } from './BarDrinkDialog';
 import { Wine, LogOut, Moon } from 'lucide-react';
 import './night-bar.css';
@@ -73,19 +74,7 @@ export function Park(props: ParkProps) {
           </span>
         </Button>
       )}
-      {barNotice && (
-        <section className="bar-npc-notice" role="status">
-          <small>루나 · 달빛 바 안내</small>
-          <p>
-            아직 문 열 시간이 아니에요.
-            <br />
-            저녁 7시에 다시 만나요!
-          </p>
-          <Button variant="ghost" onClick={() => dismissBarNotice.current()}>
-            알겠어요
-          </Button>
-        </section>
-      )}
+      {barNotice && <BarDialogue onClose={() => dismissBarNotice.current()} />}
       {barMenuOpen && (
         <BarDrinkDialog
           onClose={() => setBarMenuOpen(false)}
