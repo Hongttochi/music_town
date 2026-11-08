@@ -21,6 +21,7 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
     drinkAtlas?: HTMLCanvasElement;
     drinkTexture?: THREE.CanvasTexture;
     drinkSource?: HTMLCanvasElement;
+    drinkArmSource?: HTMLCanvasElement;
     preparedFrames?: number;
     coffee?: CoffeeId;
     barDrink?: BarDrinkId;
@@ -98,6 +99,7 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
         actor.drinkTexture = undefined;
         actor.drinkAtlas = undefined;
         actor.drinkSource = undefined;
+        actor.drinkArmSource = undefined;
         actor.preparedFrames = 0;
         actor.coffee = coffee;
         actor.barDrink = barDrink;
@@ -116,6 +118,11 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
           actor.drinkAtlas.height = 1024;
           actor.drinkSource = composeAvatar(source, { ...actor.avatar, instrument: 'none' });
           if (barDrink) {
+            actor.drinkArmSource = document.createElement('canvas');
+            actor.drinkArmSource.width = actor.drinkArmSource.height = 512;
+            actor.drinkArmSource
+              .getContext('2d')!
+              .drawImage(actor.drinkSource, 1024, 0, 512, 512, 0, 0, 512, 512);
             const seatedBack = composeSeatedAvatar(actor.drinkSource);
             actor.drinkSource = document.createElement('canvas');
             actor.drinkSource.width = actor.drinkSource.height = 512;
@@ -129,7 +136,14 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
           ctx.save();
           ctx.translate((frame % 8) * 256, Math.floor(frame / 8) * 256);
           ctx.scale(0.5, 0.5);
-          drawDrinkingPose(ctx, actor.drinkSource!, frame / 31, coffee, barDrink);
+          drawDrinkingPose(
+            ctx,
+            actor.drinkSource!,
+            frame / 31,
+            coffee,
+            barDrink,
+            actor.drinkArmSource,
+          );
           ctx.restore();
           actor.preparedFrames = frame + 1;
           if (actor.preparedFrames === 32) {
@@ -141,6 +155,7 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
             renderer.initTexture(texture);
             actor.drinkTexture = texture;
             actor.drinkSource = undefined;
+            actor.drinkArmSource = undefined;
           }
         }
       }

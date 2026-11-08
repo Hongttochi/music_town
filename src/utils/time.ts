@@ -10,9 +10,9 @@ export function koreanHour() {
   );
 }
 
-// Temporary night preview, automatically expires at 2026-11-08 15:30 KST.
+// Temporary night preview, automatically expires at 2026-11-08 16:00 KST.
 const NIGHT_PREVIEW_START = Date.parse('2026-11-08T05:51:00Z');
-const NIGHT_PREVIEW_END = Date.parse('2026-11-08T06:30:00Z');
+const NIGHT_PREVIEW_END = Date.parse('2026-11-08T07:00:00Z');
 
 // Daytime is 06:00–18:59 in Korea; the park is dark outside those hours.
 export function isParkNight(now = Date.now()) {

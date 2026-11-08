@@ -8,26 +8,33 @@ export function drawDrinkingPose(
   lift: number,
   coffee: CoffeeId,
   barDrink?: BarDrinkId,
+  armSource = standing,
 ) {
   const drink = findCoffee(coffee);
-  const angle = 0.4 + lift * 2.3;
-  const stretch = (73 + lift * 27) / 73;
-  const palmX = 22,
-    palmY = 62 * stretch;
-  const handX = 310 + palmX * Math.cos(angle) - palmY * Math.sin(angle);
-  const handY = 326 + palmX * Math.sin(angle) + palmY * Math.cos(angle);
+  const upperAngle = -0.12 - lift * 0.32;
+  const forearmAngle = 0.15 + lift * 2.5;
+  const elbowX = 310 + 20 * Math.cos(upperAngle) - 35 * Math.sin(upperAngle);
+  const elbowY = 326 + 20 * Math.sin(upperAngle) + 35 * Math.cos(upperAngle);
+  const handX = elbowX - 29 * Math.sin(forearmAngle);
+  const handY = elbowY + 29 * Math.cos(forearmAngle);
   {
     ctx.save();
     ctx.drawImage(standing, 0, 0, 512, 512, 0, 0, 512, 512);
     ctx.clearRect(306, 324, 48, 78);
+    // The upper arm and forearm pivot separately; neither is stretched.
     ctx.save();
     ctx.translate(310, 326);
-    ctx.rotate(angle);
-    ctx.drawImage(standing, 305, 324, 47, 73, -4, 0, 47, 73 * stretch);
+    ctx.rotate(upperAngle);
+    ctx.drawImage(armSource, 305, 324, 47, 39, -4, 0, 47, 39);
     ctx.restore();
     ctx.save();
-    ctx.translate(handX - 12, handY + 3);
-    ctx.rotate(-lift * 0.3);
+    ctx.translate(elbowX, elbowY);
+    ctx.rotate(forearmAngle);
+    ctx.drawImage(armSource, 314, 355, 32, 42, -16, -4, 32, 42);
+    ctx.restore();
+    ctx.save();
+    ctx.translate(handX - 10, handY);
+    ctx.rotate(-lift * 0.2);
     if (barDrink) {
       const color = barDrinks.find((drink) => drink.id === barDrink)!.color;
       ctx.fillStyle = '#edf3e8aa';
@@ -75,11 +82,11 @@ export function drawDrinkingPose(
       }
     }
     ctx.restore();
-    // Repaint the original fingers over the cup, so the hand visibly grips its side.
+    // Palm follows the forearm without a second wrist twist or scaling.
     ctx.save();
-    ctx.translate(310, 326);
-    ctx.rotate(angle);
-    ctx.drawImage(standing, 322, 377, 14, 16, 13, 53 * stretch, 14, 16 * stretch);
+    ctx.translate(elbowX, elbowY);
+    ctx.rotate(forearmAngle);
+    ctx.drawImage(armSource, 322, 377, 14, 16, -8, 18, 14, 16);
     ctx.restore();
     ctx.restore();
   }
