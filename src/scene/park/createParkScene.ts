@@ -1234,13 +1234,10 @@ export function createParkScene({
     camera.updateMatrixWorld();
     if (barBubble.current) {
       const anchor = (
-        insideBar
-          ? BAR_INSIDE
-          : barNight && shownBarAction !== 'talk'
-            ? BAR_ENTRANCE
-            : host.position
+        insideBar ? BAR_INSIDE : barNight && shownBarAction !== 'talk' ? BAR_SPOT : host.position
       ).clone();
-      anchor.y = insideBar ? 2 : 3.8;
+      // Pin entry signage to the roof, leaving the doorway and avatar clear.
+      anchor.y = insideBar ? 2 : barNight && shownBarAction !== 'talk' ? 3.65 : 3.8;
       anchor.project(camera);
       barBubble.current.style.left = `${(anchor.x * 0.5 + 0.5) * el.clientWidth}px`;
       barBubble.current.style.top = `${(-anchor.y * 0.5 + 0.5) * el.clientHeight}px`;

@@ -1,4 +1,14 @@
 import { useEffect, useState } from 'react';
+import {
+  Mic,
+  MicOff,
+  LoaderCircle,
+  SlidersHorizontal,
+  Square,
+  Play,
+  RefreshCw,
+  Volume2,
+} from 'lucide-react';
 import { StageEffectsDialog } from './StageEffectsDialog';
 import { Button } from '../ui/Button';
 import { Flaticon } from '../ui/Flaticon';
@@ -36,6 +46,12 @@ export function PerformanceControls({
   useEffect(() => {
     if (performing === null) setEffectsOpen(false);
   }, [performing]);
+  const micLabel =
+    microphone.state === 'on'
+      ? '마이크 끄기'
+      : microphone.state === 'requesting'
+        ? '권한 확인 중…'
+        : '마이크 켜기';
   return (
     <div className={`bottom-center${performing !== null ? ' performing-controls' : ''}`}>
       {queue !== null && performing === null && (
@@ -64,30 +80,66 @@ export function PerformanceControls({
             </span>
           </div>
           <Button
+            size="icon"
+            aria-label={micLabel}
+            title={micLabel}
             disabled={microphone.state === 'requesting'}
             aria-pressed={microphone.state === 'on'}
             onClick={microphone.state === 'on' ? microphone.turnOff : microphone.turnOn}
           >
-            {microphone.state === 'on'
-              ? '마이크 끄기'
-              : microphone.state === 'requesting'
-                ? '권한 확인 중…'
-                : '마이크 켜기'}
+            {microphone.state === 'on' ? (
+              <Mic size={20} />
+            ) : microphone.state === 'requesting' ? (
+              <LoaderCircle size={20} />
+            ) : (
+              <MicOff size={20} />
+            )}
           </Button>
           <Button
+            size="icon"
+            aria-label="음향 설정"
+            title="음향 설정"
             onClick={() => {
               microphone.resumeEffects();
               setEffectsOpen(true);
             }}
           >
-            음향 설정
+            <SlidersHorizontal size={20} />
           </Button>
           {microphone.effectsPaused && (
-            <Button onClick={microphone.resumeEffects}>마이크 소리 시작</Button>
+            <Button
+              size="icon"
+              aria-label="마이크 소리 시작"
+              title="마이크 소리 시작"
+              onClick={microphone.resumeEffects}
+            >
+              <Play size={20} />
+            </Button>
           )}
-          <Button onClick={onFinish}>공연 종료</Button>
-          {voice.status === 'error' && <Button onClick={voice.retry}>다시 연결</Button>}
-          {voice.blocked && <Button onClick={() => void voice.startAudio()}>소리 켜기</Button>}
+          <Button
+            size="icon"
+            className="performance-finish"
+            aria-label="공연 종료"
+            title="공연 종료"
+            onClick={onFinish}
+          >
+            <Square size={18} fill="currentColor" />
+          </Button>
+          {voice.status === 'error' && (
+            <Button size="icon" aria-label="다시 연결" title="다시 연결" onClick={voice.retry}>
+              <RefreshCw size={20} />
+            </Button>
+          )}
+          {voice.blocked && (
+            <Button
+              size="icon"
+              aria-label="소리 켜기"
+              title="소리 켜기"
+              onClick={() => void voice.startAudio()}
+            >
+              <Volume2 size={20} />
+            </Button>
+          )}
           {(microphone.error || voice.error) && (
             <p className="performance-error" role="alert">
               {microphone.error || voice.error}
