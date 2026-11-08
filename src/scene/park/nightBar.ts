@@ -2,7 +2,7 @@ import { barDrinks, type BarDrinkId } from '../../data/bar';
 import * as T from 'three';
 
 export const BAR_SPOT = new T.Vector3(32, 0, -7.5);
-export const BAR_ENTRANCE = new T.Vector3(32, 0, -2.8);
+export const BAR_ENTRANCE = new T.Vector3(32, 0, 0.2);
 export const BAR_INSIDE = new T.Vector3(32, 0, -5.6);
 export const BAR_HOST = new T.Vector3(34.8, 0, -0.8);
 export const BAR_SEATS = [new T.Vector3(29, 0, -7.1), new T.Vector3(30.4, 0, -7.1)];
@@ -12,8 +12,11 @@ export function isInsideBar(point: { x: number; z: number }) {
 export function overlapsBar(point: { x: number; z: number }, radius: number, night: boolean) {
   const x = Math.abs(point.x - BAR_SPOT.x),
     z = point.z - BAR_SPOT.z;
+  // Camera-facing avatars lean behind their feet: reserve the front apron while closed
+  // so heads cannot intersect the facade even when their feet are outside the wall.
+  if (!night) return x < 4.3 + radius && z > -3.8 - radius && z < 6.5 + radius;
   if (x >= 4 + radius || Math.abs(z) >= 3.5 + radius) return false;
-  if (!night) return true;
+
   // Solid side/back walls, with a 1.8-unit doorway on the south facade.
   if (x > 3.8 - radius || z < -3.3 + radius) return true;
   if (z > 3.3 - radius && x > 0.9 - radius) return true;

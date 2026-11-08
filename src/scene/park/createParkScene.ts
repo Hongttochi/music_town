@@ -321,6 +321,7 @@ export function createParkScene({
   const bar = createNightBar(scene);
   let barTalkUntil = 0;
   let barTalkStarted = 0;
+  let barApproachHandled = false;
   let barNoticeShown = false;
   let barSipStarted: number | null = null;
   dismissBarNotice.current = () => {
@@ -335,7 +336,8 @@ export function createParkScene({
     barSipStarted = performance.now();
     sound.current('drink');
   };
-  obstacles.push({ x: BAR_HOST.x, z: BAR_HOST.z, r: 0.4 });
+  const hostObstacle = { x: BAR_HOST.x, z: BAR_HOST.z, r: 0.4 };
+  obstacles.push(hostObstacle);
   let shownBarAction: 'enter' | 'exit' | 'closed' | null = null;
   useBar.current = () => {
     const p = latest.current;
@@ -343,7 +345,8 @@ export function createParkScene({
     const point = world(p.position.current);
     const inside = isInsideBar(point);
     if (!(p.night ?? isParkNight())) {
-      if (Math.min(point.distanceTo(BAR_ENTRANCE), point.distanceTo(BAR_HOST)) > 2.3) return;
+      if (Math.min(point.distanceTo(BAR_ENTRANCE), point.distanceTo(host.position)) > 2.3) return;
+      barApproachHandled = true;
       barTalkUntil = Infinity;
       barTalkStarted = performance.now();
       p.motion.current = { x: 0, y: 0 };
@@ -645,6 +648,7 @@ export function createParkScene({
   bartender.position.set(29.5, 0, -9.5);
   scene.add(bartender);
   let bartenderTime = 0;
+  let hostWalkTime = 0;
   let player = character(latest.current.avatar);
   scene.add(player);
   let avatarKey = JSON.stringify(latest.current.avatar);
@@ -900,6 +904,46 @@ export function createParkScene({
     }
     if (coffeePhase === 'drinking' && coffeeElapsed >= 3600) resetCoffee();
     const barNight = p.night ?? isParkNight();
+    const hostPaused =
+      !!barTalkUntil ||
+      !!p.timeTransition ||
+      !!document.querySelector('dialog[open]') ||
+      world(p.position.current).distanceTo(host.position) < 2.5;
+    if (!hostPaused) hostWalkTime += dt;
+    const leg = hostWalkTime % 12;
+    const progress = leg < 4 ? leg / 4 : leg < 6 ? 1 : leg < 10 ? 1 - (leg - 6) / 4 : 0;
+    const eased = progress * progress * (3 - 2 * progress);
+    host.position.x = BAR_HOST.x + eased * 0.9;
+    host.position.z = BAR_HOST.z + eased * 0.7;
+    host.position.y =
+      !hostPaused && (leg < 4 || (leg >= 6 && leg < 10))
+        ? Math.abs(Math.sin(hostWalkTime * 7)) * 0.045
+        : 0;
+    hostObstacle.x = host.position.x;
+    hostObstacle.z = host.position.z;
+    // Repair positions saved by older clients inside the closed facade/apron.
+    if (!barNight && overlapsBar(world(p.position.current), PLAYER_RADIUS, false)) {
+      p.position.current = { x: BAR_ENTRANCE.x * 25 + 700, y: BAR_ENTRANCE.z * 25 + 450 };
+      p.onMove({ ...p.position.current });
+    }
+    const entranceDistance = world(p.position.current).distanceTo(BAR_ENTRANCE);
+    if (entranceDistance > 4.5) barApproachHandled = false;
+    if (
+      !barNight &&
+      !barApproachHandled &&
+      !barTalkUntil &&
+      entranceDistance < 1.6 &&
+      p.performing === null &&
+      !seatedBench &&
+      coffeePhase === 'idle' &&
+      !p.timeTransition &&
+      !document.querySelector('dialog[open]')
+    ) {
+      useBar.current();
+      dx = 0;
+      dz = 0;
+    }
+
     if (barTalkUntil && (time >= barTalkUntil || barNight || p.timeTransition))
       dismissBarNotice.current();
     if (barTalkUntil && !barNoticeShown && time - barTalkStarted >= 650) {
@@ -927,7 +971,7 @@ export function createParkScene({
         ? insideBar
           ? 'exit'
           : world(p.position.current).distanceTo(BAR_ENTRANCE) < 2.3 ||
-              (!barNight && world(p.position.current).distanceTo(BAR_HOST) < 2.3)
+              (!barNight && world(p.position.current).distanceTo(host.position) < 2.3)
             ? barNight
               ? 'enter'
               : 'closed'
@@ -1100,7 +1144,7 @@ export function createParkScene({
       stageZoom = 1.6;
     }
     if (time < barTalkUntil) {
-      cameraFocusGoal.copy(BAR_HOST);
+      cameraFocusGoal.copy(host.position);
       stageZoom = 2.2;
     }
     if (p.focusNpc) {
@@ -1130,7 +1174,7 @@ export function createParkScene({
     camera.lookAt(target);
     camera.updateMatrixWorld();
     if (barBubble.current) {
-      const anchor = (insideBar ? BAR_INSIDE : barNight ? BAR_ENTRANCE : BAR_HOST).clone();
+      const anchor = (insideBar ? BAR_INSIDE : barNight ? BAR_ENTRANCE : host.position).clone();
       anchor.y = insideBar ? 2 : 3.8;
       anchor.project(camera);
       barBubble.current.style.left = `${(anchor.x * 0.5 + 0.5) * el.clientWidth}px`;

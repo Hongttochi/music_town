@@ -55,5 +55,13 @@ test('arrival and exit are clear, stay within supported coordinates and avoid th
     assert.equal(safe.x, position.x);
     assert.equal(safe.y, position.y);
   }
-  assert.equal(overlapsBar({ x: 32, z: 0 }, 2.2, false), false);
+  assert.equal(overlapsBar({ x: 32, z: 7 }, 2.2, false), false);
+});
+
+test('closed bar reserves the front apron to keep avatar heads out of the facade', () => {
+  for (const z of [-3.8, -2.8, -1.1]) {
+    assert.equal(overlapsBar({ x: 32, z }, 0.35, false), true);
+  }
+  assert.equal(overlapsBar(BAR_ENTRANCE, 0.35, false), false);
+  assert.equal(overlapsBar({ x: 32, z: -2.8 }, 0.35, true), false);
 });
