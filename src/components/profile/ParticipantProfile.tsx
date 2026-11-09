@@ -41,9 +41,11 @@ export function ParticipantProfile({
             </div>
           </section>
           {fanStats}
-          <Button variant="ghost" className="participant-report" onClick={onReport}>
-            신고하기
-          </Button>
+          {!own && (
+            <Button variant="ghost" className="participant-report" onClick={onReport}>
+              신고하기
+            </Button>
+          )}
         </div>
       )}
     </FanProfile>
