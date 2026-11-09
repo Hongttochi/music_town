@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { stageMicrophoneConstraints } from '../audio/microphone';
 import {
   createStageEffects,
   defaultStageEffects,
@@ -75,7 +76,10 @@ export function useStageMicrophone(active: boolean, stageId: number | null) {
             '이 브라우저에서는 마이크를 사용할 수 없어요. HTTPS 주소에서 다시 열어 주세요.',
           );
         }
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: stageMicrophoneConstraints,
+          video: false,
+        });
         if (cancelled) {
           stop();
           return;

@@ -14,6 +14,7 @@ import {
   BAR_INSIDE,
   isInsideBar,
   overlapsBar,
+  barWalkablePosition,
 } from './nightBar';
 import { clampParkPosition } from '../../utils/parkBounds';
 import { createSchool, SCHOOL_SPOT, overlapsSchool } from './school';
@@ -512,8 +513,20 @@ export function createParkScene({
     BAR_SEATS.includes(bench) ? bench.clone() : new T.Vector3(bench.x - 0.2, 0, bench.z + 0.25);
   const standUp = (restorePosition: boolean) => {
     if (restorePosition && standingPosition) {
-      latest.current.position.current = { ...standingPosition };
-      latest.current.onMove({ ...standingPosition });
+      const seat = seatedBench;
+      const exit =
+        seat && BAR_SEATS.includes(seat)
+          ? barWalkablePosition(
+              {
+                x: Math.max(29.5, Math.min(34.2, seat.x)),
+                z: BAR_COUNTER_SEATS.includes(seat) ? -5.8 : seat.z,
+              },
+              PLAYER_RADIUS,
+            )
+          : world(standingPosition);
+      const restored = { x: exit.x * 25 + 700, y: exit.z * 25 + 450 };
+      latest.current.position.current = restored;
+      latest.current.onMove({ ...restored });
     }
     barSipStarted = null;
     setBarMenuOpen(false);
@@ -1093,6 +1106,20 @@ export function createParkScene({
       )
         standUp(false);
       else if (dx || dz) standUp(true);
+    }
+    // Recover older saved positions and teleports into furniture, but never move a sitter
+    // or performer off their intentional seat/stage position.
+    const currentPoint = world(p.position.current);
+    if (
+      barNight &&
+      !seatedBench &&
+      p.performing === null &&
+      isInsideBar(currentPoint) &&
+      overlapsBar(currentPoint, PLAYER_RADIUS, true)
+    ) {
+      const safe = barWalkablePosition(currentPoint, PLAYER_RADIUS);
+      p.position.current = { x: safe.x * 25 + 700, y: safe.z * 25 + 450 };
+      p.onMove({ ...p.position.current });
     }
     const len = Math.hypot(dx, dz);
     if (len > 1) {
