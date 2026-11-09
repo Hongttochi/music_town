@@ -353,20 +353,20 @@ dialog.town-panel[data-panel='avatar'] {
 }
 @media (hover: hover) and (pointer: fine) {
   .reaction-bar {
-    padding: 18px 26px;
+    padding: 14px 22px;
     gap: 8px;
   }
   .reaction-bar .town-button {
-    width: 64px;
-    min-width: 64px;
-    height: 72px;
+    width: 56px;
+    min-width: 56px;
+    height: 62px;
     padding: 8px;
     gap: 5px;
     border-radius: 18px;
   }
   .reaction-bar .town-button .flaticon {
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
     margin: 0;
   }
   .reaction-bar small {

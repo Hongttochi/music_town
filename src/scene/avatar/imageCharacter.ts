@@ -22,6 +22,7 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
     drinkTexture?: THREE.CanvasTexture;
     drinkSource?: HTMLCanvasElement;
     drinkArmSource?: HTMLCanvasElement;
+    drinkHairLayer?: HTMLCanvasElement;
     preparedFrames?: number;
     coffee?: CoffeeId;
     barDrink?: BarDrinkId;
@@ -100,6 +101,7 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
         actor.drinkAtlas = undefined;
         actor.drinkSource = undefined;
         actor.drinkArmSource = undefined;
+        actor.drinkHairLayer = undefined;
         actor.preparedFrames = 0;
         actor.coffee = coffee;
         actor.barDrink = barDrink;
@@ -117,18 +119,28 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
           actor.drinkAtlas.width = 2048;
           actor.drinkAtlas.height = 1024;
           actor.drinkSource = composeAvatar(source, { ...actor.avatar, instrument: 'none' });
+          actor.drinkArmSource = composeAvatar(
+            source,
+            { ...actor.avatar, instrument: 'none' },
+            0,
+            'body',
+          );
+          actor.drinkHairLayer = composeAvatar(
+            source,
+            { ...actor.avatar, instrument: 'none' },
+            0,
+            'hair',
+          );
           if (barDrink) {
-            actor.drinkArmSource = document.createElement('canvas');
-            actor.drinkArmSource.width = actor.drinkArmSource.height = 512;
-            actor.drinkArmSource
-              .getContext('2d')!
-              .drawImage(actor.drinkSource, 0, 0, 512, 512, 0, 0, 512, 512);
-            const seatedFront = composeSeatedAvatar(actor.drinkSource);
+            const seatedFront = composeSeatedAvatar(
+              composeAvatar(source, { ...actor.avatar, instrument: 'none' }, undefined, 'body'),
+            );
             actor.drinkSource = document.createElement('canvas');
             actor.drinkSource.width = actor.drinkSource.height = 512;
             actor.drinkSource
               .getContext('2d')!
               .drawImage(seatedFront, 0, 0, 512, 512, 0, 0, 512, 512);
+            actor.drinkSource.getContext('2d')!.drawImage(actor.drinkHairLayer, 0, 0);
           }
         } else {
           const frame = actor.preparedFrames ?? 0;
@@ -143,6 +155,7 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
             coffee,
             barDrink,
             actor.drinkArmSource,
+            actor.drinkHairLayer,
           );
           ctx.restore();
           actor.preparedFrames = frame + 1;
@@ -156,6 +169,7 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
             actor.drinkTexture = texture;
             actor.drinkSource = undefined;
             actor.drinkArmSource = undefined;
+            actor.drinkHairLayer = undefined;
           }
         }
       }

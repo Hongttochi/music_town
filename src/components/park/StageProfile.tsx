@@ -8,8 +8,7 @@ import './stage-profile.css';
 type Props = {
   selected: Stage;
   selectedMusician: Participant | undefined;
-  accountId: string;
-  demo: boolean;
+  own: boolean;
   muted: boolean;
   onProfile: () => void;
   onListen: () => void;
@@ -20,6 +19,7 @@ type Props = {
 export function StageProfile({
   selected,
   selectedMusician,
+  own,
   muted,
   onProfile,
   onListen,
@@ -36,7 +36,7 @@ export function StageProfile({
         <div className="stage-performer-copy">
           <p className="stage-live-label">
             <span aria-hidden="true" />
-            지금 공연 중
+            {own ? '내 공연' : '지금 공연 중'}
           </p>
           <h3>{selected.artist || '공연자'}</h3>
         </div>
@@ -63,24 +63,28 @@ export function StageProfile({
           <span>{selected.listeners}명 관람</span>
         </span>
       </div>
-      <Button variant="primary" className="stage-listen-button" onClick={onListen}>
-        <Headphones size={19} />
-        무대 앞에서 듣기
-      </Button>
-      <div className="stage-secondary-controls">
-        <Button variant="ghost" onClick={onMute} aria-pressed={muted}>
-          {muted ? <Volume2 size={15} /> : <VolumeX size={15} />}
-          {muted ? '음소거 해제' : '음소거'}
-        </Button>
-        <Button variant="ghost" onClick={onQueue}>
-          <ListPlus size={15} />
-          공연 대기
-        </Button>
-        <Button variant="ghost" onClick={onReport}>
-          <Flag size={14} />
-          신고
-        </Button>
-      </div>
+      {!own && (
+        <>
+          <Button variant="primary" className="stage-listen-button" onClick={onListen}>
+            <Headphones size={19} />
+            무대 앞에서 듣기
+          </Button>
+          <div className="stage-secondary-controls">
+            <Button variant="ghost" onClick={onMute} aria-pressed={muted}>
+              {muted ? <Volume2 size={15} /> : <VolumeX size={15} />}
+              {muted ? '음소거 해제' : '음소거'}
+            </Button>
+            <Button variant="ghost" onClick={onQueue}>
+              <ListPlus size={15} />
+              공연 대기
+            </Button>
+            <Button variant="ghost" onClick={onReport}>
+              <Flag size={14} />
+              신고
+            </Button>
+          </div>
+        </>
+      )}
     </section>
   );
 }

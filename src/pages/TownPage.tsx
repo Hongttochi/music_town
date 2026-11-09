@@ -1,3 +1,4 @@
+import { Flag } from 'lucide-react';
 import { BAR_STAGE_ID } from '../data/bar';
 import { BAR_STAGE_EXIT, isInsideBar } from '../scene/park/nightBar';
 import { ChannelEntryDialog } from '../components/park/ChannelEntryDialog';
@@ -223,6 +224,10 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
         ?.user_id,
   );
   const selected = stages.find((s) => s.id === selectedStage.id) ?? selectedStage;
+  const selectedOwnPerformance =
+    selectedMusician?.id === account.id ||
+    town.performance?.stage_id === selected.id ||
+    town.state.performances.some((p) => p.stage_id === selected.id && p.user_id === account.id);
   const queuePlace = town.waiting
     ? town.state.queue
         .filter((q) => q.stage_id === town.waiting!.stage_id)
@@ -604,8 +609,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
             <StageProfile
               selected={selected}
               selectedMusician={selectedMusician}
-              accountId={account.id}
-              demo={account.demo}
+              own={selectedOwnPerformance}
               muted={muted.includes(selected.id)}
               onProfile={() => {
                 if (selectedMusician) {
@@ -614,6 +618,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
                 }
               }}
               onListen={() => {
+                if (selectedOwnPerformance) return;
                 position.current =
                   selected.id === BAR_STAGE_ID
                     ? { x: BAR_STAGE_EXIT.x * 25 + 700, y: BAR_STAGE_EXIT.z * 25 + 450 }
@@ -622,6 +627,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
                 setPanel(null);
               }}
               onMute={() =>
+                !selectedOwnPerformance &&
                 setMuted(
                   muted.includes(selected.id)
                     ? muted.filter((id) => id !== selected.id)
@@ -629,12 +635,18 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
                 )
               }
               onReport={() => {
-                if (selectedMusician && selectedMusician.id !== account.id) {
+                if (
+                  !selectedOwnPerformance &&
+                  selectedMusician &&
+                  selectedMusician.id !== account.id
+                ) {
                   setSelectedPerson(selectedMusician);
                   setPanel('report');
                 }
               }}
-              onQueue={() => setPanel('queue')}
+              onQueue={() => {
+                if (!selectedOwnPerformance) setPanel('queue');
+              }}
             />
           </>
         )}
@@ -667,18 +679,25 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
             {title('', '프로필')}
             <ParticipantProfile
               person={selectedPerson}
-              onReport={() => setPanel('report')}
+              onReport={() => {
+                if (selectedPerson.id !== account.id) setPanel('report');
+              }}
               own={selectedPerson.id === account.id}
               demo={account.demo}
             />
           </>
         )}
-        {panel === 'report' && selectedPerson && (
+        {panel === 'report' && selectedPerson && selectedPerson.id !== account.id && (
           <>
-            {title('', '신고하기')}
+            <PanelHeading
+              title="신고하기"
+              icon={<Flag size={18} aria-hidden="true" />}
+              onClose={() => setPanel(null)}
+            />
             <ReportForm
               key={selectedPerson.id}
               target={selectedPerson}
+              reporterId={account.id}
               onClose={() => setPanel(null)}
             />
           </>

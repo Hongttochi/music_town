@@ -1,8 +1,10 @@
+import { Flag, LockKeyhole, UserRound } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { supabase } from '../../services/auth';
 import type { Participant } from '../../hooks/useTown';
 import { Button } from '../ui/Button';
 import '../profile/participant-profile.css';
+import './report-form.css';
 
 const reasons = [
   ['sexual', '성적 발언·성희롱'],
@@ -13,7 +15,15 @@ const reasons = [
   ['other', '기타'],
 ] as const;
 
-export function ReportForm({ target, onClose }: { target: Participant; onClose: () => void }) {
+export function ReportForm({
+  target,
+  reporterId,
+  onClose,
+}: {
+  target: Participant;
+  reporterId: string;
+  onClose: () => void;
+}) {
   const [reason, setReason] = useState('sexual');
   const [details, setDetails] = useState('');
   const [busy, setBusy] = useState(false);
@@ -21,6 +31,7 @@ export function ReportForm({ target, onClose }: { target: Participant; onClose: 
   const [error, setError] = useState('');
   const requestId = useRef(crypto.randomUUID());
   const submitting = useRef(false);
+  if (target.id === reporterId) return <p role="status">본인은 신고할 수 없어요.</p>;
   if (receipt)
     return (
       <div className="report-form">
@@ -35,7 +46,7 @@ export function ReportForm({ target, onClose }: { target: Participant; onClose: 
       className="report-form"
       onSubmit={async (event) => {
         event.preventDefault();
-        if (submitting.current) return;
+        if (submitting.current || target.id === reporterId) return;
         submitting.current = true;
         setBusy(true);
         setError('');
@@ -70,6 +81,7 @@ export function ReportForm({ target, onClose }: { target: Participant; onClose: 
       }}
     >
       <p className="report-target">
+        <UserRound size={16} aria-hidden="true" />
         <span>신고 대상</span>
         <strong>{target.avatar.name}</strong>
       </p>
@@ -102,6 +114,7 @@ export function ReportForm({ target, onClose }: { target: Participant; onClose: 
       />
       <small className="report-counter">{details.length} / 1000</small>
       <p className="report-disclosure">
+        <LockKeyhole size={14} aria-hidden="true" />
         신고 대상·사유·설명·채널과 신고자 계정이 운영자 검토를 위해 저장됩니다. 다른 이용자는 신고
         내용을 볼 수 없어요.
       </p>
@@ -115,6 +128,7 @@ export function ReportForm({ target, onClose }: { target: Participant; onClose: 
           취소
         </Button>
         <Button type="submit" variant="primary" disabled={busy || details.trim().length < 10}>
+          <Flag size={14} aria-hidden="true" />
           {busy ? '접수 중…' : '신고 접수하기'}
         </Button>
       </div>
