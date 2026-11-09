@@ -3,6 +3,7 @@ import type { Position } from '../../types/park';
 export function MovementJoystick({ motion }: { motion: MutableRefObject<Position> }) {
   return (
     <div className="movement">
+      <span className="keyboard-movement-hint">WASD / 방향키로 이동</span>
       <div
         id="joystick"
         role="button"
