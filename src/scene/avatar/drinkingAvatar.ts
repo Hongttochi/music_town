@@ -43,6 +43,7 @@ export function drawDrinkingPose(
   coffee: CoffeeId,
   barDrink?: BarDrinkId,
   armSource = standing,
+  hairLayer?: HTMLCanvasElement,
 ) {
   const drink = findCoffee(coffee);
   const { upperAngle, forearmAngle, elbowX, elbowY, handX, handY } = drinkingArmPose(lift);
@@ -55,6 +56,16 @@ export function drawDrinkingPose(
       ctx.drawImage(armSource, 275, 324, 32, 82, 275, 324, 32, 82);
     }
     ctx.clearRect(306, 304, 48, 98);
+    // Restore stationary hair erased with the resting arm, before drawing the moving arm.
+    if (hairLayer) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(306, 304, 48, 98);
+      if (barDrink) ctx.rect(275, 324, 82, 82);
+      ctx.clip();
+      ctx.drawImage(hairLayer, 0, 0);
+      ctx.restore();
+    }
     // The upper arm and forearm pivot separately; neither is stretched.
     ctx.save();
     ctx.translate(310, 306);
