@@ -1,5 +1,5 @@
-dialog.town-panel.profile-dialog[data-panel='profile'][open] {
-  width: 420px;
+dialog.town-panel.profile-dialog[data-panel='profile'][open] > .profile-sheet {
+  width: min(420px, 100%);
 }
 .stage-profile-card {
   display: grid;
