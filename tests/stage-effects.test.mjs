@@ -19,7 +19,7 @@ test('persisted effects are bounded and invalid values fall back to dry defaults
   assert.equal(normalizeStageEffects({ echo: 100 }).echo, 50);
   assert.equal(normalizeStageEffects({ echo: -20 }).echo, 0);
 });
-test('effect updates preserve the outgoing stream and disposal stops only the owned output', () => {
+test('processed voice plays locally, preserves the outgoing stream, and disconnects on disposal', () => {
   const nodes = [];
   const param = () => ({
     value: 0,
@@ -78,7 +78,10 @@ test('effect updates preserve the outgoing stream and disposal stops only the ow
   for (let i = 0; i < 20; i++) graph.update({ volume: i * 5, reverb: 20, echo: 25 });
   assert.equal(graph.stream, stream);
   assert.equal(nodes.length, count);
-  assert.ok(nodes.every((n) => !n.connections.includes(ctx.destination)));
+  const monitors = nodes.filter((n) => n.connections.includes(ctx.destination));
+  assert.equal(monitors.length, 1);
+  const outgoing = nodes.find((n) => n.stream === stream);
+  assert.ok(monitors[0].connections.includes(outgoing));
   graph.dispose();
   assert.equal(outputStopped, 1);
   assert.ok(nodes.every((n) => n.connections.length === 0));

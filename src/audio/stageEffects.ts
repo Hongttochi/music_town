@@ -48,7 +48,6 @@ export function createStageEffectChain(context: BaseAudioContext, initial: Stage
   source.connect(delay).connect(echoGain).connect(sum);
   delay.connect(feedback).connect(delay);
   sum.connect(volume).connect(compressor);
-  // Deliberately no connection to context.destination: no local speaker feedback.
   function update(value: StageEffects) {
     const settings = normalizeStageEffects(value);
     for (const [param, target] of [
@@ -89,6 +88,9 @@ export function createStageEffects(
   const destination = context.createMediaStreamDestination();
   source.connect(chain.input);
   chain.output.connect(destination);
+  // Monitor the same processed voice locally without a network round trip.
+  // Disposing the chain disconnects both the local monitor and outgoing stream.
+  chain.output.connect(context.destination);
   return {
     stream: destination.stream,
     update: chain.update,

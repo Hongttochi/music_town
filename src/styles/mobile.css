@@ -1,12 +1,4 @@
-.keyboard-movement-hint {
-  display: none;
-}
-
 @media (hover: hover) and (pointer: fine) {
-  .movement > .keyboard-movement-hint {
-    display: block;
-    font-size: 12px;
-  }
   #joystick {
     display: none;
   }
