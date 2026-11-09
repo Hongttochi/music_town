@@ -8,6 +8,9 @@ import { RIVER } from '../scene/park/riverBoundary';
 import morning from '../sounds/morning.mp3';
 import night from '../sounds/night.mp3';
 import river from '../sounds/river.mp3';
+import jazz from '../sounds/jazz_bar.m4a';
+import { isInsideBar } from '../scene/park/nightBar';
+import { ambientLevels } from '../audio/ambientMix';
 
 type Position = { x: number; y: number };
 export function useAmbientAudio(
@@ -15,13 +18,14 @@ export function useAmbientAudio(
   entered: boolean,
   quiet: boolean,
   parkNight?: boolean,
+  barPerforming = false,
 ) {
   const { enabled, volume } = useSoundSettings();
-  const settings = useRef({ enabled, volume, entered, quiet, parkNight });
-  settings.current = { enabled, volume, entered, quiet, parkNight };
+  const settings = useRef({ enabled, volume, entered, quiet, parkNight, barPerforming });
+  settings.current = { enabled, volume, entered, quiet, parkNight, barPerforming };
   useEffect(() => {
     const context = new AudioContext();
-    const tracks = [morning, night, river, fire].map((url) => {
+    const tracks = [morning, night, river, fire, jazz].map((url) => {
       const audio = new Audio(url);
       audio.loop = true;
       audio.preload = 'auto';
@@ -52,8 +56,6 @@ export function useAmbientAudio(
     };
     const update = () => {
       const s = settings.current;
-      const master =
-        s.entered && s.enabled && !document.hidden ? s.volume * (s.quiet ? 0.08 : 0.3) : 0;
       const isNight = s.parkNight ?? isParkNight();
       const x = (position.current.x - 700) / 25;
       const distance = Math.max(RIVER.left - x, x - RIVER.right, 0);
@@ -64,14 +66,22 @@ export function useAmbientAudio(
         0,
         1 - Math.hypot(x - CAMPFIRE_SPOT.x, z - CAMPFIRE_SPOT.z) / 7,
       );
-      const targets = [
-        isNight ? 0 : master * (1 - mix * 0.65),
-        isNight ? master * (1 - mix * 0.65) : 0,
-        master * mix,
-        isNight ? master * fireProximity * fireProximity : 0,
-      ];
+      const targets = ambientLevels({
+        audible: s.entered && s.enabled && !document.hidden,
+        volume: s.volume,
+        quiet: s.quiet,
+        night: isNight,
+        insideBar: isInsideBar({ x, z }),
+        barPerforming: s.barPerforming,
+        riverMix: mix,
+        fireProximity,
+      });
       tracks.forEach(({ gain }, i) => {
-        // Smooth changes over roughly a second, including sliders and day/night changes.
+        // Silence excluded rooms and jazz during a performance immediately.
+        if (targets[i] === 0) {
+          gain.gain.value = 0;
+          return;
+        }
         const next = gain.gain.value + (targets[i] - gain.gain.value) * 0.25;
         gain.gain.value = Math.abs(next - targets[i]) < 0.001 ? targets[i] : next;
       });

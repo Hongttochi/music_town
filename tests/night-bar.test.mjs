@@ -22,6 +22,50 @@ const { BAR_SPOT, BAR_ENTRANCE, BAR_INSIDE, BAR_SEATS, overlapsBar, isInsideBar,
   load('../src/scene/park/nightBar.ts');
 const { isParkNight } = load('../src/utils/time.ts');
 const { clampParkPosition } = load('../src/utils/parkBounds.ts');
+const { BAR_STAGE_EXIT, BAR_COUNTER_SEATS, barWalkablePosition } = load(
+  '../src/scene/park/nightBar.ts',
+);
+
+test('stage exits and every seat exit leave room to move without furniture collisions', () => {
+  const radius = 0.35;
+  assert.equal(overlapsBar(BAR_STAGE_EXIT, radius + 0.2, true), false);
+  for (const seat of BAR_SEATS) {
+    // Compare coordinates because each test module load creates separate vectors.
+    const counter = BAR_COUNTER_SEATS.some((s) => s.x === seat.x && s.z === seat.z);
+    const exit = barWalkablePosition(
+      {
+        x: Math.max(29.5, Math.min(34.2, seat.x)),
+        z: counter ? -5.8 : seat.z,
+      },
+      radius,
+    );
+    assert.equal(isInsideBar(exit), true);
+    for (let i = 0; i < 8; i++) {
+      const angle = (i * Math.PI) / 4;
+      assert.equal(
+        overlapsBar(
+          {
+            x: exit.x + Math.cos(angle) * 0.15,
+            z: exit.z + Math.sin(angle) * 0.15,
+          },
+          radius,
+          true,
+        ),
+        false,
+        `seat ${seat.x},${seat.z}, direction ${i}`,
+      );
+    }
+  }
+});
+
+test('positions left inside furniture by old clients recover into walkable bar space', () => {
+  for (const point of [...BAR_SEATS, { x: 35.5, z: -5.8 }, { x: 36.9, z: -4.3 }]) {
+    assert.equal(overlapsBar(point, 0.35, true), true);
+    const safe = barWalkablePosition(point, 0.35);
+    assert.equal(isInsideBar(safe), true);
+    assert.equal(overlapsBar(safe, 0.55, true), false);
+  }
+});
 
 test('bar uses the existing Korean night schedule at both boundaries', () => {
   for (const [time, night] of [

@@ -1,4 +1,5 @@
 import { BAR_STAGE_ID } from '../data/bar';
+import { BAR_STAGE_EXIT, isInsideBar } from '../scene/park/nightBar';
 import { ChannelEntryDialog } from '../components/park/ChannelEntryDialog';
 import { useParkTimeTransition } from '../hooks/useParkTimeTransition';
 import { TimeTransition } from '../components/park/TimeTransition';
@@ -148,11 +149,15 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
     entered && !account.demo && town.state.channel !== null && Boolean(currentPerformance),
     currentPerformance?.stage_id ?? null,
   );
+  const insideBar = isInsideBar({
+    x: (position.current.x - 700) / 25,
+    z: (position.current.y - 450) / 25,
+  });
   const audiblePerformance =
     currentPerformance ??
     town.state.performances.find(
       (item) =>
-        item.stage_id === near?.id &&
+        (item.stage_id === BAR_STAGE_ID ? insideBar : !insideBar && item.stage_id === near?.id) &&
         !muted.includes(item.stage_id) &&
         Date.parse(item.ends_at) > now.getTime(),
     );
@@ -205,6 +210,9 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
     entered,
     timeTransition.active || microphone.state === 'on' || voice.status === 'listening',
     timeTransition.night,
+    town.state.performances.some(
+      (item) => item.stage_id === BAR_STAGE_ID && Date.parse(item.ends_at) > now.getTime(),
+    ),
   );
   const stages = account.demo ? demoStages : town.stages;
   const populations = account.demo ? demoPopulations : town.state.channels.map((c) => c.count);
@@ -230,6 +238,12 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
     if (stageId !== null && stageId !== performing) {
       const stage = town.stages.find((s) => s.id === stageId);
       if (stage) position.current = { x: stage.x, y: stage.y };
+    }
+    if (stageId === null && performing !== null && entered && town.state.channel !== null) {
+      position.current =
+        performing === BAR_STAGE_ID
+          ? { x: BAR_STAGE_EXIT.x * 25 + 700, y: BAR_STAGE_EXIT.z * 25 + 450 }
+          : { ...position.current, y: position.current.y + 70 };
     }
     setPerforming(stageId);
     setQueue(town.waiting?.stage_id ?? null);
@@ -390,7 +404,6 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
               onFinish={async () => {
                 try {
                   await town.act('finish');
-                  position.current.y += 70;
                   notify('당신의 음악으로 공원이 더 따뜻해졌어요.', 'performance');
                 } catch (error) {
                   setActionError((error as Error).message);
@@ -601,7 +614,10 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
                 }
               }}
               onListen={() => {
-                position.current = { x: selected.x, y: selected.y + 90 };
+                position.current =
+                  selected.id === BAR_STAGE_ID
+                    ? { x: BAR_STAGE_EXIT.x * 25 + 700, y: BAR_STAGE_EXIT.z * 25 + 450 }
+                    : { x: selected.x, y: selected.y + 90 };
                 setNear(selected);
                 setPanel(null);
               }}
