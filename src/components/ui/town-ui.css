@@ -324,6 +324,7 @@ dialog.town-panel[data-panel='avatar'] {
   padding: 6px;
   gap: 5px;
   border-radius: 999px;
+  overflow: hidden;
   width: max-content;
   margin-inline: auto;
 }
@@ -341,10 +342,40 @@ dialog.town-panel[data-panel='avatar'] {
   width: 19px;
   height: 19px;
   margin: auto;
+  transition: transform 0.15s ease;
+}
+.reaction-bar .town-button:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--town-leaf);
 }
 .reaction-bar small {
   font-size: 7px;
   line-height: 11px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .reaction-bar {
+    padding: 10px 16px;
+    gap: 8px;
+  }
+  .reaction-bar .town-button {
+    width: 64px;
+    min-width: 64px;
+    height: 72px;
+    padding: 8px;
+    gap: 5px;
+    border-radius: 18px;
+  }
+  .reaction-bar .town-button .flaticon {
+    width: 36px;
+    height: 36px;
+    margin: 0;
+  }
+  .reaction-bar small {
+    font-size: 11px;
+    line-height: 15px;
+  }
+  .reaction-bar .town-button:hover .flaticon {
+    transform: scale(1.1);
+  }
 }
 .reaction-divider {
   height: 24px;
@@ -816,8 +847,11 @@ body:has(#app.before-entry) .town-panel::backdrop {
 .reaction-burst[data-kind='✦'] img {
   filter: drop-shadow(0 0 7px #ffe995);
 }
-.reaction-bar .town-button:active {
-  transform: scale(0.88);
+.reaction-bar .town-button:not(:disabled):active {
+  transform: none;
+}
+.reaction-bar .town-button:not(:disabled):active .flaticon {
+  transform: scale(0.9);
 }
 @keyframes reaction-pop {
   0% {
@@ -844,8 +878,11 @@ body:has(#app.before-entry) .town-panel::backdrop {
   .reaction-burst img:not(:first-child) {
     display: none;
   }
-  .reaction-bar .town-button:active {
+  .reaction-bar .town-button .flaticon,
+  .reaction-bar .town-button:hover .flaticon,
+  .reaction-bar .town-button:not(:disabled):active .flaticon {
     transform: none;
+    transition: none;
   }
 }
 dialog.town-panel[data-panel='settings'] {

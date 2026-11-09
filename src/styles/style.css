@@ -414,7 +414,7 @@ kbd {
   transition: transform 0.2s;
 }
 .reaction-bar button:hover {
-  transform: translateY(-4px);
+  transform: none;
   background: #eee9d7;
 }
 .reaction-bar button:first-of-type {
