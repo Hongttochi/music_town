@@ -700,18 +700,30 @@ export function createParkScene({
       );
   }
   const keys = new Set<string>();
+  const movementKey = (e: KeyboardEvent) =>
+    /^Key[WASD]$/.test(e.code) ? e.code.slice(3).toLowerCase() : e.key;
+  const editing = (target: EventTarget | null) =>
+    target instanceof HTMLElement &&
+    (target.matches('input, textarea, select') || target.isContentEditable);
   const down = (e: KeyboardEvent) => {
     if (
       document.querySelector('dialog[open]') ||
-      /INPUT|TEXTAREA/.test((e.target as HTMLElement).tagName)
-    )
+      document.documentElement.dataset.deviceBlocked === 'true' ||
+      editing(e.target) ||
+      e.ctrlKey ||
+      e.metaKey ||
+      e.altKey
+    ) {
+      keys.clear();
       return;
-    if (['w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+    }
+    const key = movementKey(e);
+    if (['w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
       e.preventDefault();
-      keys.add(e.key);
+      keys.add(key);
     }
   };
-  const up = (e: KeyboardEvent) => keys.delete(e.key);
+  const up = (e: KeyboardEvent) => keys.delete(movementKey(e));
   const clear = () => {
     keys.clear();
     latest.current.motion.current = { x: 0, y: 0 };
@@ -721,6 +733,7 @@ export function createParkScene({
   window.addEventListener('blur', clear);
   window.addEventListener('orientationchange', clear);
   document.addEventListener('visibilitychange', clear);
+  document.addEventListener('focusin', clear);
   const resize = () => {
     if (!el.clientWidth || !el.clientHeight) return;
     // Keep high-density phones crisp without allocating an unbounded tablet framebuffer.
@@ -902,12 +915,14 @@ export function createParkScene({
         Number(keys.has('w') || keys.has('ArrowUp'));
     if (
       document.querySelector('dialog[open]') ||
+      editing(document.activeElement) ||
       p.performing !== null ||
       p.timeTransition ||
       time < barTalkUntil
     ) {
       dx = 0;
       dz = 0;
+      keys.clear();
     }
     if (
       coffeePhase !== 'idle' &&
@@ -1425,6 +1440,7 @@ export function createParkScene({
     observer.disconnect();
     window.removeEventListener('keydown', down);
     window.removeEventListener('keyup', up);
+    document.removeEventListener('focusin', clear);
     window.removeEventListener('blur', clear);
     window.removeEventListener('orientationchange', clear);
     document.removeEventListener('visibilitychange', clear);
