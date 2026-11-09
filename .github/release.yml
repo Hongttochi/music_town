@@ -1,0 +1,11 @@
+changelog:
+  exclude:
+    labels:
+      - skip-changelog
+  categories:
+    - title: Features
+      labels: [enhancement, feat]
+    - title: Bug Fixes
+      labels: [bug, fix, hotfix]
+    - title: Other Changes
+      labels: ['*']
