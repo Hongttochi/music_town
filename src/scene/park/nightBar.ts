@@ -117,7 +117,58 @@ export function createNightBar(scene: T.Scene) {
     front.add(window);
   }
   const door = box(0, 1.2, 4.95, 2.75, 2.4, 0.12, wood);
-  const roof = box(0, 3.35, 0, 12.6, 0.4, 10.6, roofMat);
+  const brass = makeMaterial('#c8a96b');
+  brass.metalness = 0.45;
+  brass.roughness = 0.4;
+  const facade = makeMaterial('#365653');
+  const roof = new T.Group();
+  group.add(roof);
+  roof.add(box(0, 3.24, 0, 12.6, 0.18, 10.6, facade));
+  // A raised ridge and two sloping roof planes break up the old flat box silhouette.
+  for (const side of [-1, 1]) {
+    const slope = box(side * 3.1, 3.88, 0, 6.42, 0.18, 10.6, roofMat);
+    slope.rotation.z = -side * 0.19;
+    roof.add(slope);
+    roof.add(box(side * 6.22, 3.3, 0, 0.14, 0.18, 10.7, brass));
+    for (let z = -5; z <= 5; z += 1) {
+      const seam = box(side * 3.1, 3.99, z, 6.42, 0.035, 0.035, facade);
+      seam.rotation.z = -side * 0.19;
+      roof.add(seam);
+    }
+  }
+  roof.add(box(0, 4.51, 0, 0.18, 0.16, 10.8, brass));
+  const gableShape = new T.Shape();
+  gableShape.moveTo(-6.2, 3.28);
+  gableShape.lineTo(0, 4.49);
+  gableShape.lineTo(6.2, 3.28);
+  gableShape.closePath();
+  const gableGeo = new T.ShapeGeometry(gableShape);
+  geometries.push(gableGeo);
+  for (const z of [-5.1, 5.1]) {
+    const gable = new T.Mesh(gableGeo, facade);
+    gable.position.z = z;
+    if (z < 0) gable.rotation.y = Math.PI;
+    roof.add(gable);
+  }
+  for (const side of [-1, 1]) {
+    // Facade-only decoration stays outside the traversable doorway.
+    for (const x of [side * 1.5, side * 5.75]) {
+      front.add(box(x, 1.5, 5.12, 0.2, 3, 0.26, facade));
+      front.add(box(x, 0.13, 5.18, 0.32, 0.26, 0.34, brass));
+      front.add(box(x, 2.95, 5.18, 0.32, 0.15, 0.34, brass));
+    }
+    front.add(box(side * 3.7, 0.4, 5.08, 4.25, 0.65, 0.12, facade));
+    front.add(box(side * 3.7, 1.8, 5.18, 0.05, 1.08, 0.05, brass));
+    front.add(box(side * 3.7, 1.8, 5.18, 1.08, 0.05, 0.05, brass));
+    front.add(box(side * 3.7, 1.04, 5.2, 1.55, 0.12, 0.32, brass));
+    front.add(box(side * 2.25, 2.15, 5.26, 0.1, 0.65, 0.2, wood));
+    front.add(box(side * 2.25, 2.3, 5.4, 0.28, 0.4, 0.26, amber));
+    front.add(box(side * 2.25, 2.54, 5.4, 0.38, 0.08, 0.34, brass));
+  }
+  const canopy = box(0, 2.8, 5.65, 3.25, 0.12, 1.25, facade);
+  canopy.rotation.x = 0.08;
+  front.add(canopy);
+  front.add(box(0, 2.67, 6.25, 3.3, 0.2, 0.08, brass));
   box(-2.5, 0.7, -1.8, 5.7, 1.4, 0.8, wood);
   box(-2.5, 1.46, -1.8, 6, 0.12, 1, cream);
   box(-2.5, 2, -4.75, 5.7, 0.12, 0.4, wood);
@@ -186,6 +237,9 @@ export function createNightBar(scene: T.Scene) {
   const ctx = signCanvas.getContext('2d')!;
   ctx.fillStyle = '#31454a';
   ctx.fillRect(0, 0, 512, 128);
+  ctx.strokeStyle = '#c8a96b';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(8, 8, 496, 112);
   ctx.fillStyle = '#ffe5ac';
   ctx.textAlign = 'center';
   ctx.font = 'bold 40px sans-serif';
@@ -196,8 +250,8 @@ export function createNightBar(scene: T.Scene) {
   texture.colorSpace = T.SRGBColorSpace;
   const signMaterial = new T.MeshBasicMaterial({ map: texture });
   materials.push(signMaterial);
-  const sign = box(0, 2.78, 5.22, 3.8, 0.65, 0.06, signMaterial);
-  front.add(sign);
+  const sign = box(0, 3.72, 5.24, 3.8, 0.82, 0.08, signMaterial);
+  roof.add(sign);
   const light = new T.PointLight('#ffc17c', 0, 16, 2);
   light.position.set(0, 2.8, 0.8);
   group.add(light);

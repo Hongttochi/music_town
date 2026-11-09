@@ -1,6 +1,40 @@
 import { barDrinks, type BarDrinkId } from '../../data/bar';
 import { findCoffee, type CoffeeId } from '../../data/coffeeMenu';
 
+/** Two-bone reach keeps the cup rim at the mouth at the top of the sip. */
+export function drinkingArmPose(lift: number) {
+  const amount = Math.max(0, Math.min(1, lift));
+  const eased = amount * amount * (3 - 2 * amount);
+  const handX = 329 + (271 - 329) * eased + Math.sin(eased * Math.PI) * 56;
+  const handY = 383 + (250 - 383) * eased;
+  const dx = handX - 310,
+    dy = handY - 306;
+  const upperLength = Math.hypot(20, 51),
+    lowerLength = 29;
+  const distance = Math.hypot(dx, dy);
+  const bend = Math.acos(
+    Math.max(
+      -1,
+      Math.min(
+        1,
+        (distance * distance + upperLength * upperLength - lowerLength * lowerLength) /
+          (2 * distance * upperLength),
+      ),
+    ),
+  );
+  const angle = Math.atan2(dy, dx) - bend;
+  const elbowX = 310 + upperLength * Math.cos(angle);
+  const elbowY = 306 + upperLength * Math.sin(angle);
+  return {
+    handX,
+    handY,
+    elbowX,
+    elbowY,
+    upperAngle: angle - Math.atan2(51, 20),
+    forearmAngle: Math.atan2(elbowX - handX, handY - elbowY),
+  };
+}
+
 /** Cup and fingers share the same transformed palm anchor in every animation frame. */
 export function drawDrinkingPose(
   ctx: CanvasRenderingContext2D,
@@ -11,21 +45,21 @@ export function drawDrinkingPose(
   armSource = standing,
 ) {
   const drink = findCoffee(coffee);
-  const upperAngle = -0.12 - lift * 0.32;
-  const forearmAngle = 0.15 + lift * 2.5;
-  const elbowX = 310 + 20 * Math.cos(upperAngle) - 35 * Math.sin(upperAngle);
-  const elbowY = 326 + 20 * Math.sin(upperAngle) + 35 * Math.cos(upperAngle);
-  const handX = elbowX - 29 * Math.sin(forearmAngle);
-  const handY = elbowY + 29 * Math.cos(forearmAngle);
+  const { upperAngle, forearmAngle, elbowX, elbowY, handX, handY } = drinkingArmPose(lift);
   {
     ctx.save();
     ctx.drawImage(standing, 0, 0, 512, 512, 0, 0, 512, 512);
-    ctx.clearRect(306, 324, 48, 78);
+    if (barDrink) {
+      // Replace the seated resting arm with the original torso before drawing the reach.
+      ctx.clearRect(275, 324, 82, 82);
+      ctx.drawImage(armSource, 275, 324, 32, 82, 275, 324, 32, 82);
+    }
+    ctx.clearRect(306, 304, 48, 98);
     // The upper arm and forearm pivot separately; neither is stretched.
     ctx.save();
-    ctx.translate(310, 326);
+    ctx.translate(310, 306);
     ctx.rotate(upperAngle);
-    ctx.drawImage(armSource, 305, 324, 47, 39, -4, 0, 47, 39);
+    ctx.drawImage(armSource, 305, 304, 47, 59, -4, 0, 47, 59);
     ctx.restore();
     ctx.save();
     ctx.translate(elbowX, elbowY);
