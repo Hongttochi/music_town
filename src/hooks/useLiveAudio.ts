@@ -1,6 +1,6 @@
 import { errorCode, logEvent } from '../services/telemetry';
 import { useEffect, useRef, useState } from 'react';
-import { Room, RoomEvent, Track } from 'livekit-client';
+import { AudioPresets, Room, RoomEvent, Track } from 'livekit-client';
 import { supabase } from '../services/auth';
 
 type Target = { channel: number; stage: number; performerId: string; endsAt: string };
@@ -147,7 +147,12 @@ export function useLiveAudio(target: Target | null, client: string, stream: Medi
             // Own a clone so room teardown never stops the microphone hook's track.
             const clone = track.clone();
             try {
-              await room.localParticipant.publishTrack(clone, { source: Track.Source.Microphone });
+              await room.localParticipant.publishTrack(clone, {
+                source: Track.Source.Microphone,
+                audioPreset: AudioPresets.musicHighQuality,
+                dtx: false,
+                red: true,
+              });
             } catch (failure) {
               clone.stop();
               throw failure;

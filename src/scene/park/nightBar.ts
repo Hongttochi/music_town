@@ -4,6 +4,7 @@ import * as T from 'three';
 export const BAR_SPOT = new T.Vector3(32, 0, -6.5);
 export const BAR_ENTRANCE = new T.Vector3(32, 0, 2.7);
 export const BAR_INSIDE = new T.Vector3(32, 0, -3);
+export const BAR_STAGE_EXIT = new T.Vector3(34, 0, -6.7);
 export const BAR_HOST = new T.Vector3(35.5, 0, 1.7);
 export const BAR_COUNTER_SEATS = [27.8, 29.7, 31.6].map((x) => new T.Vector3(x, 0, -7.1));
 export const BAR_LOUNGE_SEATS = [28.4, 35.6].flatMap((x) =>
@@ -45,6 +46,25 @@ export function overlapsBar(point: { x: number; z: number }, radius: number, nig
   )
     return true;
   return BAR_SEATS.some((seat) => Math.hypot(point.x - seat.x, point.z - seat.z) < 0.3 + radius);
+}
+
+/** Resolve teleports and seat exits into the aisle, with room to take a first step. */
+export function barWalkablePosition(point: { x: number; z: number }, radius: number) {
+  const clear = (p: { x: number; z: number }) =>
+    isInsideBar(p) && !overlapsBar(p, radius + 0.2, true);
+  if (clear(point)) return new T.Vector3(point.x, 0, point.z);
+  const towardAisle = Math.atan2(BAR_INSIDE.z - point.z, BAR_INSIDE.x - point.x);
+  for (let distance = 0.25; distance <= 6; distance += 0.25) {
+    for (let step = 0; step < 32; step++) {
+      const angle = towardAisle + (step * Math.PI * 2) / 32;
+      const candidate = {
+        x: point.x + Math.cos(angle) * distance,
+        z: point.z + Math.sin(angle) * distance,
+      };
+      if (clear(candidate)) return new T.Vector3(candidate.x, 0, candidate.z);
+    }
+  }
+  return BAR_INSIDE.clone();
 }
 
 export function createNightBar(scene: T.Scene) {
