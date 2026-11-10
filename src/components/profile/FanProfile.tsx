@@ -1,3 +1,5 @@
+import { Heart, UserPlus, UserCheck } from 'lucide-react';
+import { ModularPortrait } from '../avatar/ModularPortrait';
 import { FanPeopleDialog } from './FanPeopleDialog';
 import type { ReactNode } from 'react';
 import { ActivityChart } from './ActivityChart';
@@ -187,16 +189,65 @@ export function FollowedProfiles({
   return (
     <div className="followed-profiles">
       {people.map((person) => (
-        <Button key={person.id} variant="choice" onClick={() => onSelect(person)}>
-          <span className="following-person-name">
-            <img src="/icons/profile-followers.png?v=20261110-flat" width={32} height={32} alt="" />
-            {person.avatar.name}
-          </span>
-          <small>
-            프로필 보기 <span aria-hidden="true">↗</span>
-          </small>
-        </Button>
+        <FollowedPerson key={person.id} person={person} onSelect={onSelect} />
       ))}
     </div>
+  );
+}
+
+function FollowedPerson({
+  person,
+  onSelect,
+}: {
+  person: Participant;
+  onSelect: (person: Participant) => void;
+}) {
+  const { stats, busy, error, act } = useFanStats(person.id);
+  const following = stats?.following ?? true;
+  return (
+    <article className="following-person">
+      <div className="following-person-row">
+        <Button
+          className="following-profile-link"
+          onClick={() => onSelect(person)}
+          aria-label={`${person.avatar.name} 프로필 보기`}
+        >
+          <span className="following-avatar" aria-hidden="true">
+            <ModularPortrait avatar={person.avatar} lazy />
+          </span>
+          <span className="following-person-name">{person.avatar.name}</span>
+        </Button>
+        <div className="following-actions">
+          <Button
+            disabled={!stats || busy}
+            aria-pressed={following}
+            aria-label={`${person.avatar.name} ${following ? '친구 추가 취소' : '친구 추가'}`}
+            onClick={() => void act('follow', !following)}
+          >
+            {following ? (
+              <UserCheck size={16} aria-hidden="true" />
+            ) : (
+              <UserPlus size={16} aria-hidden="true" />
+            )}
+            <span>{following ? '추가됨' : '친구 추가'}</span>
+          </Button>
+          <Button
+            disabled={!stats || busy}
+            aria-pressed={stats?.hearted ?? false}
+            className="following-heart"
+            aria-label={`${person.avatar.name} ${stats?.hearted ? '하트 취소' : '하트 보내기'}`}
+            onClick={() => void act('heart', !stats?.hearted)}
+          >
+            <Heart size={16} fill={stats?.hearted ? 'currentColor' : 'none'} aria-hidden="true" />
+            <span>{stats?.hearted ? '보낸 하트' : '하트 보내기'}</span>
+          </Button>
+        </div>
+      </div>
+      {error && (
+        <p className="following-action-error" role="status">
+          {error}
+        </p>
+      )}
+    </article>
   );
 }

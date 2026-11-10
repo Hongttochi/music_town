@@ -238,7 +238,9 @@ export function composeAvatar(
     const side = direction === 1 || direction === 3;
     // Tie/bun volume sits above the crown; it must not shrink the scalp coverage.
     const tied = p.hair === 7 || p.hair === 8;
-    const hairWidth = p.hair === 7 ? (side ? 322 : 326) : side ? 278 : 306;
+    const hairWidth = p.hair === 7 ? (side ? 322 : 326) : side ? (p.hair === 6 ? 302 : 278) : 306;
+    // Extend the wave silhouette over the rear scalp without moving the fringe.
+    const hairX = 256 - hairWidth / 2 + (p.hair === 6 && side ? (direction === 1 ? -12 : 12) : 0);
     const hairHeight =
       p.hair === 7
         ? direction === 2
@@ -266,7 +268,7 @@ export function composeAvatar(
       ctx.clip();
     }
     if (layer !== 'body') {
-      if (hair) ctx.drawImage(hair, 256 - hairWidth / 2, hairY, hairWidth, hairHeight);
+      if (hair) ctx.drawImage(hair, hairX, hairY, hairWidth, hairHeight);
       else drawExtraHair(ctx, p.hair, p.hairColor, direction);
     }
     ctx.restore();

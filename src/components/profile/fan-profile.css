@@ -226,25 +226,11 @@
   text-decoration: underline;
   text-underline-offset: 4px;
 }
-.activity-footnote,
 .activity-empty {
   margin: 12px 0 0;
   color: #969b8b;
   font-size: 10px;
   line-height: 1.6;
-}
-.followed-profiles {
-  display: grid;
-  gap: 8px;
-}
-.followed-profiles > button {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px;
-  border-radius: 8px;
-}
-.followed-profiles small {
-  color: #79816e;
 }
 .account-panel .account-identity {
   padding-bottom: 0;
@@ -288,31 +274,6 @@
   .activity-stats > .activity-toggle svg {
     transition: none;
   }
-}
-
-/* Compact segmented control replaces the underlined chart tabs. */
-.activity-stats .activity-metrics {
-  display: inline-flex;
-  gap: 2px;
-  padding: 3px;
-  border: 1px solid #e1e5d7;
-  border-radius: 10px;
-  background: #f0f2e9;
-}
-.activity-stats .activity-expanded .activity-metrics > .town-button {
-  min-height: 28px;
-  min-width: 48px;
-  padding: 4px 12px;
-  border: 0;
-  border-radius: 7px;
-  background: transparent;
-  box-shadow: none;
-  color: #8a9380;
-}
-.activity-stats .activity-expanded .activity-metrics > .town-button[aria-pressed='true'] {
-  color: #536347;
-  background: #fffdf6;
-  box-shadow: 0 1px 3px #42533112;
 }
 
 dialog.town-panel[data-panel='following'] {
@@ -371,25 +332,6 @@ dialog.town-panel[data-panel='following'] {
   line-height: 1.8;
   padding: 24px;
 }
-.following-person-name {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-  overflow-wrap: anywhere;
-  text-align: left;
-}
-.followed-profiles > .town-button {
-  gap: 12px;
-  align-items: center;
-  padding: 14px;
-  border: 1px solid #e1e5d5;
-  border-radius: 12px;
-}
-.followed-profiles small {
-  flex-shrink: 0;
-  font-size: 11px;
-}
 @media (max-height: 500px) {
   .following-empty {
     padding-top: 0;
@@ -417,125 +359,117 @@ dialog.town-panel[data-panel='following'] {
 }
 
 /* Neutral activity card with restrained blue and warm stage accents. */
-.activity-stats {
-  --activity-accent: #798ba9;
-}
-.activity-stats[data-metric='stageSeconds'] {
-  --activity-accent: #b58e77;
-}
-.activity-stats .activity-expanded {
-  margin-top: 4px;
-  padding: 14px;
-  border: 1px solid #e7e5e1;
-  border-radius: 12px;
-  background: #fcfbf8;
-  color: #454851;
-  font-family: var(--font-town);
+/* A single quiet chart surface; selection uses a dot and an underlined date. */
+.activity-expanded {
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
 }
-dialog.town-panel[open] .fan-profile .activity-chart-heading {
-  font-size: 12px;
-  font-weight: 600;
-  color: #50535b;
+.activity-dates > .town-button {
+  border-radius: 0;
 }
-.activity-stats .activity-metrics {
-  padding: 3px;
-  gap: 2px;
-  border: 0;
-  border-radius: 7px;
-  background: #efeeeb;
+.followed-profiles {
+  display: grid;
+  gap: 0;
 }
-dialog.town-panel[open] .fan-profile .activity-stats .activity-metrics > .town-button {
-  min-width: 38px;
-  min-height: 26px;
-  height: 26px;
-  padding: 3px 8px;
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 500;
-  color: #81838a;
-  line-height: 1.4;
-  border-radius: 5px;
+.following-person + .following-person {
+  border-top: 1px solid #e3e6db;
 }
-dialog.town-panel[open]
-  .fan-profile
-  .activity-stats
-  .activity-metrics
-  > .town-button[aria-pressed='true'] {
-  color: #444955;
-  background: #fff;
-  box-shadow: 0 1px 3px #35394412;
-  font-weight: 600;
+.following-person-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 76px;
+  padding: 12px 0;
 }
-.activity-stats .activity-detail {
-  margin-top: 16px;
-  color: #81838a;
-}
-dialog.town-panel[open] .fan-profile .activity-detail strong {
-  font-size: 18px;
-  font-weight: 650;
-  letter-spacing: -0.04em;
-  color: #373d48;
-}
-.activity-stats .activity-plot text {
-  font-family: var(--font-town);
-  font-size: 10px;
-  fill: #91939b;
-}
-.activity-stats .activity-line {
-  stroke: var(--activity-accent);
-  stroke-width: 2;
-}
-.activity-stats .activity-grid {
-  stroke: #e4e4e7;
-  stroke-dasharray: 3 5;
-}
-.activity-selected-column {
-  fill: var(--activity-accent);
-  opacity: 0.08;
-}
-.activity-point-halo {
-  fill: var(--activity-accent);
-  opacity: 0.16;
-}
-.activity-stats .activity-point {
-  stroke: var(--activity-accent);
-  fill: #fcfbf8;
-}
-.activity-stats .activity-point.is-selected {
-  fill: var(--activity-accent);
-}
-.activity-stats .activity-dates > .town-button[aria-pressed='true'] {
-  background: #e9edf4;
-  color: #536480;
-  border-radius: 7px;
-  text-decoration: none;
-}
-.activity-stats .activity-footnote {
-  font-size: 10px;
-  line-height: 1.6;
-  color: #929298;
-  margin: 12px 0 0;
-}
-
-/* Keep date highlights close to the label instead of filling the chart column. */
-dialog.town-panel[open] .fan-profile .activity-dates > button.town-button {
-  justify-self: center;
-  width: auto;
-  max-width: 100%;
-  height: 24px;
-  min-height: 24px;
+.following-person-row .following-profile-link {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 1;
   min-width: 0;
-  padding: 3px 5px;
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 500;
-  color: #85868e;
-  line-height: 18px;
-  border-radius: 6px;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: left;
 }
-dialog.town-panel[open] .fan-profile .activity-dates > button.town-button[aria-pressed='true'] {
-  color: #536480;
-  font-weight: 650;
+.following-profile-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+}
+.following-profile-link:focus-visible::after {
+  outline: 2px solid #81916a;
+  outline-offset: 2px;
+}
+.following-avatar {
+  display: block;
+  width: 48px;
+  height: 48px;
+  flex: none;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #eef0e6;
+}
+.following-avatar .modular-portrait {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+.following-avatar canvas {
+  width: 100%;
+  height: 100%;
+  transform: scale(1.6) translateY(12%);
+}
+.following-person-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+}
+.following-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+.following-actions > .town-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 36px;
+  padding: 6px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #737d69;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.following-actions > .following-heart[aria-pressed='true'] {
+  color: #b56868;
+}
+.following-action-error {
+  margin: 0 0 12px;
+  color: #9c564b;
+  font-size: 12px;
+}
+@media (max-width: 480px) {
+  .following-person-row {
+    gap: 8px;
+  }
+  .following-actions {
+    gap: 2px;
+  }
+  .following-actions > .town-button {
+    min-width: 36px;
+  }
+  .following-actions span {
+    display: none;
+  }
 }

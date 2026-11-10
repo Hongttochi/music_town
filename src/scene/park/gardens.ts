@@ -40,8 +40,10 @@ export function createGardens(
     return object;
   }
 
-  // Behind the fountain-side stage, outside its audience and approach paths.
+  // Give the central lawn a focal point, with fallback sites for occupied layouts.
   const fountain = [
+    { x: -5, z: 2 },
+    { x: -5, z: 3.5 },
     { x: 6.5, z: -5 },
     { x: 8, z: -4.8 },
     { x: 4, z: -5.5 },
@@ -84,30 +86,83 @@ export function createGardens(
   }
 
   const beds: Spot[] = [];
-  for (let i = 3; i < walkways.length; i += 9) {
+  const addBed = (x: number, z: number) => {
+    if (!clear(x, z, 0.65) || beds.some((b) => Math.hypot(x - b.x, z - b.z) < 1.35)) return;
+    if (fountain && Math.hypot(x - fountain.x, z - fountain.z) < 2.35) return;
+    beds.push({ x, z });
+  };
+  if (fountain) {
+    // A low flower wreath leaves the water visible and plenty of room to walk around it.
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2;
+      addBed(fountain.x + Math.cos(angle) * 2.75, fountain.z + Math.sin(angle) * 2.75);
+    }
+  }
+  // Small drifts fill the lawn between the stages, rather than only its perimeter.
+  for (const [x, z] of [
+    [-10, 0],
+    [-10, 2],
+    [-9, 4.5],
+    [-7, 7],
+    [-5, 7.5],
+    [-3.5, -3],
+    [-5, -6.5],
+    [-7, -7.5],
+    [3, -4],
+    [4, 4.5],
+    [6, 7],
+    [8, 7.5],
+  ])
+    addBed(x, z);
+  // The lawn east of the bar is beyond the loop path. Give it its own planting
+  // before the path-border budget is filled by the main park.
+  for (const [x, z] of [
+    [40.5, -9],
+    [42, -7.5],
+    [40.5, -5.5],
+    [43, -4],
+    [40.5, -2],
+    [42.5, 0],
+    [40, 1.5],
+    [43.5, 3],
+    [38, 4],
+    [40.5, 5],
+    [42.5, 6.5],
+    [38.5, 7.5],
+    [41, 9],
+    [37, 10],
+    [43, 11],
+  ])
+    addBed(x, z);
+  const shrubs = [
+    { x: 43.5, z: -8.5 },
+    { x: 44, z: -1 },
+    { x: 43.5, z: 8.5 },
+    { x: 40.5, z: 11.5 },
+  ].filter(({ x, z }) => clear(x, z, 0.85));
+  for (let i = 3; i < walkways.length; i += 4) {
     const p = walkways[i],
       previous = walkways[i - 1];
     const dx = p.x - previous.x,
       dz = p.z - previous.z;
     const length = Math.hypot(dx, dz);
     if (length < 0.001 || length > 2) continue;
-    const side = i % 2 ? 1 : -1;
-    const x = p.x - (dz / length) * (p.width + 1) * side;
-    const z = p.z + (dx / length) * (p.width + 1) * side;
-    if (!clear(x, z, 0.55) || beds.some((b) => Math.hypot(x - b.x, z - b.z) < 2.1)) continue;
-    if (fountain && Math.hypot(x - fountain.x, z - fountain.z) < 2.8) continue;
-    beds.push({ x, z });
-    if (beds.length === 28) break;
+    for (const side of [-1, 1]) {
+      const x = p.x - (dz / length) * (p.width + 1.15) * side;
+      const z = p.z + (dx / length) * (p.width + 1.15) * side;
+      addBed(x, z);
+    }
+    if (beds.length >= 110) break;
   }
   const flowers = beds.flatMap((bed, bedIndex) =>
-    Array.from({ length: 9 }, (_, i) => {
+    Array.from({ length: 15 }, (_, i) => {
       const angle = i * 2.4 + bedIndex;
-      const radius = Math.sqrt(i / 9) * 0.48;
+      const radius = Math.sqrt(i / 15) * 0.55;
       return {
         x: bed.x + Math.cos(angle) * radius,
         z: bed.z + Math.sin(angle) * radius,
-        y: 0.23 + (i % 3) * 0.06,
-        color: bedIndex % 4,
+        y: 0.25 + (i % 4) * 0.055,
+        color: i % 5 === 0 ? 3 : bedIndex % 4,
       };
     }),
   );
@@ -136,6 +191,13 @@ export function createGardens(
   instances(new T.ConeGeometry(0.16, 0.25, 5), material('#82966b'), flowers.length, (i) => {
     const f = flowers[i];
     transform.position.set(f.x, 0.12, f.z);
+  });
+  // Low rounded foliage frames the flowers without hiding people or the doorway.
+  instances(new T.SphereGeometry(1, 10, 7), material('#718754'), shrubs.length * 3, (i) => {
+    const shrub = shrubs[Math.floor(i / 3)];
+    const lobe = i % 3;
+    transform.position.set(shrub.x + (lobe - 1) * 0.32, 0.26, shrub.z + (lobe === 1 ? -0.14 : 0.1));
+    transform.scale.set(0.43, lobe === 1 ? 0.46 : 0.34, 0.42);
   });
   palette.forEach((color, colorIndex) => {
     const selected = flowers.filter((f) => f.color === colorIndex);
