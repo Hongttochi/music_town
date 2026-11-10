@@ -6,6 +6,7 @@ import mochaIcon from '../assets/coffee/mocha.webp';
 export const coffeeMenu = [
   {
     id: 'americano',
+    menuName: 'Iced Americano',
     icon: americanoIcon,
     name: '아이스 아메리카노',
     shortName: '아아',
@@ -15,6 +16,7 @@ export const coffeeMenu = [
   },
   {
     id: 'latte',
+    menuName: 'Caffè Latte',
     icon: latteIcon,
     name: '카페라떼',
     shortName: '카페라떼',
@@ -24,6 +26,7 @@ export const coffeeMenu = [
   },
   {
     id: 'vanilla',
+    menuName: 'Vanilla Latte',
     icon: vanillaIcon,
     name: '바닐라라떼',
     shortName: '바닐라라떼',
@@ -33,6 +36,7 @@ export const coffeeMenu = [
   },
   {
     id: 'mocha',
+    menuName: 'Caffè Mocha',
     icon: mochaIcon,
     name: '카페모카',
     shortName: '카페모카',

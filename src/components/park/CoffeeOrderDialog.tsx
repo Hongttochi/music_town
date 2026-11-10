@@ -1,7 +1,8 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { coffeeMenu, type CoffeeId } from '../../data/coffeeMenu';
 import { Button } from '../ui/Button';
-import { DialogPanel, PanelHeading } from '../ui/Panel';
+import { Check, X } from 'lucide-react';
+import { DialogPanel } from '../ui/Panel';
 import './coffee-order.css';
 
 export function CoffeeOrderDialog({
@@ -29,9 +30,20 @@ export function CoffeeOrderDialog({
         onClose();
       }}
     >
-      <div id={title}>
-        <PanelHeading title="PARK COFFEE · 오늘의 커피" onClose={onClose} />
-      </div>
+      <header className="coffee-menu-heading">
+        <p>PARK COFFEE</p>
+        <h2 id={title}>Coffee Menu</h2>
+        <span>공원에서 쉬어가는 한 잔</span>
+        <Button
+          className="coffee-menu-close"
+          variant="ghost"
+          size="icon"
+          aria-label="닫기"
+          onClick={onClose}
+        >
+          <X size={18} aria-hidden="true" />
+        </Button>
+      </header>
       <div className="coffee-menu" role="group" aria-label="커피 메뉴">
         {coffeeMenu.map((drink) => (
           <Button
@@ -50,11 +62,12 @@ export function CoffeeOrderDialog({
               aria-hidden="true"
             />
             <span className="coffee-menu-description">
+              <span className="coffee-menu-english">{drink.menuName}</span>
               <strong>{drink.name}</strong>
               <small>{drink.detail}</small>
             </span>
             <span className="coffee-selection-mark" aria-hidden="true">
-              {selected === drink.id ? '✓' : ''}
+              {selected === drink.id && <Check size={14} strokeWidth={1.5} />}
             </span>
           </Button>
         ))}
