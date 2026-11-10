@@ -32,17 +32,9 @@ header.topbar {
   min-width: 34px;
   min-height: 34px;
   padding: 6px;
-  border: 1px solid #d7dfc6;
-  border-radius: 12px;
-  background: #fffbed;
-  box-shadow: 0 2px 5px #34432a18;
-}
-.topbar .header-right .town-button.ranking-button:hover {
-  background: #edf2e2;
-}
-.topbar .header-right .town-button.ranking-button:active {
-  background: #e2e9d5;
-  box-shadow: inset 0 1px 3px #34432a20;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 .ranking-button > img {
   display: block;
