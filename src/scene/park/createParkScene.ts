@@ -479,7 +479,7 @@ export function createParkScene({
     walkways,
     (x, z, radius) =>
       x > -23 &&
-      x < 39 &&
+      x < 45 &&
       z > -16 &&
       z < 19 &&
       !(x > RIVER.left - radius && x < RIVER.right + radius) &&

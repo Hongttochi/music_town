@@ -21,3 +21,11 @@ Orca embedded browser connection restored. Verified development preview -> avata
 
 ## Compact shared UI — 2026-11-05
 Extracted Button, DialogPanel, Panel and PanelHeading. Shared tokens in src/components/ui/town-ui.css: 34px default actions, 8px button radius, 12px panels, cream/leaf palette. Converted active main, login, avatar and part-option buttons. Build passed. Actual Orca browser screenshots inspected: tmp/qa/compact-editor.png and compact-channels.png; editor confirmation now fits the captured viewport and channel transition works. Full mobile device matrix remains unverified.
+
+## 2026-11-10 coffee menu and profile refinement
+
+final result: blocked
+
+Target: user-supplied printed coffee menu reference (740 × 513), adapted to the existing four-drink ordering dialog. Source assets retained: the four local coffee illustrations. Implemented cream paper color, brown serif English headings, restrained dotted dividers, compact selection marks, and a single-column menu with two columns for short landscape viewports. Selection and ordering callbacks remain intact.
+
+Verification limitation: Node REPL browser execution tools are not exposed in this session after tool discovery. No current implementation screenshot or same-state visual comparison is available. Typography, spacing, responsive fit, image cropping, and interaction appearance remain visually unverified; build checks do not constitute visual QA. Prior browser results above apply only to their historical snapshots.
