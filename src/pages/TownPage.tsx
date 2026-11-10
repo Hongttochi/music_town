@@ -1,4 +1,5 @@
 import { Flag } from 'lucide-react';
+import { MusicianRankings } from '../components/profile/MusicianRankings';
 import { BAR_STAGE_ID } from '../data/bar';
 import { BAR_STAGE_EXIT, isInsideBar } from '../scene/park/nightBar';
 import { ChannelEntryDialog } from '../components/park/ChannelEntryDialog';
@@ -53,6 +54,7 @@ import {
 } from '../data/model';
 
 type Panel =
+  | 'rankings'
   | 'role'
   | 'registration'
   | 'account'
@@ -377,6 +379,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
               profileIcon={avatar.profileIcon}
               onProfile={() => setPanel('account')}
               onSettings={() => setPanel('settings')}
+              onRankings={() => setPanel('rankings')}
             />
             <ParkIntroduction hour={hour} night={night} />
             <StageDirectory
@@ -659,6 +662,18 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
               busy={town.busy}
               musician={memberProfile.role === 'musician'}
               onJoin={() => join(selected)}
+            />
+          </>
+        )}
+        {panel === 'rankings' && (
+          <>
+            {title('', '뮤지션 랭킹')}
+            <MusicianRankings
+              demo={account.demo}
+              onSelect={(person) => {
+                setSelectedPerson(person);
+                setPanel('participant');
+              }}
             />
           </>
         )}

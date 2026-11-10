@@ -67,7 +67,7 @@ export function FanProfile({
           </dd>
         </div>
         <div>
-          <dt>받은 하트</dt>
+          <dt>누적 하트</dt>
           <dd>
             <button
               type="button"
@@ -79,6 +79,10 @@ export function FanProfile({
               <span>{stats ? stats.hearts.toLocaleString('ko-KR') : '—'}</span>
             </button>
           </dd>
+        </div>
+        <div>
+          <dt>주간 하트</dt>
+          <dd>{stats?.weeklyHearts?.toLocaleString('ko-KR') ?? '—'}</dd>
         </div>
       </dl>
       {!children && actions}

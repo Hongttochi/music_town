@@ -1,0 +1,86 @@
+dialog.town-panel[data-panel='rankings'] {
+  width: 440px;
+  max-width: calc(100vw - 32px);
+}
+.musician-rankings {
+  color: #536348;
+}
+.ranking-periods {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: #edf0e3;
+}
+.ranking-periods > .town-button {
+  flex: 1;
+  border: 0;
+  box-shadow: none;
+}
+.ranking-periods > .town-button[aria-pressed='true'] {
+  background: #fffdf6;
+  box-shadow: 0 1px 4px #42533118;
+}
+.ranking-description {
+  margin: 18px 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.ranking-dates,
+.ranking-note {
+  color: #79816e;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.ranking-list {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 16px 0;
+  padding: 0;
+}
+.ranking-list .town-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  text-align: left;
+  border: 1px solid #e1e5d5;
+  border-radius: 12px;
+}
+.ranking-position {
+  min-width: 34px;
+  color: #89907f;
+  font-size: 18px;
+}
+.ranking-position[data-top='true'] {
+  color: #9b7449;
+}
+.ranking-position > span {
+  margin-left: 2px;
+  font-size: 10px;
+}
+.ranking-name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.ranking-name small {
+  display: block;
+  margin-top: 4px;
+  color: #89907f;
+  font-size: 10px;
+}
+.ranking-hearts {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-variant-numeric: tabular-nums;
+}
+.ranking-empty {
+  padding: 24px 8px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.8;
+}
