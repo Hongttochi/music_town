@@ -220,18 +220,25 @@ dialog.profile-dialog[data-panel='participant'] > .profile-sheet {
   margin: 0;
 }
 .participant-name-actions .fan-actions > .town-button.fan-action-icon {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  min-width: 28px;
-  height: 28px;
-  min-height: 28px;
-  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: auto;
+  min-width: 0;
+  height: 26px;
+  min-height: 26px;
+  padding: 3px 6px;
+  font-size: 10px;
   border: 0;
   background: transparent;
   box-shadow: none;
 }
 .participant-name-actions .fan-action-icon img {
-  width: 20px;
-  height: 20px;
+  width: 14px;
+  height: 14px;
+}
+.participant-profile .participant-report {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }

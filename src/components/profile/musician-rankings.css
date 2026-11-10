@@ -35,21 +35,25 @@ dialog.town-panel[data-panel='rankings'] .modal-title > img {
 .ranking-periods {
   display: flex;
   flex-shrink: 0;
-  gap: 4px;
-  padding: 4px;
+  gap: 2px;
+  padding: 3px;
   border-radius: 999px;
   background: #e9eddf;
 }
-.musician-rankings .ranking-periods > .town-button {
+dialog.town-panel[data-panel='rankings'] .ranking-periods > .town-button {
   flex: 1;
   border: 0;
   border-radius: 999px;
   box-shadow: none;
   background: transparent;
-  min-height: 34px;
+  min-height: 24px;
+  height: 24px;
+  padding: 2px 10px;
+  font-size: 11px;
+  line-height: 20px;
   color: #8b9182;
 }
-.musician-rankings .ranking-periods > .town-button[aria-pressed='true'] {
+dialog.town-panel[data-panel='rankings'] .ranking-periods > .town-button[aria-pressed='true'] {
   color: #43543a;
   background: #fffdf5;
   box-shadow: 0 1px 3px #43543a14;

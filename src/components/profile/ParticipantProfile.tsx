@@ -1,4 +1,5 @@
 import { FanProfile } from './FanProfile';
+import { Flag } from 'lucide-react';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
 import { ProfileBio } from './ProfileBio';
 import type { Participant } from '../../hooks/useTown';
@@ -43,6 +44,7 @@ export function ParticipantProfile({
           {fanStats}
           {!own && (
             <Button variant="ghost" className="participant-report" onClick={onReport}>
+              <Flag size={13} aria-hidden="true" />
               신고하기
             </Button>
           )}
