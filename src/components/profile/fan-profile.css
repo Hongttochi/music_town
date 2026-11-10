@@ -407,45 +407,79 @@ dialog.town-panel[data-panel='following'] {
   }
 }
 
-/* A compact park-toned activity card with a clear selected day. */
+/* Neutral activity card with restrained blue and warm stage accents. */
 .activity-stats {
-  --activity-accent: #7e9763;
+  --activity-accent: #798ba9;
 }
 .activity-stats[data-metric='stageSeconds'] {
-  --activity-accent: #bf9470;
+  --activity-accent: #b58e77;
 }
 .activity-stats .activity-expanded {
   margin-top: 4px;
-  padding: 10px;
-  border: 1px solid #e7eadc;
+  padding: 14px;
+  border: 1px solid #e7e5e1;
   border-radius: 12px;
-  background: linear-gradient(145deg, #f8f9f1, #f0f3e7);
+  background: #fcfbf8;
+  color: #454851;
+  font-family: var(--font-town);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+dialog.town-panel[open] .fan-profile .activity-chart-heading {
+  font-size: 12px;
+  font-weight: 600;
+  color: #50535b;
 }
 .activity-stats .activity-metrics {
-  padding: 2px;
-  gap: 1px;
+  padding: 3px;
+  gap: 2px;
   border: 0;
   border-radius: 7px;
-  background: #e5eadb;
+  background: #efeeeb;
 }
 dialog.town-panel[open] .fan-profile .activity-stats .activity-metrics > .town-button {
-  min-width: 34px;
-  min-height: 22px;
-  height: 22px;
-  padding: 2px 6px;
-  font-size: 10px;
+  min-width: 38px;
+  min-height: 26px;
+  height: 26px;
+  padding: 3px 8px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  color: #81838a;
   line-height: 1.4;
   border-radius: 5px;
 }
+dialog.town-panel[open]
+  .fan-profile
+  .activity-stats
+  .activity-metrics
+  > .town-button[aria-pressed='true'] {
+  color: #444955;
+  background: #fff;
+  box-shadow: 0 1px 3px #35394412;
+  font-weight: 600;
+}
 .activity-stats .activity-detail {
-  margin-top: 10px;
+  margin-top: 16px;
+  color: #81838a;
+}
+dialog.town-panel[open] .fan-profile .activity-detail strong {
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.04em;
+  color: #373d48;
+}
+.activity-stats .activity-plot text {
+  font-family: var(--font-town);
+  font-size: 10px;
+  fill: #91939b;
 }
 .activity-stats .activity-line {
   stroke: var(--activity-accent);
   stroke-width: 2;
 }
 .activity-stats .activity-grid {
-  stroke: #dde4d3;
+  stroke: #e4e4e7;
   stroke-dasharray: 3 5;
 }
 .activity-selected-column {
@@ -458,19 +492,22 @@ dialog.town-panel[open] .fan-profile .activity-stats .activity-metrics > .town-b
 }
 .activity-stats .activity-point {
   stroke: var(--activity-accent);
+  fill: #fcfbf8;
 }
 .activity-stats .activity-point.is-selected {
   fill: var(--activity-accent);
 }
 .activity-stats .activity-dates > .town-button[aria-pressed='true'] {
-  background: #e5ebda;
+  background: #e9edf4;
+  color: #536480;
   border-radius: 7px;
   text-decoration: none;
 }
 .activity-stats .activity-footnote {
-  font-size: 9px;
-  line-height: 1.5;
-  margin: 8px 0 0;
+  font-size: 10px;
+  line-height: 1.6;
+  color: #929298;
+  margin: 12px 0 0;
 }
 
 /* Keep date highlights close to the label instead of filling the chart column. */
@@ -482,7 +519,14 @@ dialog.town-panel[open] .fan-profile .activity-dates > button.town-button {
   min-height: 24px;
   min-width: 0;
   padding: 3px 5px;
-  font-size: 10px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  color: #85868e;
   line-height: 18px;
   border-radius: 6px;
+}
+dialog.town-panel[open] .fan-profile .activity-dates > button.town-button[aria-pressed='true'] {
+  color: #536480;
+  font-weight: 650;
 }

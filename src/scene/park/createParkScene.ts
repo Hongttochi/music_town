@@ -38,6 +38,7 @@ import { createImageCharacters } from '../avatar/imageCharacter';
 import { loadAvatarLayers } from '../avatar/modularAvatar';
 import { npcAppearance } from '../../data/avatarParts';
 import { createVillageProps } from './villageProps';
+import { createGardens } from './gardens';
 import {
   CHARACTER_ASSET,
   loadCharacterAsset,
@@ -473,6 +474,23 @@ export function createParkScene({
 
   const stageMeshes: T.Object3D[] = [];
   const stageCenters = latest.current.liveStages.map(world);
+  const gardens = createGardens(
+    scene,
+    walkways,
+    (x, z, radius) =>
+      x > -23 &&
+      x < 39 &&
+      z > -16 &&
+      z < 19 &&
+      !(x > RIVER.left - radius && x < RIVER.right + radius) &&
+      !walkways.some((p) => Math.hypot(x - p.x, z - p.z) < p.width + radius + 0.2) &&
+      !stageCenters.some((p) => Math.hypot(x - p.x, z - p.z) < STAGE_RADIUS + radius + 0.8) &&
+      !obstacles.some((p) => Math.hypot(x - p.x, z - p.z) < p.r + radius + 0.5) &&
+      !overlapsBar({ x, z }, radius + 1, false) &&
+      !overlapsSchool({ x, z }, radius + 0.5) &&
+      Math.hypot(x - COFFEE_BUILDING.x, z - COFFEE_BUILDING.z) > radius + 4,
+  );
+  if (gardens.fountain) obstacles.push({ ...gardens.fountain, r: 1.8 });
   // Leave room for the full bench, the stage edge, and the audience walkway.
   const benches: T.Vector3[] = [];
   for (const [preferredX, preferredZ] of [
@@ -841,6 +859,7 @@ export function createParkScene({
     const dt = Math.min((time - last) / 1000, 0.04);
     last = time;
     waterTexture.offset.y = (time * 0.000008) % 1;
+    gardens.update(time);
     const p = latest.current,
       key = JSON.stringify(p.avatar);
     const present = new Set(p.participants.map((person) => person.id));
@@ -1454,6 +1473,7 @@ export function createParkScene({
     campfire.dispose();
     useBench.current = () => {};
     scenery.dispose();
+    gardens.dispose();
     waterTexture.dispose();
     glowTexture.dispose();
     lanternMaterial.dispose();

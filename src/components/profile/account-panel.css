@@ -203,8 +203,9 @@ dialog.town-panel[data-panel='account'] {
 }
 .account-panel .account-section .account-bio {
   padding: 14px 16px;
-  background: #f3f2eb;
-  border: 0;
+  background: #fff7e6;
+  border: 1px solid #eee1c8;
+  color: #74634f;
   border-radius: 4px;
   line-height: 1.8;
   min-height: 70px;
