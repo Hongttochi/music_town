@@ -73,19 +73,39 @@ export function FanPeopleDialog({
       <div id="fan-people-title">
         <PanelHeading
           title={kind === 'follow' ? '팔로워' : '하트를 보낸 사람들'}
+          icon={
+            <img
+              src={
+                kind === 'follow'
+                  ? '/icons/profile-followers.png'
+                  : '/icons/profile-received-heart.png'
+              }
+              width={22}
+              height={22}
+              alt=""
+            />
+          }
           onClose={onClose}
         />
       </div>
-      <div className="fan-people-list" aria-busy={busy}>
+      <div
+        className="fan-people-list"
+        aria-busy={busy}
+        role="region"
+        aria-label={kind === 'follow' ? '팔로워 목록' : '하트를 보낸 사람 목록'}
+        tabIndex={0}
+      >
         {people.map((person) => (
           <article className="fan-person" key={person.id}>
             <ModularPortrait avatar={person.avatar} lazy />
             <div className="fan-person-details">
-              <strong>{person.avatar.name}</strong>
-              <small>{person.role === 'musician' ? '뮤지션' : '관람객'}</small>
-              {person.bio && <p>{person.bio}</p>}
-              <ProfileSocialLinks instagram={person.instagram} soundcloud={person.soundcloud} />
+              <div className="fan-person-name">
+                <strong>{person.avatar.name}</strong>
+                <small>{person.role === 'musician' ? '뮤지션' : '관람객'}</small>
+              </div>
+              {person.bio && <p title={person.bio}>{person.bio}</p>}
             </div>
+            <ProfileSocialLinks instagram={person.instagram} soundcloud={person.soundcloud} />
           </article>
         ))}
         {busy && <p role="status">불러오는 중…</p>}

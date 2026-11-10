@@ -667,7 +667,11 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
         )}
         {panel === 'rankings' && (
           <>
-            {title('', '뮤지션 랭킹')}
+            <PanelHeading
+              title="뮤지션 랭킹"
+              icon={<img src="/icons/achievement-award.png" width={22} height={22} alt="" />}
+              onClose={() => setPanel(null)}
+            />
             <MusicianRankings
               demo={account.demo}
               onSelect={(person) => {
