@@ -7,21 +7,40 @@ dialog.town-panel.fan-people-dialog {
   max-height: calc(100dvh - 24px);
   padding: 14px 18px;
   border-radius: 18px;
+  overflow: hidden;
+}
+dialog.town-panel.fan-people-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.fan-people-dialog > #fan-people-title {
+  flex: none;
+}
+.fan-people-list {
+  min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.fan-people-list:focus-visible {
+  outline: 2px solid #81996c;
+  outline-offset: -2px;
 }
 .fan-person {
   display: flex;
   gap: 10px;
-  padding: 12px 0;
-  border-bottom: 1px solid #e5e9dd;
-  align-items: flex-start;
+  padding: 10px 2px;
+  align-items: center;
+}
+.fan-person + .fan-person {
+  border-top: 1px solid #e5e9dd;
 }
 .fan-person .modular-portrait {
-  width: 42px;
+  width: 48px;
   height: 48px;
   flex: none;
   background: #eff2e6;
-  border-radius: 12px;
+  border-radius: 50%;
 }
 .fan-person canvas {
   width: 100%;
@@ -35,21 +54,45 @@ dialog.town-panel.fan-people-dialog {
 .fan-person-details strong {
   display: block;
   font-size: 12px;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fan-person-name {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
 }
 .fan-person-details small {
+  flex: none;
   font-size: 10px;
   color: #859078;
 }
 .fan-person-details p {
   font-size: 11px;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  margin: 6px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #859078;
+  margin: 4px 0 0;
 }
-.fan-person-details .profile-social-links {
-  align-items: flex-start;
-  margin-top: 6px;
+.fan-person > .profile-social-links {
+  flex: none;
+  flex-direction: row;
+  gap: 2px;
+  margin: 0;
+}
+.fan-person > .profile-social-links a {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.fan-person > .profile-social-links a span {
+  display: none;
 }
 .fan-people-list > p {
   font-size: 11px;
