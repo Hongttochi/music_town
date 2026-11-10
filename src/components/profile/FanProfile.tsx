@@ -25,7 +25,7 @@ export function FanProfile({
     <div className="fan-actions">
       <Button
         variant="plain"
-        size="icon"
+        size="sm"
         className="fan-action-icon"
         disabled={!stats || busy}
         aria-pressed={stats?.following ?? false}
@@ -33,11 +33,12 @@ export function FanProfile({
         title={stats?.following ? '팔로우 취소' : '팔로우'}
         onClick={() => void act('follow', !stats?.following)}
       >
-        <img src="/icons/profile-followers.png?v=20261110-flat" width={28} height={28} alt="" />
+        <img src="/icons/profile-followers.png?v=20261110-flat" width={14} height={14} alt="" />
+        <span>{stats?.following ? '팔로잉' : '팔로우'}</span>
       </Button>
       <Button
         variant="plain"
-        size="icon"
+        size="sm"
         className="fan-action-icon"
         disabled={!stats || busy}
         aria-pressed={stats?.hearted ?? false}
@@ -47,10 +48,11 @@ export function FanProfile({
       >
         <img
           src="/icons/profile-received-heart.png?v=20261110-flat"
-          width={28}
-          height={28}
+          width={14}
+          height={14}
           alt=""
         />
+        <span>{stats?.hearted ? '보낸 하트' : '하트 보내기'}</span>
       </Button>
     </div>
   );
