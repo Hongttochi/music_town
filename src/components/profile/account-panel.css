@@ -185,8 +185,8 @@ dialog.town-panel[data-panel='account'] {
   border-radius: 8px;
 }
 .profile-icon-options {
-  display: grid;
-  grid-template-columns: repeat(6, 40px);
+  display: flex;
+  flex-wrap: wrap;
   gap: 7px;
 }
 .account-panel .profile-icon-options .town-button {
