@@ -16,6 +16,18 @@ dialog.town-panel.fan-people-dialog[open] {
 .fan-people-dialog > #fan-people-title {
   flex: none;
 }
+dialog.town-panel.fan-people-dialog[open] .panel-heading h2.modal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+dialog.town-panel.fan-people-dialog .modal-title > img {
+  display: block;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
 .fan-people-list {
   min-height: 0;
   overflow-y: auto;
