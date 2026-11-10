@@ -3,6 +3,7 @@ import { supabase } from '../services/auth';
 export type FanStats = {
   followers: number;
   hearts: number;
+  weeklyHearts: number;
   following: boolean;
   hearted: boolean;
   onlineSeconds: number;

@@ -32,6 +32,12 @@ async function fixture() {
       'utf8',
     ),
   );
+  await db.exec(
+    await readFile(
+      new URL('../supabase/migrations/202611100001_heart_rankings.sql', import.meta.url),
+      'utf8',
+    ),
+  );
   await db.exec(`set role authenticated; set request.jwt.claim.sub='${a}';`);
   return db;
 }
@@ -43,6 +49,69 @@ const stats = async (db, target = b, action = 'stats', enabled = true) =>
       enabled,
     ])
   ).rows[0].result;
+test('weekly rankings preserve lifetime hearts, use KST Monday boundaries, and resist re-add inflation', async () => {
+  const db = await fixture();
+  const rankings = async (period = 'weekly') =>
+    (await db.query('select public.musician_rankings($1) as result', [period])).rows[0].result;
+  try {
+    assert.deepEqual((await rankings()).entries, []);
+    await stats(db, b, 'heart');
+    await db.exec(`reset role;
+      update profile_fans set created_at=(date_trunc('week', now() at time zone 'Asia/Seoul') at time zone 'Asia/Seoul')-interval '1 microsecond' where kind='heart';
+      update profile_heart_receipts set created_at=(date_trunc('week', now() at time zone 'Asia/Seoul') at time zone 'Asia/Seoul')-interval '1 microsecond';
+      set role authenticated;`);
+    assert.equal((await stats(db)).hearts, 1);
+    assert.equal((await stats(db)).weeklyHearts, 0);
+    assert.deepEqual((await rankings()).entries, []);
+    assert.equal((await rankings('all')).entries[0].hearts, 1);
+    await stats(db, b, 'heart', false);
+    assert.equal((await stats(db, b, 'heart')).weeklyHearts, 0);
+    await db.exec(`set request.jwt.claim.sub='${c}'`);
+    await stats(db, b, 'heart');
+    await db.exec(
+      `reset role; update profile_fans set created_at=date_trunc('week',now() at time zone 'Asia/Seoul') at time zone 'Asia/Seoul' where sender_id='${c}'; set role authenticated;`,
+    );
+    assert.equal((await stats(db)).hearts, 2);
+    assert.equal((await stats(db)).weeklyHearts, 1);
+    const weekly = await rankings();
+    assert.equal(weekly.entries[0].id, b);
+    assert.equal(weekly.entries[0].weeklyHearts, 1);
+    const kstStart = new Date(new Date(weekly.weekStart).getTime() + 9 * 3600000);
+    assert.equal(kstStart.getUTCDay(), 1);
+    assert.equal(kstStart.getUTCHours(), 0);
+    assert.equal(new Date(weekly.weekEnd) - new Date(weekly.weekStart), 7 * 86400000);
+    await stats(db, a, 'heart');
+    assert.deepEqual(
+      (await rankings()).entries.map((p) => p.rank),
+      [1, 1],
+    );
+    await stats(db, b, 'follow');
+    assert.equal((await rankings('all')).entries[0].hearts, 2);
+    await db.exec(
+      `reset role; update member_profiles set completed=false where id='${b}'; set role authenticated;`,
+    );
+    assert.deepEqual(
+      (await rankings()).entries.map((p) => p.id),
+      [a],
+    );
+    await db.exec(
+      `reset role; update member_profiles set role='listener' where id='${a}'; set role authenticated;`,
+    );
+    assert.deepEqual((await rankings()).entries, []);
+    await assert.rejects(rankings('invalid'), /INVALID_PERIOD/);
+    await assert.rejects(db.query('select * from profile_heart_receipts'), /permission denied/);
+    await assert.rejects(
+      db.query('select private.profile_fan_action_before_rankings($1)', [b]),
+      /permission denied/,
+    );
+    await db.exec("set request.jwt.claim.sub=''");
+    await assert.rejects(rankings(), /AUTH_REQUIRED/);
+    await db.exec('reset role; set role anon');
+    await assert.rejects(rankings(), /permission denied/);
+  } finally {
+    await db.close();
+  }
+});
 test('fan counts are per account, private, idempotent and cannot impersonate another account', async () => {
   const db = await fixture();
   try {
