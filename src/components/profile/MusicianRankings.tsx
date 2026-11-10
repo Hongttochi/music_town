@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../services/auth';
 import type { Participant } from '../../hooks/useTown';
 import { Button } from '../ui/Button';
+import { ModularPortrait } from '../avatar/ModularPortrait';
 import './musician-rankings.css';
 
 type Ranking = Participant & { rank: number; hearts: number; weeklyHearts: number };
@@ -9,7 +10,7 @@ type Snapshot = { entries: Ranking[]; weekStart: string; weekEnd: string };
 const date = (value: string) =>
   new Date(value).toLocaleDateString('ko-KR', {
     timeZone: 'Asia/Seoul',
-    month: 'long',
+    month: 'numeric',
     day: 'numeric',
   });
 
@@ -70,19 +71,16 @@ export function MusicianRankings({
           aria-pressed={period === 'weekly'}
           onClick={() => setPeriod('weekly')}
         >
-          주간 랭킹
+          주간
         </Button>
         <Button variant="ghost" aria-pressed={period === 'all'} onClick={() => setPeriod('all')}>
-          누적 랭킹
+          누적
         </Button>
       </div>
-      <p className="ranking-description">
-        {period === 'weekly' ? '이번 주, 마음을 사로잡은 뮤지션' : '지금까지 받은 마음이 쌓이는 곳'}
-      </p>
       {period === 'weekly' && snapshot && (
         <p className="ranking-dates">
           {date(snapshot.weekStart)} ~{' '}
-          {date(new Date(new Date(snapshot.weekEnd).getTime() - 1).toISOString())} · 한국 시간
+          {date(new Date(new Date(snapshot.weekEnd).getTime() - 1).toISOString())}
         </p>
       )}
       {demo ? (
@@ -98,25 +96,25 @@ export function MusicianRankings({
         <p role="status">랭킹을 불러오고 있어요…</p>
       ) : snapshot.entries.length === 0 ? (
         <p className="ranking-empty" role="status">
-          {period === 'weekly'
-            ? '이번 주 첫 하트를 기다리고 있어요.'
-            : '아직 하트를 받은 뮤지션이 없어요.'}
-          <br />
-          마음에 드는 라이브에 하트를 보내 보세요.
+          {period === 'weekly' ? '이번 주 랭킹이 없습니다.' : '아직 랭킹이 없습니다.'}
         </p>
       ) : (
         <ol className="ranking-list">
           {snapshot.entries.map((person) => (
             <li key={person.id}>
-              <Button variant="choice" onClick={() => onSelect(person)}>
+              <Button
+                variant="choice"
+                onClick={() => onSelect(person)}
+                aria-label={`${person.rank}위 ${person.avatar.name} 프로필 보기`}
+              >
                 <strong className="ranking-position" data-top={person.rank <= 3}>
                   {person.rank}
                   <span>위</span>
                 </strong>
-                <span className="ranking-name">
-                  {person.avatar.name}
-                  <small>프로필 보기</small>
+                <span className="ranking-avatar" aria-hidden="true">
+                  <ModularPortrait avatar={person.avatar} lazy />
                 </span>
+                <span className="ranking-name">{person.avatar.name}</span>
                 <span className="ranking-hearts">
                   <img src="/icons/profile-received-heart.png" width={18} height={18} alt="하트" />
                   {(period === 'weekly' ? person.weeklyHearts : person.hearts).toLocaleString(
@@ -128,10 +126,6 @@ export function MusicianRankings({
           ))}
         </ol>
       )}
-      <p className="ranking-note">
-        매주 월요일 0시부터 새 주간 집계가 시작돼요. 누적 하트는 초기화되지 않아요. 팬 등록은 순위에
-        포함되지 않아요. 동점은 공동 순위로 표시해요. 상위 100명을 표시하며 15초마다 갱신돼요.
-      </p>
     </section>
   );
 }

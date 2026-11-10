@@ -1,5 +1,4 @@
 import './town-header.css';
-import { Trophy } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { ProfileIcon } from '../profile/ProfileIcon';
 import { Flaticon } from '../ui/Flaticon';
@@ -29,7 +28,7 @@ export function TownHeader({
           aria-label="뮤지션 랭킹"
           title="뮤지션 랭킹"
         >
-          <Trophy size={18} aria-hidden="true" />
+          <img src="/icons/achievement-award.png" width={22} height={22} alt="" />
         </Button>
         <Button className="avatar-button" onClick={onProfile} aria-label="마이페이지">
           <ProfileIcon id={profileIcon} size={10} />
