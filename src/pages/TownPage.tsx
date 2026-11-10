@@ -377,6 +377,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
             <TownHeader
               channel={channel}
               profileIcon={avatar.profileIcon}
+              avatar={avatar}
               onProfile={() => setPanel('account')}
               onSettings={() => setPanel('settings')}
               onRankings={() => setPanel('rankings')}

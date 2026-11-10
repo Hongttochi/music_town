@@ -1,0 +1,15 @@
+.profile-person-badge,
+.profile-character-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  color: #778769;
+  overflow: hidden;
+}
+.profile-character-badge > .modular-portrait {
+  width: 140%;
+  height: 140%;
+  max-width: none;
+  flex: none;
+}
