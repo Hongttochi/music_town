@@ -116,7 +116,12 @@ export function MusicianRankings({
                 </span>
                 <span className="ranking-name">{person.avatar.name}</span>
                 <span className="ranking-hearts">
-                  <img src="/icons/profile-received-heart.png" width={18} height={18} alt="하트" />
+                  <img
+                    src="/icons/profile-received-heart.png?v=20261110-flat"
+                    width={18}
+                    height={18}
+                    alt="하트"
+                  />
                   {(period === 'weekly' ? person.weeklyHearts : person.hearts).toLocaleString(
                     'ko-KR',
                   )}

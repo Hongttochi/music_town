@@ -33,7 +33,7 @@ export function FanProfile({
         title={stats?.following ? '팔로우 취소' : '팔로우'}
         onClick={() => void act('follow', !stats?.following)}
       >
-        <img src="/icons/profile-followers.png" width={28} height={28} alt="" />
+        <img src="/icons/profile-followers.png?v=20261110-flat" width={28} height={28} alt="" />
       </Button>
       <Button
         variant="plain"
@@ -45,7 +45,12 @@ export function FanProfile({
         title={stats?.hearted ? '하트 취소' : '하트 보내기'}
         onClick={() => void act('heart', !stats?.hearted)}
       >
-        <img src="/icons/profile-received-heart.png" width={28} height={28} alt="" />
+        <img
+          src="/icons/profile-received-heart.png?v=20261110-flat"
+          width={28}
+          height={28}
+          alt=""
+        />
       </Button>
     </div>
   );
@@ -61,7 +66,12 @@ export function FanProfile({
               aria-label="팔로워 목록 보기"
               onClick={() => setPeopleKind('follow')}
             >
-              <img src="/icons/profile-followers.png" width={20} height={20} alt="" />
+              <img
+                src="/icons/profile-followers.png?v=20261110-flat"
+                width={20}
+                height={20}
+                alt=""
+              />
               <span>{stats ? stats.followers.toLocaleString('ko-KR') : '—'}</span>
             </button>
           </dd>
@@ -75,7 +85,12 @@ export function FanProfile({
               aria-label="하트를 보낸 사람들 보기"
               onClick={() => setPeopleKind('heart')}
             >
-              <img src="/icons/profile-received-heart.png" width={20} height={20} alt="" />
+              <img
+                src="/icons/profile-received-heart.png?v=20261110-flat"
+                width={20}
+                height={20}
+                alt=""
+              />
               <span>{stats ? stats.hearts.toLocaleString('ko-KR') : '—'}</span>
             </button>
           </dd>
@@ -137,7 +152,7 @@ export function FollowedProfiles({
     return (
       <section className="following-empty">
         <div className="following-empty-art" aria-hidden="true">
-          <img src="/icons/profile-followers.png" width={72} height={72} alt="" />
+          <img src="/icons/profile-followers.png?v=20261110-flat" width={72} height={72} alt="" />
           <img
             className="following-empty-note"
             src="/icons/musical.png"
@@ -172,7 +187,7 @@ export function FollowedProfiles({
       {people.map((person) => (
         <Button key={person.id} variant="choice" onClick={() => onSelect(person)}>
           <span className="following-person-name">
-            <img src="/icons/profile-followers.png" width={32} height={32} alt="" />
+            <img src="/icons/profile-followers.png?v=20261110-flat" width={32} height={32} alt="" />
             {person.avatar.name}
           </span>
           <small>

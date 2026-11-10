@@ -77,8 +77,8 @@ export function FanPeopleDialog({
             <img
               src={
                 kind === 'follow'
-                  ? '/icons/profile-followers.png'
-                  : '/icons/profile-received-heart.png'
+                  ? '/icons/profile-followers.png?v=20261110-flat'
+                  : '/icons/profile-received-heart.png?v=20261110-flat'
               }
               width={22}
               height={22}

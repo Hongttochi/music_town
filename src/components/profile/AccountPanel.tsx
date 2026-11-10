@@ -41,7 +41,7 @@ export function AccountPanel({
           disabled={savingIcon}
           onClick={() => setChoosingBadge((open) => !open)}
         >
-          <ProfileIcon id={avatar.profileIcon} size={40} />
+          <ProfileIcon id={avatar.profileIcon} avatar={avatar} size={40} />
         </button>
         <div className="account-name">
           <span className="account-role">{profile.role === 'musician' ? '뮤지션' : '관람객'}</span>
@@ -69,7 +69,7 @@ export function AccountPanel({
               key={item.id}
               variant="choice"
               aria-label={item.label}
-              aria-pressed={(avatar.profileIcon || 'leaf') === item.id}
+              aria-pressed={(avatar.profileIcon || 'person') === item.id}
               disabled={savingIcon}
               onClick={async () => {
                 setSavingIcon(true);
@@ -84,7 +84,7 @@ export function AccountPanel({
                 }
               }}
             >
-              <ProfileIcon id={item.id} size={18} />
+              <ProfileIcon id={item.id} avatar={avatar} size={18} />
             </Button>
           ))}
         </div>

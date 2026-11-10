@@ -13,6 +13,19 @@ dialog.town-panel[data-panel='rankings'] .panel-heading {
   margin-bottom: 12px;
   padding-bottom: 12px;
 }
+dialog.town-panel[data-panel='rankings'][open] .panel-heading h2.modal-title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+dialog.town-panel[data-panel='rankings'] .modal-title > img {
+  display: block;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
 .musician-rankings {
   color: #536348;
   display: flex;
