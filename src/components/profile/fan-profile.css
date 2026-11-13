@@ -72,6 +72,18 @@
   filter: none;
   opacity: 1;
 }
+.fan-actions > .town-button.fan-action-icon[aria-pressed='true'] {
+  color: #909090;
+}
+.fan-actions .fan-action-icon[aria-pressed='true'] img,
+.fan-actions .fan-action-icon[aria-pressed='true']:not(:disabled):hover img {
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+.fan-actions .fan-action-icon[aria-pressed='false'] img {
+  filter: none;
+  opacity: 1;
+}
 .fan-action-icon:not(:disabled):active img {
   scale: 0.9;
 }
@@ -133,7 +145,11 @@
   outline-offset: 3px;
 }
 .activity-expanded {
-  padding: 4px 0 12px;
+  margin: 0 0 12px;
+  padding: 12px;
+  border: 1px solid #e4e8e5;
+  border-radius: 8px;
+  background: #f4f6f3;
   min-width: 0;
 }
 .activity-chart-heading {
@@ -141,37 +157,78 @@
   align-items: center;
   justify-content: space-between;
   font-size: 12px;
+  color: #7c8592;
 }
 .activity-metrics {
   display: flex;
   gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: #e8ecf1;
 }
 .activity-metrics > .town-button {
+  flex: 1;
   border: 0;
-  border-radius: 0;
+  border-radius: 999px;
   background: transparent;
   box-shadow: none;
-  min-height: 30px;
-  padding: 3px 10px;
+  min-height: 24px;
+  padding: 3px 12px;
   font-size: 11px;
-  color: #949989;
+  color: #7c8592;
 }
 .activity-metrics > .town-button[aria-pressed='true'] {
-  color: #536845;
-  box-shadow: inset 0 -1px #71875b;
+  color: #435a75;
+  background: #ffffff;
+  box-shadow: 0 1px 3px #34465b14;
 }
 .activity-detail {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin: 16px 0 0;
-  color: #89907f;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #858d98;
   font-size: 11px;
 }
+.activity-detail > span,
+.activity-detail > strong {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  box-sizing: border-box;
+  padding: 0;
+  border-radius: 999px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+.activity-detail > span {
+  color: #7e8793;
+  background: transparent;
+  font-size: 10px;
+}
 .activity-detail strong {
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 600;
-  color: #56634b;
+  color: #607a9a;
+  background: transparent;
+  gap: 6px;
+}
+.activity-detail strong small {
+  font-size: 10px;
+  font-weight: 400;
+  color: #8993a0;
+}
+.activity-scale-note {
+  margin: 10px 0 2px;
+  font-size: 9px;
+  line-height: 1.5;
+  color: #929ba7;
+  text-align: right;
 }
 .activity-plot {
   display: block;
@@ -181,28 +238,59 @@
 }
 .activity-plot text {
   font: 9px sans-serif;
-  fill: #9aa08f;
+  fill: #929ba7;
 }
 .activity-grid {
   fill: none;
-  stroke: #e7eadd;
+  stroke: #e7ebf0;
   stroke-width: 1;
 }
 .activity-line {
   fill: none;
-  stroke: #81916a;
+  stroke: #7b91ad;
   stroke-width: 1.7;
   stroke-linecap: round;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
 }
 .activity-point {
-  fill: #fffaf0;
-  stroke: #81916a;
+  fill: #fff9e9;
+  stroke: #7b91ad;
   stroke-width: 1.4;
+  transition:
+    r 220ms ease,
+    fill 220ms ease;
 }
 .activity-point.is-selected {
-  fill: #81916a;
+  fill: #7b91ad;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: none;
+}
+@keyframes activity-point-select {
+  0% {
+    transform: scale(0.8);
+  }
+  55% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes activity-badge-reveal {
+  from {
+    opacity: 0.4;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.activity-detail > span,
+.activity-detail > strong {
+  animation: none;
 }
 .activity-dates {
   display: grid;
@@ -218,17 +306,23 @@
   min-width: 0;
   padding: 4px 0;
   font-size: 10px;
-  color: #969b8b;
+  color: #8993a0;
+  transition:
+    color 180ms ease,
+    transform 140ms ease;
+}
+.activity-dates > .town-button:active {
+  transform: scale(0.92);
 }
 .activity-dates > .town-button[aria-pressed='true'] {
-  color: #4d6240;
+  color: #435a75;
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 4px;
 }
 .activity-empty {
   margin: 12px 0 0;
-  color: #969b8b;
+  color: #8993a0;
   font-size: 10px;
   line-height: 1.6;
 }
@@ -270,6 +364,18 @@
   overflow: hidden;
 }
 @media (prefers-reduced-motion: reduce) {
+  .activity-point,
+  .activity-dates > .town-button {
+    transition: none;
+  }
+  .activity-point.is-selected,
+  .activity-detail > span,
+  .activity-detail > strong {
+    animation: none;
+  }
+  .activity-dates > .town-button:active {
+    transform: none;
+  }
   .activity-reveal,
   .activity-stats > .activity-toggle svg {
     transition: none;
@@ -277,8 +383,35 @@
 }
 
 dialog.town-panel[data-panel='following'] {
-  width: 440px;
+  width: 380px;
   max-width: calc(100vw - 32px);
+  scrollbar-width: thin;
+  scrollbar-color: #b5bea1 transparent;
+}
+@supports selector(::-webkit-scrollbar) {
+  dialog.town-panel[data-panel='following'] {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+  dialog.town-panel[data-panel='following']::-webkit-scrollbar {
+    width: 6px;
+  }
+  dialog.town-panel[data-panel='following']::-webkit-scrollbar-track {
+    background: transparent;
+    margin-block: 12px;
+  }
+  dialog.town-panel[data-panel='following']::-webkit-scrollbar-thumb {
+    background: #b5bea1;
+    border-radius: 999px;
+  }
+  dialog.town-panel[data-panel='following']::-webkit-scrollbar-thumb:hover {
+    background: #909e79;
+  }
+  dialog.town-panel[data-panel='following']::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 }
 /* Keep the empty state readable within short landscape dialogs. */
 .following-empty {
@@ -377,9 +510,9 @@ dialog.town-panel[data-panel='following'] {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 76px;
-  padding: 12px 0;
+  gap: 8px;
+  min-height: 60px;
+  padding: 8px 0;
 }
 .following-person-row .following-profile-link {
   display: flex;
@@ -387,7 +520,7 @@ dialog.town-panel[data-panel='following'] {
   justify-content: flex-start;
   flex: 1;
   min-width: 0;
-  gap: 12px;
+  gap: 8px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -406,8 +539,8 @@ dialog.town-panel[data-panel='following'] {
 }
 .following-avatar {
   display: block;
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   flex: none;
   overflow: hidden;
   border-radius: 50%;
@@ -427,7 +560,7 @@ dialog.town-panel[data-panel='following'] {
   min-width: 0;
   overflow-wrap: anywhere;
   text-align: left;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
 }
 .following-actions {
@@ -435,21 +568,25 @@ dialog.town-panel[data-panel='following'] {
   z-index: 1;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   flex: none;
 }
 .following-actions > .town-button {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  min-height: 36px;
-  padding: 6px;
+  gap: 4px;
+  min-height: 30px;
+  padding: 4px;
   border: 0;
   background: transparent;
   box-shadow: none;
   color: #737d69;
-  font-size: 11px;
+  font-size: 10px;
   white-space: nowrap;
+}
+.following-actions > .town-button svg {
+  width: 14px;
+  height: 14px;
 }
 .following-actions > .following-heart[aria-pressed='true'] {
   color: #b56868;
@@ -472,4 +609,26 @@ dialog.town-panel[data-panel='following'] {
   .following-actions span {
     display: none;
   }
+}
+
+.account-name .fan-counts,
+.participant-identity-details .fan-counts {
+  gap: 4px 10px;
+  margin: 4px 0 0;
+}
+.account-name .fan-counts > div,
+.participant-identity-details .fan-counts > div {
+  gap: 4px;
+}
+.account-name .fan-counts dt,
+.participant-identity-details .fan-counts dt {
+  font-size: 9px;
+}
+.account-name .fan-counts dd,
+.participant-identity-details .fan-counts dd {
+  font-size: 10px;
+}
+.account-name .fan-counts dd img,
+.participant-identity-details .fan-counts dd img {
+  display: none;
 }

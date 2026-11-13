@@ -1,4 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
+import { RankingCalendar } from './RankingCalendar';
+import { CalendarDays, ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
+import { koreaDate, rankingWeek, shiftRankingWeek } from '../../data/rankingWeeks';
 import { supabase } from '../../services/auth';
 import type { Participant } from '../../hooks/useTown';
 import { Button } from '../ui/Button';
@@ -7,12 +10,7 @@ import './musician-rankings.css';
 
 type Ranking = Participant & { rank: number; hearts: number; weeklyHearts: number };
 type Snapshot = { entries: Ranking[]; weekStart: string; weekEnd: string };
-const date = (value: string) =>
-  new Date(value).toLocaleDateString('ko-KR', {
-    timeZone: 'Asia/Seoul',
-    month: 'numeric',
-    day: 'numeric',
-  });
+const date = (value: string) => koreaDate(new Date(value)).replaceAll('-', '.');
 
 export function MusicianRankings({
   demo,
@@ -25,6 +23,25 @@ export function MusicianRankings({
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [error, setError] = useState('');
   const [retry, setRetry] = useState(0);
+  const [selectedWeek, setSelectedWeek] = useState<string | null>(null);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const calendarId = useId();
+  const calendarToggle = useRef<HTMLButtonElement>(null);
+  const closeCalendar = () => {
+    setCalendarOpen(false);
+    calendarToggle.current?.focus();
+  };
+  const today = koreaDate();
+  const currentWeek = rankingWeek(today);
+  const displayedWeek = selectedWeek ?? currentWeek;
+  const historical = displayedWeek < currentWeek;
+  const chooseWeek = (day: string) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || day > today) return;
+    const week = rankingWeek(day);
+    if (week === displayedWeek) return;
+    setSnapshot(null);
+    setSelectedWeek(week === currentWeek ? null : week);
+  };
   useEffect(() => {
     let active = true;
     let pending = false;
@@ -36,7 +53,10 @@ export function MusicianRankings({
       pending = true;
       try {
         if (!supabase) throw new Error();
-        const { data, error } = await supabase.rpc('musician_rankings', { period });
+        const { data, error } =
+          period === 'weekly' && selectedWeek
+            ? await supabase.rpc('musician_rankings_week', { selected_date: selectedWeek })
+            : await supabase.rpc('musician_rankings', { period });
         if (error) throw error;
         if (active) {
           setSnapshot(data as Snapshot);
@@ -61,7 +81,7 @@ export function MusicianRankings({
       window.removeEventListener('music-town-fans-changed', update);
       document.removeEventListener('visibilitychange', update);
     };
-  }, [period, demo, retry]);
+  }, [period, demo, retry, selectedWeek]);
 
   return (
     <section className="musician-rankings" aria-label="뮤지션 하트 랭킹">
@@ -77,11 +97,79 @@ export function MusicianRankings({
           누적
         </Button>
       </div>
-      {period === 'weekly' && snapshot && (
-        <p className="ranking-dates">
-          {date(snapshot.weekStart)} ~{' '}
-          {date(new Date(new Date(snapshot.weekEnd).getTime() - 1).toISOString())}
-        </p>
+      {period === 'weekly' && !demo && (
+        <>
+          <div className="ranking-dates">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="이전 주"
+              onClick={() => chooseWeek(shiftRankingWeek(displayedWeek, -1))}
+            >
+              <ChevronLeft size={14} aria-hidden="true" />
+            </Button>
+            <Button
+              variant="ghost"
+              className="ranking-calendar-toggle"
+              ref={calendarToggle}
+              aria-expanded={calendarOpen}
+              aria-controls={calendarId}
+              onClick={() => setCalendarOpen((open) => !open)}
+            >
+              <CalendarDays size={14} aria-hidden="true" />
+              <span>
+                {date(`${displayedWeek}T00:00:00+09:00`)}
+              </span>
+              <span aria-hidden="true">~</span>
+              <CalendarDays size={14} aria-hidden="true" />
+              <span>
+                {date(
+                  new Date(
+                    new Date(`${shiftRankingWeek(displayedWeek, 1)}T00:00:00+09:00`).getTime() - 1,
+                  ).toISOString(),
+                )}
+              </span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="다음 주"
+              disabled={!historical}
+              onClick={() => chooseWeek(shiftRankingWeek(displayedWeek, 1))}
+            >
+              <ChevronRight size={14} aria-hidden="true" />
+            </Button>
+          </div>
+          {calendarOpen && (
+            <RankingCalendar
+              id={calendarId}
+              selectedWeek={displayedWeek}
+              today={today}
+              onSelect={(day) => {
+                chooseWeek(day);
+                closeCalendar();
+              }}
+              onClose={closeCalendar}
+            />
+          )}
+          {snapshot && !error && snapshot.entries.some((person) => person.rank === 1) && (
+            <div className="ranking-winners" aria-live="polite">
+              <Trophy size={16} aria-hidden="true" />
+              <span>
+                {historical ? '주간' : '이번 주'}{' '}
+                {snapshot.entries.filter((person) => person.rank === 1).length > 1
+                  ? '공동 1위'
+                  : '1위'}
+              </span>
+              <strong>
+                {snapshot.entries
+                  .filter((person) => person.rank === 1)
+                  .map((person) => person.avatar.name)
+                  .join(' · ')}
+              </strong>
+            </div>
+          )}
+        </>
       )}
       {demo ? (
         <p role="status">로그인하면 뮤지션들의 랭킹을 볼 수 있어요.</p>
@@ -93,10 +181,12 @@ export function MusicianRankings({
           </Button>
         </p>
       ) : !snapshot ? (
-        <p role="status">랭킹을 불러오고 있어요…</p>
+        <div className="ranking-loading" role="status" aria-label="랭킹을 불러오고 있어요">
+          <span className="ranking-spinner" aria-hidden="true" />
+        </div>
       ) : snapshot.entries.length === 0 ? (
         <p className="ranking-empty" role="status">
-          {period === 'weekly' ? '이번 주 랭킹이 없습니다.' : '아직 랭킹이 없습니다.'}
+          {period === 'weekly' ? '선택한 주의 랭킹이 없습니다.' : '아직 랭킹이 없습니다.'}
         </p>
       ) : (
         <ol className="ranking-list">

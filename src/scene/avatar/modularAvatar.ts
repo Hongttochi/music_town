@@ -1,6 +1,5 @@
 import { drawWristwear } from './avatarWristwear';
 import { drawExtraEyes, drawExtraNose } from './avatarExtraFeatures';
-import { drawExtraHair } from './avatarExtraHair';
 import { drawOutfit } from './avatarOutfit';
 import { drawEquipment } from './avatarEquipment';
 import type { Avatar } from '../../data/model';
@@ -14,6 +13,8 @@ type Layers = {
   features: HTMLImageElement;
   hairExtra: HTMLImageElement;
   featuresExtra: HTMLImageElement;
+  hairStyledA: HTMLImageElement;
+  hairStyledB: HTMLImageElement;
 };
 let loading: Promise<Layers> | null = null;
 const cache = new Map<string, HTMLCanvasElement>();
@@ -42,13 +43,17 @@ export function loadAvatarLayers() {
       load('/art/avatar-features.png'),
       load('/art/avatar-hair-extra.png'),
       load('/art/avatar-features-extra.png'),
+      load('/art/avatar-hair-styled-a.png'),
+      load('/art/avatar-hair-styled-b.png'),
     ])
-      .then(([base, hair, features, hairExtra, featuresExtra]) => ({
+      .then(([base, hair, features, hairExtra, featuresExtra, hairStyledA, hairStyledB]) => ({
         base,
         hair,
         features,
         hairExtra,
         featuresExtra,
+        hairStyledA,
+        hairStyledB,
       }))
       .catch((error) => {
         loading = null;
@@ -63,15 +68,16 @@ function canvas(w: number, h: number) {
   return result;
 }
 /** Tight alpha bounds align independently generated parts without mutating source art. */
-function piece(image: HTMLImageElement, columns: number, rows: number, col: number, row: number) {
-  const key = [image.src, columns, rows, col, row].join('|');
+function piece(image: HTMLImageElement, columns: number, rows: number, col: number, row: number, gutter = 0) {
+  const key = [image.src, columns, rows, col, row, gutter].join('|');
   const prior = pieces.get(key);
   if (prior) return prior;
   const w = Math.floor(image.width / columns),
     h = Math.floor(image.height / rows),
     temp = canvas(w, h),
     ctx = temp.getContext('2d', { willReadFrequently: true })!;
-  ctx.drawImage(image, col * w, row * h, w, h, 0, 0, w, h);
+  const inset = Math.floor(w * gutter);
+  ctx.drawImage(image, col * w + inset, row * h, w - inset * 2, h, inset, 0, w - inset * 2, h);
   const data = ctx.getImageData(0, 0, w, h);
   let left = w,
     right = -1,
@@ -162,6 +168,8 @@ export function composeAvatar(
       layer,
       avatar.headwear,
       avatar.earwear,
+      avatar.facewear,
+      avatar.neckwear,
       avatar.eyewear,
       avatar.bag,
       avatar.wristwear,
@@ -221,8 +229,11 @@ export function composeAvatar(
         ctx.restore();
       }
     }
-    const hair =
-      p.hair < 9
+    const styledSource =
+      p.hair >= 10 ? (p.hair < 15 ? layers.hairStyledA : layers.hairStyledB) : undefined;
+    const hair = styledSource
+      ? tinted(piece(styledSource, 5, 4, (p.hair - 10) % 5, direction, p.hair === 13 ? 0.06 : 0), p.hairColor, 'hair')
+      : p.hair < 9
         ? tinted(
             piece(
               p.hair < 3 ? layers.hair : layers.hairExtra,
@@ -238,11 +249,40 @@ export function composeAvatar(
     const side = direction === 1 || direction === 3;
     // Tie/bun volume sits above the crown; it must not shrink the scalp coverage.
     const tied = p.hair === 7 || p.hair === 8;
-    const hairWidth = p.hair === 7 ? (side ? 322 : 326) : side ? (p.hair === 6 ? 302 : 278) : 306;
+    const hairWidth = styledSource
+      ? side
+        ? 296
+        : p.hair === 13
+          ? 324
+          : 306
+      : p.hair === 7
+        ? side
+          ? 322
+          : 326
+        : side
+          ? p.hair === 6
+            ? 302
+            : 278
+          : 306;
     // Extend the wave silhouette over the rear scalp without moving the fringe.
     const hairX = 256 - hairWidth / 2 + (p.hair === 6 && side ? (direction === 1 ? -12 : 12) : 0);
-    const hairHeight =
-      p.hair === 7
+    const styledSizes: Record<number, [number, number, number, number]> = {
+      // Front / side / back height, then crown Y. Match the original round scalp.
+      10: [184, 238, 245, 32],
+      11: [254, 266, 274, 38],
+      12: [154, 220, 232, 48],
+      13: [256, 280, 280, 12],
+      14: [236, 248, 258, 38],
+      15: [242, 256, 266, 38],
+      16: [280, 300, 320, 24],
+      17: [254, 282, 290, 30],
+      18: [290, 300, 306, 30],
+      19: [256, 280, 286, 12],
+    };
+    const styledSize = styledSource ? styledSizes[p.hair] : undefined;
+    const hairHeight = styledSize
+      ? styledSize[direction === 2 ? 2 : side ? 1 : 0]
+      : p.hair === 7
         ? direction === 2
           ? 282
           : side
@@ -257,11 +297,11 @@ export function composeAvatar(
               ? 290
               : 235
             : [178, 215, 200, 178, 210, 178, 280, 230, 220][p.hair];
-    const hairY = p.hair === 7 ? 10 : tied ? 24 : 42;
+    const hairY = styledSize ? styledSize[3] : p.hair === 7 ? 10 : tied ? 24 : 42;
     ctx.save();
     if (avatar.headwear && avatar.headwear !== 'none') {
       // Tuck crown volume and tied hair under the hat while keeping the lower hairstyle.
-      const brim = avatar.headwear === 'bucket' ? 155 : 136;
+      const brim = avatar.headwear === 'bucket' || avatar.headwear === 'satgat' ? 155 : 136;
       ctx.beginPath();
       ctx.rect(116, brim, 280, 45);
       ctx.rect(0, brim + 45, 512, 512);
@@ -269,7 +309,6 @@ export function composeAvatar(
     }
     if (layer !== 'body') {
       if (hair) ctx.drawImage(hair, hairX, hairY, hairWidth, hairHeight);
-      else drawExtraHair(ctx, p.hair, p.hairColor, direction);
     }
     ctx.restore();
     if (layer !== 'hair') {

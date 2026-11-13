@@ -126,7 +126,7 @@ dialog.profile-dialog[data-panel='participant'] > .profile-sheet {
   margin: 0;
   padding: 14px 16px;
   min-height: 90px;
-  border-radius: 12px;
+  border-radius: 4px;
   background: #fff7e6;
   border: 1px solid #eee1c8;
   color: #74634f;
@@ -222,23 +222,51 @@ dialog.profile-dialog[data-panel='participant'] > .profile-sheet {
 .participant-name-actions .fan-actions > .town-button.fan-action-icon {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   width: auto;
   min-width: 0;
-  height: 26px;
-  min-height: 26px;
-  padding: 3px 6px;
-  font-size: 10px;
+  height: 24px;
+  min-height: 24px;
+  padding: 3px 4px;
+  font-size: 9px;
   border: 0;
   background: transparent;
   box-shadow: none;
 }
 .participant-name-actions .fan-action-icon img {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
 }
 .participant-profile .participant-report {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+}
+.participant-profile-actions:empty {
+  display: none;
+}
+.participant-identity-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+.participant-identity-topline .participant-profile-actions {
+  margin-left: auto;
+}
+.participant-profile-actions .fan-actions {
+  gap: 8px;
+  margin: 0;
+}
+.participant-profile-actions .fan-actions > .town-button.fan-action-icon {
+  height: 24px;
+  min-height: 24px;
+  padding: 2px 0;
+  font-size: 9px;
+  gap: 3px;
+}
+.participant-profile-actions .fan-action-icon img {
+  width: 11px;
+  height: 11px;
 }

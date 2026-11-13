@@ -40,3 +40,17 @@ header.topbar {
   display: block;
   object-fit: contain;
 }
+
+.topbar .header-right .town-button.avatar-button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border: 1px solid #a4b68b;
+  border-radius: 50%;
+  background: #e8edda;
+  overflow: hidden;
+}

@@ -1,4 +1,6 @@
 export type IconName =
+  | 'crescent-moon'
+  | 'siren'
   | 'wine-glass'
   | 'chat'
   | 'music'
@@ -53,7 +55,7 @@ export function Logo({ className = '' }: { className?: string }) {
   return (
     <img
       className={`town-brand ${className}`}
-      src="/art/music-town-brand-v3.png"
+      src="/art/busking-town-logo.png"
       alt="MUSIC TOWN"
       width={230}
       height={81}

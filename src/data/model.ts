@@ -15,6 +15,14 @@ export type Avatar = {
     | 'shirt'
     | 'dress'
     | 'monk'
+    | 'hoodie'
+    | 'uniform'
+    | 'hanbok'
+    | 'blouse'
+    | 'cardigan-skirt'
+    | 'ribbon-dress'
+    | 'pleated-skirt'
+    | 'aline-skirt'
     | 'tank';
   hair: number;
   sprite?: number;
@@ -23,8 +31,10 @@ export type Avatar = {
   eyeShape?: number;
   noseShape?: number;
   hairColor?: string;
-  headwear?: 'none' | 'snapback' | 'beanie' | 'bucket';
+  headwear?: 'none' | 'snapback' | 'backward-cap' | 'satgat' | 'beanie' | 'bucket';
   earwear?: 'none' | 'headset' | 'airpods';
+  facewear?: 'none' | 'white-mask' | 'black-mask';
+  neckwear?: 'none' | 'cream-scarf' | 'rose-scarf';
   eyewear?: 'none' | 'sunglasses' | 'glasses';
   bag?: 'none' | 'backpack' | 'crossbody';
   wristwear?: 'none' | 'bracelet' | 'watch' | 'apple-watch';
@@ -119,7 +129,7 @@ export const stages: Stage[] = [
   },
   barStage,
 ];
-export const populations = [18, 24, 12, 30, 9];
+export const populations = [18, 24, 12];
 export const defaultAvatar: Avatar = {
   name: '산책자',
   skin: '#eac09a',

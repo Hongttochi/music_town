@@ -19,6 +19,8 @@ const { composeAvatar } = await import(
   'data:text/javascript;base64,' + Buffer.from(bundled.outputFiles[0].text).toString('base64')
 );
 const layers = {
+  hairStyledA: await loadImage('public/art/avatar-hair-styled-a.png'),
+  hairStyledB: await loadImage('public/art/avatar-hair-styled-b.png'),
   hairExtra: await loadImage('public/art/avatar-hair-extra.png'),
   featuresExtra: await loadImage('public/art/avatar-features-extra.png'),
   base: await loadImage('public/art/avatar-base.png'),
@@ -174,18 +176,30 @@ console.log(
   'Fit sheets: 42 hair/hat combinations and six crossbody/instrument combinations, four directions each.',
 );
 
-const extraHairSheet = createCanvas(1024, 5 * 256);
+const extraHairSheet = createCanvas(1024, 11 * 256);
 const extraHairCtx = extraHairSheet.getContext('2d');
 extraHairCtx.fillStyle = '#e9eddb';
-extraHairCtx.fillRect(0, 0, 1024, 5 * 256);
-for (let hair = 9; hair < 14; hair++) {
+extraHairCtx.fillRect(0, 0, 1024, 11 * 256);
+for (let hair = 9; hair < 20; hair++) {
   const sprite = composeAvatar(layers, { hair, hairColor: '#67402a' });
   assert.notDeepEqual(sprite.toBuffer('image/png'), plain.toBuffer('image/png'));
   extraHairCtx.drawImage(sprite, 0, (hair - 9) * 256, 1024, 256);
   extraHairCtx.fillStyle = '#263d35';
   extraHairCtx.font = '14px sans-serif';
   extraHairCtx.fillText(
-    ['bald', 'pomade', 'dreads', 'buzz cut', 'mohawk'][hair - 9],
+    [
+      'bald',
+      'pomade',
+      'dreads',
+      'buzz cut',
+      'mohawk',
+      'wispy bob',
+      'leaf',
+      'hime',
+      'wolf',
+      'braids',
+      'bun',
+    ][hair - 9],
     8,
     (hair - 9) * 256 + 18,
   );

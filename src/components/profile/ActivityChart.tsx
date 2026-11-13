@@ -66,18 +66,22 @@ export function ActivityChart({ stats }: { stats: FanStats | null }) {
             {stats && days.length ? (
               <>
                 <p className="activity-detail" aria-live="polite">
-                  <span>{selected?.date.replaceAll('-', '.')}</span>
-                  <strong>{selected ? formatActivity(selected[metric]) : '—'}</strong>
+                  <span key={selected?.date}>{selected?.date.replaceAll('-', '.')}</span>
+                  <strong key={`${selected?.date}-${metric}`}>
+                    <small>{metric === 'onlineSeconds' ? '접속' : '무대'} 시간</small>
+                    {selected ? formatActivity(selected[metric]) : '—'}
+                  </strong>
+                </p>
+                <p className="activity-scale-note">
+                  최근 7일 최장 {metric === 'onlineSeconds' ? '접속' : '무대'} ·{' '}
+                  {formatActivity(Math.max(0, ...days.map((day) => day[metric])))}
                 </p>
                 <svg
                   className="activity-plot"
-                  viewBox="0 0 332 120"
+                  viewBox="0 20 332 92"
                   role="img"
                   aria-label={`최근 7일 ${metric === 'onlineSeconds' ? '접속' : '무대'} 시간. 날짜별 값은 아래 버튼에서 확인할 수 있어요.`}
                 >
-                  <text x="0" y="15">
-                    {formatActivity(max)}
-                  </text>
                   <path d="M24 28H308 M24 64H308 M24 100H308" className="activity-grid" />
                   <polyline
                     points={points.map((p) => `${p.x},${p.y}`).join(' ')}
@@ -96,9 +100,6 @@ export function ActivityChart({ stats }: { stats: FanStats | null }) {
                       }
                     />
                   ))}
-                  <text x="0" y="104">
-                    0
-                  </text>
                 </svg>
                 <div
                   className="activity-dates"

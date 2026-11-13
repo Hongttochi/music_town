@@ -29,12 +29,12 @@ dialog.town-panel.notice-board-dialog {
 }
 .notice-board-heading h2 {
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 600;
   margin: 3px 0 0;
-  color: #fff3d6;
+  color: #fff2d6;
 }
 .notice-board-dialog .town-button.notice-board-close {
-  color: #fff3d6;
+  color: #e4dbc3;
   border: 0;
   border-radius: 8px;
   background: transparent;
@@ -43,6 +43,17 @@ dialog.town-panel.notice-board-dialog {
   width: 32px;
   height: 32px;
   flex: none;
+}
+.notice-board-dialog .town-button.notice-board-close:hover,
+.notice-board-dialog .town-button.notice-board-close:active {
+  color: #fff2d6;
+  background: transparent;
+}
+.notice-board-dialog .town-button.notice-board-close:focus-visible {
+  outline: none;
+  color: #ffffff;
+  text-decoration: none;
+  box-shadow: inset 0 -1px #e4dbc3;
 }
 .notice-board-papers {
   display: grid;
@@ -155,19 +166,58 @@ dialog.town-panel.notice-board-dialog {
   object-fit: contain;
 }
 .notice-board-dialog .notice-board-heading {
+  position: relative;
   align-items: center;
-  gap: 8px;
-  margin: 0 0 16px;
-  padding: 0 0 10px;
-  border-bottom: 1px solid #e9edcb33;
+  justify-content: center;
+  margin: 0 0 22px;
+  padding: 7px 38px 0;
+  border: 0;
+  background: transparent;
 }
-.notice-board-heading > .flaticon {
-  width: 24px;
-  height: 24px;
-  flex: none;
+.notice-board-heading > .notice-board-sign {
+  position: relative;
+  flex: 0 1 230px;
+  padding: 12px 24px;
+  text-align: center;
+  border: 1px solid #614731;
+  border-radius: 5px 3px 5px 4px;
+  background:
+    repeating-linear-gradient(2deg, transparent 0 9px, #f5d7a40a 10px, transparent 11px 19px),
+    linear-gradient(180deg, #97734e, #80603f);
+  box-shadow: inset 0 1px #cfaa7680, inset 0 -2px #63462f80, 0 3px 0 #283e3440;
 }
-.notice-board-heading > div > span {
-  font-size: 9px;
+.notice-board-sign::before,
+.notice-board-sign::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 50%;
+  background: #533e2d;
+  box-shadow: 0 1px #c5a077;
+}
+.notice-board-sign::before {
+  left: 10px;
+}
+.notice-board-sign::after {
+  right: 10px;
+}
+dialog.town-panel.notice-board-dialog .notice-board-sign h2 {
+  margin: 0;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  white-space: nowrap;
+  text-shadow: 0 1px #63462f;
+}
+.notice-board-heading .notice-board-close {
+  position: absolute;
+  top: 0;
+  right: -6px;
 }
 .notice-board-dialog .notice-paper {
   padding: 18px 20px 12px;

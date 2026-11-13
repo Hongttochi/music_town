@@ -1,4 +1,6 @@
-import { Flag, LockKeyhole, UserRound } from 'lucide-react';
+import { LockKeyhole } from 'lucide-react';
+import { ProfileIcon } from '../profile/ProfileIcon';
+import { Flaticon } from '../ui/Flaticon';
 import { useRef, useState } from 'react';
 import { supabase } from '../../services/auth';
 import type { Participant } from '../../hooks/useTown';
@@ -81,7 +83,7 @@ export function ReportForm({
       }}
     >
       <p className="report-target">
-        <UserRound size={16} aria-hidden="true" />
+        <ProfileIcon id={target.avatar.profileIcon || 'character'} avatar={target.avatar} size={24} />
         <span>신고 대상</span>
         <strong>{target.avatar.name}</strong>
       </p>
@@ -128,7 +130,7 @@ export function ReportForm({
           취소
         </Button>
         <Button type="submit" variant="primary" disabled={busy || details.trim().length < 10}>
-          <Flag size={14} aria-hidden="true" />
+          <Flaticon name="siren" size={14} />
           {busy ? '접수 중…' : '신고 접수하기'}
         </Button>
       </div>

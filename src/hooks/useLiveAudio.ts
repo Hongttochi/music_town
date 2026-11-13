@@ -2,6 +2,7 @@ import { errorCode, logEvent } from '../services/telemetry';
 import { useEffect, useRef, useState } from 'react';
 import { AudioPresets, Room, RoomEvent, Track } from 'livekit-client';
 import { supabase } from '../services/auth';
+import { readVoiceToken } from '../services/voiceResponse';
 
 type Target = { channel: number; stage: number; performerId: string; endsAt: string };
 type Status = 'off' | 'connecting' | 'listening' | 'ready' | 'live' | 'reconnecting' | 'error';
@@ -121,16 +122,15 @@ export function useLiveAudio(target: Target | null, client: string, stream: Medi
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ channel, stage, client }),
         });
-        const data = await response.json();
-        if (!response.ok) {
+        const data = await readVoiceToken(response).catch((failure) => {
           logEvent('api_failed', {
             operation: 'voice_token',
             status: response.status,
             channel,
             stage,
           });
-          throw new Error(data.error || '음성 연결에 실패했어요.');
-        }
+          throw failure;
+        });
         if (disposed) return;
         if (data.performerId !== performerId || data.expiresAt !== Date.parse(endsAt)) {
           throw new Error('공연 정보가 바뀌었어요. 다시 연결해 주세요.');
