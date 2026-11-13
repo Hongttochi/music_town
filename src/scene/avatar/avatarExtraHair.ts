@@ -8,6 +8,14 @@ export function drawExtraHair(
   if (hair === 9) return; // The original body layer already contains a shaded bare scalp.
   const side = direction === 1 || direction === 3,
     back = direction === 2;
+  const rgb = /^#[0-9a-f]{6}$/i.test(color) ? color : '#67402a';
+  const tone = (amount: number) => {
+    const channels = [1, 3, 5].map((offset) => {
+      const value = parseInt(rgb.slice(offset, offset + 2), 16);
+      return Math.round(amount > 0 ? value + (255 - value) * amount : value * (1 + amount));
+    });
+    return `rgb(${channels.join(',')})`;
+  };
   ctx.save();
   // Draw a single right-facing profile, then mirror for the left view.
   if (direction === 3) {
@@ -25,22 +33,23 @@ export function drawExtraHair(
       ctx.lineTo(236, 219);
       ctx.quadraticCurveTo(167, 231, 120, 190);
     } else {
-      ctx.lineTo(372, 201);
-      ctx.lineTo(358, 138);
+      ctx.quadraticCurveTo(383, 198, 372, 201);
+      ctx.quadraticCurveTo(362, 184, 358, 138);
       ctx.quadraticCurveTo(260, bottom, 153, 138);
-      ctx.lineTo(139, 201);
+      ctx.quadraticCurveTo(148, 187, 139, 201);
       ctx.closePath();
     }
   };
-  const fill = ctx.createLinearGradient(120, 70, 380, 240);
-  fill.addColorStop(0, color);
-  fill.addColorStop(1, '#242326');
+  const fill = ctx.createRadialGradient(214, 82, 18, 257, 145, 190);
+  fill.addColorStop(0, tone(0.23));
+  fill.addColorStop(0.38, tone(0.08));
+  fill.addColorStop(0.73, color);
+  fill.addColorStop(1, tone(-0.25));
   ctx.fillStyle = fill;
   if (hair === 12 || hair === 13) {
-    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = hair === 12 ? tone(0.18) : tone(-0.08);
     cap(136);
     ctx.fill();
-    ctx.globalAlpha = 1;
     if (hair === 12) {
       ctx.save();
       cap(136);
@@ -81,8 +90,24 @@ export function drawExtraHair(
       ctx.fill();
     }
   } else if (hair === 10) {
-    cap(153);
+    cap(126);
     ctx.fill();
+    if (back) {
+      ctx.save();
+      cap(126);
+      ctx.clip();
+      ctx.strokeStyle = tone(-0.14);
+      ctx.lineWidth = 2;
+      for (let x = 145; x < 385; x += 24) {
+        ctx.beginPath();
+        ctx.moveTo(256 + (x - 256) * 0.35, 60);
+        ctx.bezierCurveTo(x, 100, x + 9, 175, x, 248);
+        ctx.stroke();
+      }
+      ctx.restore();
+      ctx.restore();
+      return;
+    }
     // Lifted, swept-back quiff with a clean part and comb lines.
     ctx.beginPath();
     ctx.moveTo(136, 129);
@@ -91,8 +116,8 @@ export function drawExtraHair(
     ctx.quadraticCurveTo(320, 83, 286, 118);
     ctx.quadraticCurveTo(217, 145, 136, 129);
     ctx.fill();
-    ctx.strokeStyle = '#ffffff30';
-    ctx.lineWidth = 4;
+    ctx.strokeStyle = tone(0.27);
+    ctx.lineWidth = 2.5;
     ctx.lineCap = 'round';
     for (let i = 0; i < 5; i++) {
       ctx.beginPath();
@@ -101,8 +126,8 @@ export function drawExtraHair(
       ctx.stroke();
     }
     if (!back) {
-      ctx.strokeStyle = '#211f2860';
-      ctx.lineWidth = 5;
+      ctx.strokeStyle = tone(-0.24);
+      ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.moveTo(side ? 307 : 326, 120);
       ctx.quadraticCurveTo(350, 98, 372, 131);
@@ -113,17 +138,17 @@ export function drawExtraHair(
     ctx.fill();
     ctx.lineCap = 'round';
     const lock = (sx: number, sy: number, ex: number, ey: number, index: number) => {
-      ctx.strokeStyle = '#242326';
+      ctx.strokeStyle = tone(-0.3);
       ctx.lineWidth = 22;
       ctx.beginPath();
       ctx.moveTo(sx, sy);
       ctx.bezierCurveTo(sx - 12, sy + 25, ex + 13, ey - 36, ex, ey);
       ctx.stroke();
-      ctx.strokeStyle = color;
+      ctx.strokeStyle = fill;
       ctx.lineWidth = 17;
       ctx.stroke();
-      ctx.strokeStyle = '#ffffff25';
-      ctx.lineWidth = 3;
+      ctx.strokeStyle = tone(0.22);
+      ctx.lineWidth = 1.5;
       for (let t = 0.2; t < 0.95; t += 0.18) {
         const x = sx + (ex - sx) * t,
           y = sy + (ey - sy) * t;
@@ -161,7 +186,7 @@ export function drawExtraHair(
       ctx.bezierCurveTo(points[2], points[3], points[4], points[5], points[6], points[7]);
       ctx.stroke();
     };
-    const sheen = (points: number[]) => strand(points, 3, '#ffffff25');
+    const sheen = (points: number[]) => strand(points, 2, tone(0.2));
     ctx.fillStyle = fill;
     // A cropped crown leaves room for each fringe; side profiles are mirrored above.
     cap(hair === 16 ? 135 : 126);
@@ -223,8 +248,12 @@ export function drawExtraHair(
         for (let x = 148; x < 380; x += 30) sheen([x, 136, x - 3, 185, x + 3, 247, x, 302]);
       } else {
         for (const x of side ? [126] : [126, 354]) {
-          ctx.fillRect(x, 116, 34, 191);
-          ctx.fillRect(x < 256 ? x + 19 : x - 19, 135, 29, 91);
+          ctx.beginPath();
+          ctx.roundRect(x, 116, 34, 191, [12, 12, 8, 8]);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.roundRect(x < 256 ? x + 19 : x - 19, 135, 29, 91, [6, 6, 5, 5]);
+          ctx.fill();
           sheen([x + 10, 128, x + 8, 188, x + 12, 248, x + 10, 295]);
         }
         ctx.beginPath();
@@ -279,7 +308,7 @@ export function drawExtraHair(
           ctx.save();
           ctx.translate(x, 193 + i * 16);
           ctx.rotate(i % 2 ? -0.5 : 0.5);
-          ctx.fillStyle = i % 2 ? color : fill;
+          ctx.fillStyle = fill;
           ctx.beginPath();
           ctx.ellipse(0, 0, 16, 12, 0, 0, Math.PI * 2);
           ctx.fill();

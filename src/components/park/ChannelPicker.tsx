@@ -1,5 +1,6 @@
 import { useRef, useState, type CSSProperties } from 'react';
 import { Button } from '../ui/Button';
+import { CHANNEL_COUNT } from '../../data/channels';
 import './channel-picker.css';
 
 export function ChannelPicker({
@@ -20,7 +21,9 @@ export function ChannelPicker({
   const [selecting, setSelecting] = useState<number | null>(null);
   const pending = useRef(false);
   const loading = populations.length === 0;
-  const rows: (number | null)[] = loading ? Array(5).fill(null) : populations;
+  const rows: (number | null)[] = loading
+    ? Array(CHANNEL_COUNT).fill(null)
+    : populations.slice(0, CHANNEL_COUNT);
   const select = async (index: number) => {
     if (pending.current || busy || loading) return;
     pending.current = true;
@@ -72,7 +75,6 @@ export function ChannelPicker({
           );
         })}
       </div>
-      {entered && <p className="directory-footnote">공원을 옮기면 공연과 대기가 종료돼요.</p>}
     </div>
   );
 }

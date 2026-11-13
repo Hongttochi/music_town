@@ -1,5 +1,5 @@
 import { FanProfile } from './FanProfile';
-import { Flag } from 'lucide-react';
+import { Flaticon } from '../ui/Flaticon';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
 import { ProfileBio } from './ProfileBio';
 import type { Participant } from '../../hooks/useTown';
@@ -20,19 +20,22 @@ export function ParticipantProfile({
 }) {
   return (
     <FanProfile userId={person.id} own={own} demo={demo}>
-      {(fanStats, actions) => (
+      {(fanStats, actions, counts) => (
         <div className="participant-profile">
           <div className="participant-identity">
             <ModularPortrait avatar={person.avatar} />
             <div className="participant-identity-details">
-              <small>{person.role === 'musician' ? '뮤지션' : '관람객'}</small>
+              <div className="participant-identity-topline">
+                <small>{person.role === 'musician' ? '뮤지션' : '관람객'}</small>
+                <div className="participant-profile-actions">{actions}</div>
+              </div>
               <div className="profile-name-line">
                 <div className="participant-name-actions">
                   <h3>{person.avatar.name}</h3>
-                  {actions}
                 </div>
                 <ProfileSocialLinks instagram={person.instagram} soundcloud={person.soundcloud} />
               </div>
+              {counts}
             </div>
           </div>
           <section className="participant-about" aria-label="자기소개">
@@ -44,7 +47,7 @@ export function ParticipantProfile({
           {fanStats}
           {!own && (
             <Button variant="ghost" className="participant-report" onClick={onReport}>
-              <Flag size={13} aria-hidden="true" />
+              <Flaticon name="siren" size={14} />
               신고하기
             </Button>
           )}

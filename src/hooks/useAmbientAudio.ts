@@ -20,7 +20,8 @@ export function useAmbientAudio(
   parkNight?: boolean,
   barPerforming = false,
 ) {
-  const { enabled, volume } = useSoundSettings();
+  const { ambientVolume: volume } = useSoundSettings();
+  const enabled = volume > 0;
   const settings = useRef({ enabled, volume, entered, quiet, parkNight, barPerforming });
   settings.current = { enabled, volume, entered, quiet, parkNight, barPerforming };
   useEffect(() => {

@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Button } from '../ui/Button';
-import { Flaticon } from '../ui/Flaticon';
+import './delete-account.css';
 
 export function DeleteAccountDialog({
   onClose,
@@ -33,9 +33,13 @@ export function DeleteAccountDialog({
         if (!pendingRef.current) onClose();
       }}
     >
-      <Flaticon name="delete" size={32} />
-      <h2 id={title}>탈퇴하시겠어요?</h2>
-      <p id={description}>
+      <div className="delete-account-heading">
+        <div className="delete-account-art" aria-hidden="true">
+          <img src="/art/mori-farewell.png" width={104} height={120} alt="" />
+        </div>
+        <h2 id={title}>탈퇴하시겠어요?</h2>
+      </div>
+      <p id={description} className="delete-account-description">
         {demo
           ? '체험 모드에서는 삭제할 계정이 없어요.'
           : '계정이 삭제되고 로그아웃돼요. 삭제한 계정은 복구할 수 없어요.'}

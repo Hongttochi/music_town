@@ -29,6 +29,8 @@ for (const [key, name] of Object.entries({
   features: 'features',
   hairExtra: 'hair-extra',
   featuresExtra: 'features-extra',
+  hairStyledA: 'hair-styled-a',
+  hairStyledB: 'hair-styled-b',
 })) {
   layers[key] = await loadImage(`public/art/avatar-${name}.png`);
 }

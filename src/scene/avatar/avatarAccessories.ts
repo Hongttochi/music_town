@@ -69,7 +69,31 @@ export function drawAccessories(
       }
     }
   }
-  if (avatar.headwear && avatar.headwear !== 'none') {
+  if (avatar.headwear === 'satgat') {
+    ctx.fillStyle = '#d8bb7b';
+    ctx.strokeStyle = '#967445';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(256, 22);
+    ctx.quadraticCurveTo(333, 76, 421, 142);
+    ctx.quadraticCurveTo(256, 182, 91, 142);
+    ctx.quadraticCurveTo(179, 76, 256, 22);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.strokeStyle = '#ae8b5280';
+    ctx.lineWidth = 2;
+    for (let x = 113; x <= 399; x += 22) {
+      ctx.beginPath();
+      ctx.moveTo(256, 29);
+      ctx.lineTo(x, 145 + 15 * (1 - Math.abs(x - 256) / 165));
+      ctx.stroke();
+    }
+    ctx.beginPath();
+    ctx.moveTo(150, 113);
+    ctx.quadraticCurveTo(256, 137, 362, 113);
+    ctx.stroke();
+  } else if (avatar.headwear && avatar.headwear !== 'none') {
     const beanie = avatar.headwear === 'beanie';
     const bucket = avatar.headwear === 'bucket';
     ctx.strokeStyle = beanie ? '#8e5965' : '#455a6b';
@@ -102,10 +126,12 @@ export function drawAccessories(
       ctx.fill();
       ctx.stroke();
     } else {
-      const brimX = side ? (right ? 317 : 91) : 172;
-      if (!back) box(brimX, 119, side ? 106 : 168, 24, 12, '#4d667e');
+      const reversed = avatar.headwear === 'backward-cap';
+      const brimX = side ? (right !== reversed ? 317 : 91) : 172;
+      if (side || back === reversed) box(brimX, 119, side ? 106 : 168, 24, 12, '#4d667e');
       else box(224, 112, 64, 23, 9, '#344657');
-      if (!side && !back) box(241, 73, 30, 28, 7, '#e7d6ab');
+      if (!side && back === reversed) box(241, 73, 30, 28, 7, '#e7d6ab');
+      if (reversed && !side && !back) box(233, 124, 46, 7, 3, '#b7c6cc');
     }
   }
   if (avatar.eyewear && avatar.eyewear !== 'none') {

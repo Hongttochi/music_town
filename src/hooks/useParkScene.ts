@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useSoundEffects } from './useSoundEffects';
 import type { CoffeeId } from '../data/coffeeMenu';
 import type { ParkProps } from '../types/park';
+import type { ResidentTalk } from '../data/parkResidents';
 import { createParkScene } from '../scene/park/createParkScene';
 export function useParkScene(props: ParkProps) {
   const playSound = useSoundEffects();
@@ -12,6 +13,7 @@ export function useParkScene(props: ParkProps) {
     latest = useRef(props);
   latest.current = props;
   const [error, setError] = useState(false);
+  const [residentTalk, setResidentTalk] = useState<ResidentTalk | null>(null);
   const barBubble = useRef<HTMLButtonElement>(null);
   const [barNotice, setBarNotice] = useState(false);
   const [barMenuOpen, setBarMenuOpen] = useState(false);
@@ -33,6 +35,7 @@ export function useParkScene(props: ParkProps) {
   const [coffeeMenuOpen, setCoffeeMenuOpen] = useState(false);
   useEffect(() => {
     if (props.timeTransition) {
+      setResidentTalk(null);
       setBarMenuOpen(false);
       setBarNotice(false);
       setGuideOpen(false);
@@ -62,6 +65,7 @@ export function useParkScene(props: ParkProps) {
         useBench,
         useCoffee,
         setError,
+        setResidentTalk,
         setBenchAction,
         setNearNoticeBoard,
         setCoffeeMenuOpen,
@@ -70,6 +74,8 @@ export function useParkScene(props: ParkProps) {
     [],
   );
   return {
+    residentTalk,
+    setResidentTalk,
     barNotice,
     barMenuOpen,
     setBarMenuOpen,

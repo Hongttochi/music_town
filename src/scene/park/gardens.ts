@@ -5,7 +5,7 @@ type Spot = { x: number; z: number };
 /** Shared geometry keeps the flower borders inexpensive on mobile. */
 export function createGardens(
   scene: T.Scene,
-  walkways: (Spot & { width: number })[],
+  _walkways: (Spot & { width: number })[],
   clear: (x: number, z: number, radius: number) => boolean,
 ) {
   const group = new T.Group();
@@ -85,53 +85,21 @@ export function createGardens(
     }
   }
 
+  // Keep the open lawn calm: a few dense beds instead of scattered flower dots.
   const beds: Spot[] = [];
   const addBed = (x: number, z: number) => {
-    if (!clear(x, z, 0.65) || beds.some((b) => Math.hypot(x - b.x, z - b.z) < 1.35)) return;
-    if (fountain && Math.hypot(x - fountain.x, z - fountain.z) < 2.35) return;
+    if (!clear(x, z, 1) || beds.some((b) => Math.hypot(x - b.x, z - b.z) < 2.4)) return;
+    if (fountain && Math.hypot(x - fountain.x, z - fountain.z) < 2.9) return;
     beds.push({ x, z });
   };
-  if (fountain) {
-    // A low flower wreath leaves the water visible and plenty of room to walk around it.
-    for (let i = 0; i < 12; i++) {
-      const angle = (i / 12) * Math.PI * 2;
-      addBed(fountain.x + Math.cos(angle) * 2.75, fountain.z + Math.sin(angle) * 2.75);
-    }
-  }
-  // Small drifts fill the lawn between the stages, rather than only its perimeter.
   for (const [x, z] of [
-    [-10, 0],
     [-10, 2],
-    [-9, 4.5],
     [-7, 7],
-    [-5, 7.5],
-    [-3.5, -3],
     [-5, -6.5],
-    [-7, -7.5],
-    [3, -4],
-    [4, 4.5],
     [6, 7],
-    [8, 7.5],
-  ])
-    addBed(x, z);
-  // The lawn east of the bar is beyond the loop path. Give it its own planting
-  // before the path-border budget is filled by the main park.
-  for (const [x, z] of [
-    [40.5, -9],
-    [42, -7.5],
-    [40.5, -5.5],
-    [43, -4],
-    [40.5, -2],
+    [40.5, -7.5],
     [42.5, 0],
-    [40, 1.5],
-    [43.5, 3],
-    [38, 4],
-    [40.5, 5],
-    [42.5, 6.5],
-    [38.5, 7.5],
-    [41, 9],
-    [37, 10],
-    [43, 11],
+    [40.5, 7.5],
   ])
     addBed(x, z);
   const shrubs = [
@@ -140,29 +108,15 @@ export function createGardens(
     { x: 43.5, z: 8.5 },
     { x: 40.5, z: 11.5 },
   ].filter(({ x, z }) => clear(x, z, 0.85));
-  for (let i = 3; i < walkways.length; i += 4) {
-    const p = walkways[i],
-      previous = walkways[i - 1];
-    const dx = p.x - previous.x,
-      dz = p.z - previous.z;
-    const length = Math.hypot(dx, dz);
-    if (length < 0.001 || length > 2) continue;
-    for (const side of [-1, 1]) {
-      const x = p.x - (dz / length) * (p.width + 1.15) * side;
-      const z = p.z + (dx / length) * (p.width + 1.15) * side;
-      addBed(x, z);
-    }
-    if (beds.length >= 110) break;
-  }
   const flowers = beds.flatMap((bed, bedIndex) =>
-    Array.from({ length: 15 }, (_, i) => {
+    Array.from({ length: 32 }, (_, i) => {
       const angle = i * 2.4 + bedIndex;
-      const radius = Math.sqrt(i / 15) * 0.55;
+      const radius = Math.sqrt(i / 32) * 0.82;
       return {
         x: bed.x + Math.cos(angle) * radius,
         z: bed.z + Math.sin(angle) * radius,
-        y: 0.25 + (i % 4) * 0.055,
-        color: i % 5 === 0 ? 3 : bedIndex % 4,
+        y: 0.28 + (i % 3) * 0.035,
+        color: bedIndex % 3,
       };
     }),
   );
@@ -188,9 +142,10 @@ export function createGardens(
     mesh.computeBoundingSphere();
     group.add(mesh);
   }
-  instances(new T.ConeGeometry(0.16, 0.25, 5), material('#82966b'), flowers.length, (i) => {
-    const f = flowers[i];
-    transform.position.set(f.x, 0.12, f.z);
+  instances(new T.SphereGeometry(1, 10, 7), material('#82966b'), beds.length, (i) => {
+    const bed = beds[i];
+    transform.position.set(bed.x, 0.1, bed.z);
+    transform.scale.set(0.98, 0.18, 0.98);
   });
   // Low rounded foliage frames the flowers without hiding people or the doorway.
   instances(new T.SphereGeometry(1, 10, 7), material('#718754'), shrubs.length * 3, (i) => {
@@ -227,6 +182,8 @@ export function createGardens(
   update(0);
   return {
     fountain,
+    beds,
+    shrubs,
     update,
     dispose() {
       group.removeFromParent();

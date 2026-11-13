@@ -1,13 +1,15 @@
-import { ArrowUpRight, Headphones, VolumeX, Volume2, Users, Flag, ListPlus } from 'lucide-react';
-import { Button } from '../ui/Button';
+import { ChevronRight, Headphones, VolumeX, Volume2, Users, ListPlus } from 'lucide-react';
 import { Flaticon } from '../ui/Flaticon';
+import { Button } from '../ui/Button';
+import { ProfileIcon } from '../profile/ProfileIcon';
 import { ProfileBio } from '../profile/ProfileBio';
-import type { Stage } from '../../data/model';
+import type { Avatar, Stage } from '../../data/model';
 import type { Participant } from '../../hooks/useTown';
 import './stage-profile.css';
 type Props = {
   selected: Stage;
   selectedMusician: Participant | undefined;
+  performerAvatar?: Avatar;
   own: boolean;
   muted: boolean;
   onProfile: () => void;
@@ -19,6 +21,7 @@ type Props = {
 export function StageProfile({
   selected,
   selectedMusician,
+  performerAvatar,
   own,
   muted,
   onProfile,
@@ -31,12 +34,12 @@ export function StageProfile({
     <section className="stage-profile-card" aria-label="공연 정보">
       <div className="stage-performer">
         <div className="stage-performer-icon">
-          <Flaticon name="music" size={32} />
+          <ProfileIcon id={performerAvatar?.profileIcon} avatar={performerAvatar} size={32} />
         </div>
         <div className="stage-performer-copy">
           <p className="stage-live-label">
             <span aria-hidden="true" />
-            {own ? '내 공연' : '지금 공연 중'}
+            뮤지션
           </p>
           <h3>{selected.artist || '공연자'}</h3>
         </div>
@@ -47,7 +50,7 @@ export function StageProfile({
             onClick={onProfile}
             aria-label={`${selected.artist} 프로필 보기`}
           >
-            프로필 <ArrowUpRight size={14} />
+            프로필 <ChevronRight size={14} aria-hidden="true" />
           </Button>
         )}
       </div>
@@ -79,7 +82,7 @@ export function StageProfile({
               공연 대기
             </Button>
             <Button variant="ghost" onClick={onReport}>
-              <Flag size={14} />
+              <Flaticon name="siren" size={14} />
               신고
             </Button>
           </div>

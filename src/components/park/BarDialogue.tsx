@@ -49,7 +49,7 @@ export function BarDialogue({ onClose, night = false }: { onClose: () => void; n
       <div className="bar-dialogue-speaker">
         <img src={dogImage} alt="정장을 입은 강아지 루나" />
         <span id="bar-speaker" className="bar-dialogue-name">
-          루나 <small>문나잇 바 안내</small>
+          루나 <small>문나잇 바 호스트</small>
         </span>
       </div>
       <div className="bar-dialogue-body">

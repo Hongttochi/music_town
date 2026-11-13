@@ -211,16 +211,16 @@ export function AvatarEditor({
               </section>
             ))}
           </div>
-          <Button
-            variant="primary"
-            className="village-confirm"
-            disabled={!avatar.name.trim()}
-            onClick={onContinue}
-          >
-            <Flaticon name="leaf" size={21} /> 좋아, 이 모습으로 갈래!
-          </Button>
         </div>
       </div>
+      <Button
+        variant="primary"
+        className="village-confirm"
+        disabled={!avatar.name.trim()}
+        onClick={onContinue}
+      >
+        <Flaticon name="leaf" size={21} /> 좋아, 이 모습으로 갈래!
+      </Button>
     </div>
   );
 }

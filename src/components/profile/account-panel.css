@@ -87,6 +87,16 @@ dialog.town-panel[data-panel='account'] {
   font-weight: 600;
   color: #48513f;
 }
+.account-name-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  gap: 4px;
+}
+.account-name .account-name-summary .fan-counts {
+  margin: 0;
+}
 .account-role {
   font-size: 10px;
   color: #8a8c7d;
@@ -335,4 +345,10 @@ dialog .account-panel .account-edit-actions > .town-button {
 dialog .account-panel .account-edit-actions > .town-button img {
   width: 16px;
   height: 16px;
+}
+.account-panel .account-badge .profile-character-badge,
+.account-panel .account-badge .profile-person-badge {
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }

@@ -1,4 +1,5 @@
 import type { Avatar } from '../../data/model';
+import { drawSoftOutfit } from './avatarSoftOutfits';
 
 /** Tailored silhouettes use the same body coordinates as every avatar view. */
 export function drawOutfit(
@@ -8,6 +9,12 @@ export function drawOutfit(
 ) {
   const style = avatar.clothingStyle;
   if (!style || ['plain', 'stripe', 'pocket'].includes(style)) return;
+  if (
+    ['blouse', 'cardigan-skirt', 'ribbon-dress', 'pleated-skirt', 'aline-skirt'].includes(style)
+  ) {
+    drawSoftOutfit(ctx, avatar, direction);
+    return;
+  }
   const side = direction === 1 || direction === 3,
     back = direction === 2;
   const x = side ? 236 : 214,
@@ -90,6 +97,93 @@ export function drawOutfit(
       );
     }
   }
+  if (style === 'hanbok') {
+    poly(
+      [
+        [x - 3, 333],
+        [x + width + 3, 333],
+        [x + width + 18, 438],
+        [x - 18, 438],
+      ],
+      pants,
+    );
+    for (const fraction of [0.2, 0.4, 0.6, 0.8]) {
+      line(
+        [
+          [x + width * fraction, 350],
+          [x - 12 + (width + 24) * fraction, 430],
+        ],
+        '#ffffff35',
+        2,
+      );
+    }
+    panel(x - 3, 279, width + 6, 65, shirt, 9);
+    if (side) panel(237, 292, 43, 71, shirt, 13);
+    else {
+      poly(
+        [
+          [216, 287],
+          [199, 289],
+          [181, 355],
+          [211, 366],
+          [229, 318],
+        ],
+        shirt,
+      );
+      poly(
+        [
+          [296, 287],
+          [313, 289],
+          [331, 355],
+          [301, 366],
+          [283, 318],
+        ],
+        shirt,
+      );
+    }
+    panel(x - 2, 336, width + 4, 8, '#e8cfa9', 2);
+    if (!back) {
+      line(
+        [
+          [x + 12, 282],
+          [x + width - 13, 320],
+          [x + width - 17, 339],
+        ],
+        '#fff9e9',
+        6,
+      );
+      const tieX = x + width * 0.65;
+      poly(
+        [
+          [tieX, 317],
+          [tieX - 17, 308],
+          [tieX - 15, 325],
+          [tieX, 319],
+          [tieX + 16, 308],
+          [tieX + 18, 325],
+        ],
+        '#a8556e',
+      );
+      line(
+        [
+          [tieX - 2, 321],
+          [tieX - 8, 351],
+        ],
+        '#a8556e',
+        5,
+      );
+      line(
+        [
+          [tieX + 3, 321],
+          [tieX + 10, 347],
+        ],
+        '#a8556e',
+        4,
+      );
+    }
+    ctx.restore();
+    return;
+  }
   if (style === 'tank') {
     // Sleeves are recolored in the source garment mask, preserving the original arm outline.
     if (!side) {
@@ -166,7 +260,7 @@ export function drawOutfit(
       panel(x, 344, width, 9, '#737e75', 3);
     }
   } else {
-    const bulky = style === 'street' || style === 'puffer';
+    const bulky = style === 'street' || style === 'puffer' || style === 'hoodie';
     panel(
       x - (bulky ? 7 : 0),
       280,
@@ -180,7 +274,7 @@ export function drawOutfit(
       panel(195, 294, 29, 67, shirt, 12);
       panel(288, 294, 29, 67, shirt, 12);
     }
-    if (style === 'suit') {
+    if (style === 'suit' || style === 'uniform') {
       if (!back) {
         poly(
           [
@@ -220,6 +314,20 @@ export function drawOutfit(
           3,
         );
         panel(x + width / 2 - 2, 345, 4, 4, '#e8d6ab', 2);
+        if (style === 'uniform') {
+          panel(x + width - 24, 321, 15, 17, '#c6ad72', 3);
+          line(
+            [
+              [x + width - 20, 325],
+              [x + width - 17, 333],
+              [x + width - 13, 325],
+            ],
+            '#59647a',
+            2,
+          );
+          panel(x + 9, 344, 19, 3, '#c6ad72', 1);
+          panel(x + width / 2 - 2, 358, 4, 4, '#e8d6ab', 2);
+        }
       }
     } else if (style === 'shirt') {
       if (!back) {
@@ -269,7 +377,24 @@ export function drawOutfit(
           3,
         );
       panel(x - 2, 277, width + 4, 16, shirt, 7);
-    } else if (style === 'street') {
+    } else if (style === 'street' || style === 'hoodie') {
+      if (style === 'hoodie') {
+        ctx.fillStyle = shirt;
+        ctx.strokeStyle = '#00000025';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.ellipse(
+          x + width / 2,
+          back ? 302 : 285,
+          width * 0.48,
+          back ? 27 : 15,
+          0,
+          0,
+          Math.PI * 2,
+        );
+        ctx.fill();
+        ctx.stroke();
+      }
       line(
         [
           [x + 5, 284],

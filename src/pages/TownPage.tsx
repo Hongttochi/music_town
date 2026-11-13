@@ -1,4 +1,3 @@
-import { Flag } from 'lucide-react';
 import { MusicianRankings } from '../components/profile/MusicianRankings';
 import { BAR_STAGE_ID } from '../data/bar';
 import { BAR_STAGE_EXIT, isInsideBar } from '../scene/park/nightBar';
@@ -97,7 +96,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
     if (timeTransition.active) setPanel(null);
   }, [timeTransition.active]);
   const [toast, setToast] = useState('');
-  const [toastKind, setToastKind] = useState<'notice' | 'performance'>('notice');
+  const [toastKind, setToastKind] = useState<'notice' | 'performance' | 'arrival'>('notice');
   const [actionError, setActionError] = useState('');
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -112,7 +111,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
   const mapPositions = useRef(new Map<string, Position>());
   const motion = useRef<Position>({ x: 0, y: 0 });
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const notify = (text: string, kind: 'notice' | 'performance' = 'notice') => {
+  const notify = (text: string, kind: 'notice' | 'performance' | 'arrival' = 'notice') => {
     setToastKind(kind);
     setToast(text);
     clearTimeout(toastTimer.current);
@@ -314,7 +313,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
       setNear(null);
       position.current = { x: 650, y: 470 };
       setPanel(null);
-      notify(`${String(id + 1).padStart(2, '0')}번 공원에 도착했어요.`);
+      notify(`${String(id + 1).padStart(2, '0')}번 공원`, 'arrival');
     } catch (error) {
       setActionError((error as Error).message);
       entryPending.current = false;
@@ -531,18 +530,23 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
         {panel === 'account' && (
           <>
             {title('', '\uB0B4 \uD504\uB85C\uD544')}
-            <AccountPanel
-              fanStats={<FanProfile userId={account.id} own demo={account.demo} />}
-              avatar={avatar}
-              onCustomize={() => setPanel('avatar')}
-              profile={memberProfile}
-              onEditProfile={() => setPanel('registration')}
-              onChooseIcon={async (id) => {
-                const next = { ...avatar, profileIcon: id };
-                if (!account.demo) await saveProfile(account.id, memberProfile, next);
-                setAvatar(next);
-              }}
-            />
+            <FanProfile userId={account.id} own demo={account.demo}>
+              {(content, _actions, counts) => (
+                <AccountPanel
+                  fanStats={content}
+                  fanCounts={counts}
+                  avatar={avatar}
+                  onCustomize={() => setPanel('avatar')}
+                  profile={memberProfile}
+                  onEditProfile={() => setPanel('registration')}
+                  onChooseIcon={async (id) => {
+                    const next = { ...avatar, profileIcon: id };
+                    if (!account.demo) await saveProfile(account.id, memberProfile, next);
+                    setAvatar(next);
+                  }}
+                />
+              )}
+            </FanProfile>
           </>
         )}
         {panel === 'avatar' && (
@@ -613,6 +617,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
             <StageProfile
               selected={selected}
               selectedMusician={selectedMusician}
+              performerAvatar={selectedOwnPerformance ? avatar : selectedMusician?.avatar}
               own={selectedOwnPerformance}
               muted={muted.includes(selected.id)}
               onProfile={() => {
@@ -656,7 +661,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
         )}
         {panel === 'queue' && (
           <>
-            {title('YOUR VOICE, YOUR STAGE', '누구나 시작할 수 있어요')}
+            {title('YOUR VOICE, YOUR STAGE', '라이브 무대')}
             <BuskingBook
               stage={selected}
               performing={performing !== null}
@@ -711,7 +716,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
           <>
             <PanelHeading
               title="신고하기"
-              icon={<Flag size={18} aria-hidden="true" />}
+              icon={<Flaticon name="siren" size={18} />}
               onClose={() => setPanel(null)}
             />
             <ReportForm
@@ -744,9 +749,19 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
       <div
         id="toast"
         role="status"
-        className={`${toast ? 'visible' : ''}${toastKind === 'performance' ? ' performance-toast' : ''}`}
+        className={`${toast ? 'visible' : ''}${toastKind !== 'notice' ? ` ${toastKind}-toast` : ''}`}
       >
-        {toastKind === 'performance' ? (
+        {toastKind === 'arrival' ? (
+          <>
+            <span className="arrival-toast-icon" aria-hidden="true">
+              <Flaticon name="leaf" size={26} />
+            </span>
+            <span className="arrival-toast-copy">
+              <strong>{toast}</strong>
+              <span>공원에 왔어요</span>
+            </span>
+          </>
+        ) : toastKind === 'performance' ? (
           <>
             <span className="performance-toast-icon" aria-hidden="true">
               <Flaticon name="clap" size={28} />

@@ -4,6 +4,7 @@ import { sources, type SoundEffect } from '../data/sounds';
 import { SoundContext, SoundSettingsContext } from '../contexts/SoundContext';
 const preferenceKey = 'music-town-sound-effects';
 const volumeKey = 'music-town-sound-volume';
+const ambientVolumeKey = 'music-town-ambient-volume';
 export function SoundEffectsProvider({ children }: { children: ReactNode }) {
   const [enabled, updateEnabled] = useState(() => {
     try {
@@ -21,6 +22,25 @@ export function SoundEffectsProvider({ children }: { children: ReactNode }) {
       return 1;
     }
   });
+  const [ambientVolume, updateAmbientVolume] = useState(() => {
+    try {
+      const saved = localStorage.getItem(ambientVolumeKey);
+      const value = saved === null ? (enabled ? volume : 0) : Number(saved);
+      return Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 1;
+    } catch {
+      return 1;
+    }
+  });
+  const setAmbientVolume = useCallback((value: number) => {
+    if (!Number.isFinite(value)) return;
+    const next = Math.max(0, Math.min(1, value));
+    updateAmbientVolume(next);
+    try {
+      localStorage.setItem(ambientVolumeKey, String(next));
+    } catch {
+      /* Storage is optional. */
+    }
+  }, []);
   const volumeRef = useRef(volume);
   const enabledRef = useRef(enabled);
   const playbackVersion = useRef(0);
@@ -202,7 +222,7 @@ export function SoundEffectsProvider({ children }: { children: ReactNode }) {
   }, [play]);
   return createElement(
     SoundSettingsContext.Provider,
-    { value: { enabled, setEnabled, volume, setVolume } },
+    { value: { enabled, setEnabled, volume, setVolume, ambientVolume, setAmbientVolume } },
     createElement(SoundContext.Provider, { value: play }, children),
   );
 }

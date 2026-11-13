@@ -1,4 +1,5 @@
 import { drawAccessories } from './avatarAccessories';
+import { drawFacewear } from './avatarFacewear';
 import type { Avatar } from '../../data/model';
 
 /** Equipment is drawn into the same four-view texture used by preview and world. */
@@ -13,6 +14,7 @@ export function drawEquipment(
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   drawAccessories(ctx, avatar, direction);
+  drawFacewear(ctx, avatar, direction);
   if (['guitar', 'electric', 'ukulele'].includes(avatar.instrument || '')) {
     const electric = avatar.instrument === 'electric',
       small = avatar.instrument === 'ukulele';

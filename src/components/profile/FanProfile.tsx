@@ -19,7 +19,7 @@ export function FanProfile({
   userId?: string;
   own?: boolean;
   demo?: boolean;
-  children?: (content: ReactNode, actions: ReactNode) => ReactNode;
+  children?: (content: ReactNode, actions: ReactNode, counts: ReactNode) => ReactNode;
 }) {
   const [peopleKind, setPeopleKind] = useState<'follow' | 'heart' | null>(null);
   const { stats, error, busy, act, refresh } = useFanStats(userId, demo);
@@ -28,7 +28,7 @@ export function FanProfile({
       <Button
         variant="plain"
         size="sm"
-        className="fan-action-icon"
+        className="fan-action-icon fan-follow-action"
         disabled={!stats || busy}
         aria-pressed={stats?.following ?? false}
         aria-label={stats?.following ? '팔로우 취소' : '팔로우'}
@@ -58,52 +58,50 @@ export function FanProfile({
       </Button>
     </div>
   );
+  const counts = (
+    <dl className="fan-counts">
+      <div>
+        <dt>팔로워</dt>
+        <dd>
+          <button
+            type="button"
+            disabled={demo || !userId}
+            aria-label="팔로워 목록 보기"
+            onClick={() => setPeopleKind('follow')}
+          >
+            <img src="/icons/profile-followers.png?v=20261110-flat" width={20} height={20} alt="" />
+            <span>{stats ? stats.followers.toLocaleString('ko-KR') : '—'}</span>
+          </button>
+        </dd>
+      </div>
+      <div>
+        <dt>누적 하트</dt>
+        <dd>
+          <button
+            type="button"
+            disabled={demo || !userId}
+            aria-label="하트를 보낸 사람들 보기"
+            onClick={() => setPeopleKind('heart')}
+          >
+            <img
+              src="/icons/profile-received-heart.png?v=20261110-flat"
+              width={20}
+              height={20}
+              alt=""
+            />
+            <span>{stats ? stats.hearts.toLocaleString('ko-KR') : '—'}</span>
+          </button>
+        </dd>
+      </div>
+      <div>
+        <dt>주간 하트</dt>
+        <dd>{stats?.weeklyHearts?.toLocaleString('ko-KR') ?? '—'}</dd>
+      </div>
+    </dl>
+  );
   const content = (
     <section className="fan-profile" aria-label="팬 활동">
-      <dl className="fan-counts">
-        <div>
-          <dt>팔로워</dt>
-          <dd>
-            <button
-              type="button"
-              disabled={demo || !userId}
-              aria-label="팔로워 목록 보기"
-              onClick={() => setPeopleKind('follow')}
-            >
-              <img
-                src="/icons/profile-followers.png?v=20261110-flat"
-                width={20}
-                height={20}
-                alt=""
-              />
-              <span>{stats ? stats.followers.toLocaleString('ko-KR') : '—'}</span>
-            </button>
-          </dd>
-        </div>
-        <div>
-          <dt>누적 하트</dt>
-          <dd>
-            <button
-              type="button"
-              disabled={demo || !userId}
-              aria-label="하트를 보낸 사람들 보기"
-              onClick={() => setPeopleKind('heart')}
-            >
-              <img
-                src="/icons/profile-received-heart.png?v=20261110-flat"
-                width={20}
-                height={20}
-                alt=""
-              />
-              <span>{stats ? stats.hearts.toLocaleString('ko-KR') : '—'}</span>
-            </button>
-          </dd>
-        </div>
-        <div>
-          <dt>주간 하트</dt>
-          <dd>{stats?.weeklyHearts?.toLocaleString('ko-KR') ?? '—'}</dd>
-        </div>
-      </dl>
+      {!children && counts}
       {!children && actions}
       <ActivityChart stats={stats} />
       {demo && <small>로그인 후 팬 정보를 볼 수 있어요.</small>}
@@ -119,7 +117,7 @@ export function FanProfile({
   );
   return (
     <>
-      {children ? children(content, actions) : content}
+      {children ? children(content, actions, counts) : content}
       {peopleKind && userId && (
         <FanPeopleDialog
           key={`${userId}:${peopleKind}`}

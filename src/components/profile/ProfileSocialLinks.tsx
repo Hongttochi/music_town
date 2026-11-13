@@ -11,8 +11,8 @@ export function ProfileSocialLinks({
 }) {
   const links = (
     [
-      ['instagram', '인스타그램', instagram],
-      ['soundcloud', '사운드클라우드', soundcloud],
+      ['instagram', 'Instagram', instagram],
+      ['soundcloud', 'SoundCloud', soundcloud],
     ] as const
   ).flatMap(([kind, label, value]) => {
     if (!value) return [];

@@ -1,4 +1,6 @@
 import { createBarNpc } from '../avatar/barNpc';
+import { createParkResidents } from './parkResidents';
+import type { ResidentTalk } from '../../data/parkResidents';
 import dogImage from '../../assets/npc/bar-dog.webp';
 import catImage from '../../assets/npc/bar-cat.webp';
 import { BAR_STAGE_ID, type BarDrinkId } from '../../data/bar';
@@ -49,6 +51,7 @@ const world = (p: Position) => new T.Vector3((p.x - 700) / 25, 0, (p.y - 450) / 
 const STAGE_RADIUS = 2.2;
 const STAGE_SURFACE_HEIGHT = 0.24;
 type ParkSceneBindings = {
+  setResidentTalk: (value: ResidentTalk) => void;
   setBarNotice: (value: boolean) => void;
   setBarMenuOpen: (value: boolean) => void;
   useBarDrink: React.MutableRefObject<(id: BarDrinkId) => void>;
@@ -73,6 +76,7 @@ type ParkSceneBindings = {
   setCoffeeAction: (value: string | null) => void;
 };
 export function createParkScene({
+  setResidentTalk,
   el,
   latest,
   sound,
@@ -309,14 +313,25 @@ export function createParkScene({
       )
     )
       return;
+    const geometry = new T.IcosahedronGeometry(1, 1);
+    const vertices = geometry.getAttribute('position');
+    const seed = random() * 20;
+    for (let i = 0; i < vertices.count; i++) {
+      const vx = vertices.getX(i),
+        vy = vertices.getY(i),
+        vz = vertices.getZ(i);
+      const rough = 1 + 0.14 * Math.sin(vx * 7 + vz * 5 + seed) + 0.09 * Math.cos(vy * 9 + seed);
+      vertices.setXYZ(i, vx * rough + vy * 0.13, Math.max(-0.38, vy * rough), vz * rough);
+    }
+    geometry.computeVertexNormals();
     const stone = mesh(
-      new T.IcosahedronGeometry(1, 1),
-      ['#b3b6a2', '#c6c6b2', '#a5ad9e'][Math.floor(random() * 3)],
+      geometry,
+      ['#87897a', '#9b9c88', '#737c70'][Math.floor(random() * 3)],
       x + (random() - 0.5) * 0.18,
-      0.12,
+      0.18,
       z,
     );
-    stone.scale.set(0.48 + random() * 0.2, 0.27 + random() * 0.15, 0.62 + random() * 0.2);
+    stone.scale.set(0.48 + random() * 0.2, 0.48 + random() * 0.32, 0.56 + random() * 0.3);
     stone.rotation.y = random() * Math.PI;
   }
   for (let z = -46; z < 47; z += 1.45) {
@@ -427,6 +442,11 @@ export function createParkScene({
     coffeeStarted = performance.now();
   };
   obstacles.push({ x: COFFEE_BUILDING.x, z: COFFEE_BUILDING.z, r: 2.5 });
+  const flowerBedSpots: { x: number; z: number }[] = [];
+  const flowerBed = (x: number, z: number) => {
+    scenery.prop(3, x, z, 1.1);
+    flowerBedSpots.push({ x, z });
+  };
   [
     [-9, -6],
     [-7, -5.5],
@@ -434,7 +454,7 @@ export function createParkScene({
     [8, 8],
     [10, -11],
     [-8, 12],
-  ].forEach(([x, z]) => scenery.prop(3, x, z, 1.1));
+  ].forEach(([x, z]) => flowerBed(x, z));
 
   for (let x = -20; x < 14; x += 3.4) scenery.prop(5, x, -17, 1.2);
   // A small wooden footbridge makes the river part of the walk.
@@ -467,10 +487,10 @@ export function createParkScene({
     [33, 17],
   ].forEach(([x, z]) => tree(x, z));
   [
-    [27, 8],
+    [27, 14.5],
     [35, 12],
     [39, -15],
-  ].forEach(([x, z]) => scenery.prop(3, x, z, 1.1));
+  ].forEach(([x, z]) => flowerBed(x, z));
 
   const stageMeshes: T.Object3D[] = [];
   const stageCenters = latest.current.liveStages.map(world);
@@ -483,6 +503,7 @@ export function createParkScene({
       z > -16 &&
       z < 19 &&
       !(x > RIVER.left - radius && x < RIVER.right + radius) &&
+      !(Math.abs(x - 26.6) < radius + 1.8 && z > 6.5 - radius && z < 12 + radius) &&
       !walkways.some((p) => Math.hypot(x - p.x, z - p.z) < p.width + radius + 0.2) &&
       !stageCenters.some((p) => Math.hypot(x - p.x, z - p.z) < STAGE_RADIUS + radius + 0.8) &&
       !obstacles.some((p) => Math.hypot(x - p.x, z - p.z) < p.r + radius + 0.5) &&
@@ -490,7 +511,26 @@ export function createParkScene({
       !overlapsSchool({ x, z }, radius + 0.5) &&
       Math.hypot(x - COFFEE_BUILDING.x, z - COFFEE_BUILDING.z) > radius + 4,
   );
-  if (gardens.fountain) obstacles.push({ ...gardens.fountain, r: 1.8 });
+  if (gardens.fountain) obstacles.push({ ...gardens.fountain, r: 1.9 });
+  // Use the same solid footprints for player movement and resident navigation.
+  obstacles.push(
+    ...flowerBedSpots.map((spot) => ({ ...spot, r: 0.85 })),
+    ...gardens.beds.map((spot) => ({ ...spot, r: 1 })),
+    ...gardens.shrubs.map((spot) => ({ ...spot, r: 0.8 })),
+  );
+  function woodenBench(x: number, z: number, facing = 0) {
+    const bench = new T.Group();
+    bench.position.set(x, 0, z);
+    bench.rotation.y = facing;
+    scene.add(bench);
+    for (const slatZ of [-0.26, 0, 0.26]) box(0, 0.64, slatZ, 2.4, 0.13, 0.22, '#b88b56', bench);
+    for (const y of [0.98, 1.25]) box(0, y, -0.43, 2.4, 0.21, 0.12, '#bd925d', bench);
+    for (const legX of [-0.96, 0.96]) {
+      for (const legZ of [-0.3, 0.3]) box(legX, 0.3, legZ, 0.14, 0.6, 0.14, '#667257', bench);
+      box(legX, 0.93, -0.43, 0.12, 0.82, 0.14, '#667257', bench);
+      box(legX, 0.91, 0, 0.15, 0.12, 0.9, '#9e784d', bench);
+    }
+  }
   // Leave room for the full bench, the stage edge, and the audience walkway.
   const benches: T.Vector3[] = [];
   for (const [preferredX, preferredZ] of [
@@ -511,14 +551,32 @@ export function createParkScene({
         if (stageCenters.some((center) => Math.hypot(x - center.x, z - center.z) < 5)) continue;
         if (obstacles.some((o) => Math.hypot(x - o.x, z - o.z) < o.r + 2)) continue;
         if (overlapsBar({ x, z }, 2, false)) continue;
+        if (
+          [...flowerBedSpots, ...gardens.beds].some((bed) => Math.hypot(x - bed.x, z - bed.z) < 3)
+        )
+          continue;
         if (benches.some((bench) => Math.hypot(x - bench.x, z - bench.z) < 4)) continue;
         chosen = new T.Vector3(x, 0, z);
         break;
       }
     }
     if (chosen) {
-      scenery.prop(4, chosen.x, chosen.z, 1.8);
+      woodenBench(chosen.x, chosen.z);
       benches.push(chosen);
+    }
+  }
+  // Two wooden benches face each other beside the east riverbank.
+  // Each has two independent seats so friends can sit together.
+  const riversideSeats = new Map<T.Vector3, number>();
+  for (const [z, facing] of [
+    [7.5, 0],
+    [11, Math.PI],
+  ]) {
+    woodenBench(26.6, z, facing);
+    for (const offset of [-0.5, 0.5]) {
+      const seat = new T.Vector3(26.6 + offset, 0, z + (facing === 0 ? 0.48 : -0.48));
+      benches.push(seat);
+      riversideSeats.set(seat, facing);
     }
   }
   benches.push(...BAR_SEATS);
@@ -528,7 +586,9 @@ export function createParkScene({
   let standingPosition: Position | null = null;
   let shownBenchAction: 'sit' | null = null;
   const seatPosition = (bench: T.Vector3) =>
-    BAR_SEATS.includes(bench) ? bench.clone() : new T.Vector3(bench.x - 0.2, 0, bench.z + 0.25);
+    BAR_SEATS.includes(bench) || riversideSeats.has(bench)
+      ? bench.clone()
+      : new T.Vector3(bench.x - 0.2, 0, bench.z + 0.65);
   const standUp = (restorePosition: boolean) => {
     if (restorePosition && standingPosition) {
       const seat = seatedBench;
@@ -782,7 +842,43 @@ export function createParkScene({
   observer.observe(el);
   resize();
   const raycaster = new T.Raycaster();
+  const residents = createParkResidents({
+    coffee: { x: COFFEE_SPOT.x, z: COFFEE_SPOT.z + 1.2 },
+    scene,
+    canvas: el,
+    camera,
+    talk: setResidentTalk,
+    insideBar: isInsideBar,
+    cross: canCrossRiver,
+    surface: surfaceHeight,
+    clear: (point, night) =>
+      !overlapsCoffeeMachine(point, PLAYER_RADIUS) &&
+      !overlapsSchool(point, PLAYER_RADIUS) &&
+      !overlapsBar(point, PLAYER_RADIUS, night) &&
+      !obstacles.some((o) => Math.hypot(point.x - o.x, point.z - o.z) < o.r + PLAYER_RADIUS) &&
+      !stageCenters.some((s) => Math.hypot(point.x - s.x, point.z - s.z) < STAGE_RADIUS + 0.4),
+    seats: benches.map((bench) => {
+      const point = seatPosition(bench);
+      const barSeat = BAR_SEATS.includes(bench);
+      const facing =
+        riversideSeats.get(bench) ??
+        (BAR_LOUNGE_SEATS.includes(bench)
+          ? bench.x < BAR_SPOT.x
+            ? -Math.PI / 2
+            : Math.PI / 2
+          : 0);
+      return {
+        point,
+        facing,
+        bar: barSeat,
+        approach: barSeat
+          ? barWalkablePosition(point, PLAYER_RADIUS)
+          : point.clone().add(new T.Vector3(Math.sin(facing) * 0.75, 0, Math.cos(facing) * 0.75)),
+      };
+    }),
+  });
   const click = (e: MouseEvent) => {
+    if (document.querySelector('dialog[open]')) return;
     const r = el.getBoundingClientRect();
     raycaster.setFromCamera(
       new T.Vector2(
@@ -921,11 +1017,16 @@ export function createParkScene({
         benches.some((bench) => destination.distanceTo(seatPosition(bench)) < 0.1);
       if (visitor.group.userData.seated) {
         const lounge = BAR_LOUNGE_SEATS.find((seat) => destination.distanceTo(seat) < 0.1);
-        visitor.group.rotation.y = lounge
-          ? lounge.x < BAR_SPOT.x
-            ? -Math.PI / 2
-            : Math.PI / 2
-          : 0;
+        const riverside = [...riversideSeats.keys()].find(
+          (seat) => destination.distanceTo(seat) < 0.1,
+        );
+        visitor.group.rotation.y = riverside
+          ? riversideSeats.get(riverside)!
+          : lounge
+            ? lounge.x < BAR_SPOT.x
+              ? -Math.PI / 2
+              : Math.PI / 2
+            : 0;
       }
     }
     if (key !== avatarKey) {
@@ -1075,7 +1176,12 @@ export function createParkScene({
     );
     npcObstacle.x = school.npcPosition.x;
     npcObstacle.z = school.npcPosition.z;
-    coffeeShop.update(coffeePhase, coffeeElapsed / 2300, orderedCoffee);
+    const residentCoffee = coffeePhase === 'idle' ? residents.coffeeService(time) : null;
+    coffeeShop.update(
+      residentCoffee?.brewing ? 'brewing' : coffeePhase,
+      residentCoffee?.progress ?? coffeeElapsed / 2300,
+      orderedCoffee,
+    );
     player.userData.coffee = orderedCoffee;
     player.userData.barDrink = barSipStarted !== null ? orderedBarDrink : undefined;
     player.userData.coffeePreparing =
@@ -1155,7 +1261,12 @@ export function createParkScene({
       !overlapsCoffeeMachine(point, PLAYER_RADIUS) &&
       !overlapsSchool(point, PLAYER_RADIUS) &&
       !overlapsBar(point, PLAYER_RADIUS, barNight) &&
-      !obstacles.some((o) => Math.hypot(point.x - o.x, point.z - o.z) < o.r + PLAYER_RADIUS)
+      !obstacles.some((o) => {
+        const distance = Math.hypot(point.x - o.x, point.z - o.z);
+        const previous = Math.hypot(currentPoint.x - o.x, currentPoint.z - o.z);
+        // Saved positions may predate a new obstacle: allow walking out, never farther in.
+        return distance < o.r + PLAYER_RADIUS && distance <= previous;
+      })
     )
       p.position.current = next;
     if ((dx || dz) && time - lastMove > 70) {
@@ -1201,7 +1312,9 @@ export function createParkScene({
     bridgeRailMaterial.opacity +=
       ((crossingBridge ? 0.25 : 1) - bridgeRailMaterial.opacity) * (1 - Math.exp(-dt * 10));
     // Stage performers face the audience, regardless of their approach direction.
-    if (seatedBench && BAR_LOUNGE_SEATS.includes(seatedBench))
+    if (seatedBench && riversideSeats.has(seatedBench))
+      player.rotation.y = riversideSeats.get(seatedBench)!;
+    else if (seatedBench && BAR_LOUNGE_SEATS.includes(seatedBench))
       player.rotation.y = seatedBench.x < BAR_SPOT.x ? -Math.PI / 2 : Math.PI / 2;
     else if (p.performing !== null || seatedBench || coffeePhase === 'drinking')
       player.rotation.y = 0;
@@ -1448,6 +1561,15 @@ export function createParkScene({
       asset.update(dt, walking);
     }
     imageCharacters.update(player, walking, time);
+    residents.update(time, dt, {
+      night: barNight,
+      paused: !!p.timeTransition || !!document.querySelector('dialog[open]'),
+      stages: p.liveStages
+        .filter((stage) => stage.artist && (stage.id !== BAR_STAGE_ID || barNight))
+        .map((stage) => ({ id: stage.id, point: world(stage) })),
+      people: [world(p.position.current), ...p.participants.map(world)],
+      insideBar: isInsideBar(world(p.position.current)),
+    });
     renderer.render(scene, camera);
     if (entranceReady && !readyReported) {
       readyReported = true;
@@ -1463,6 +1585,7 @@ export function createParkScene({
     bridgeRailMaterial.dispose();
     bar.dispose();
     hostNpc.dispose();
+    residents.dispose();
     bartenderNpc.dispose();
     useBar.current = () => {};
     useBarDrink.current = () => {};

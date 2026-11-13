@@ -2,7 +2,7 @@ import { ModularPortrait } from '../avatar/ModularPortrait';
 import { defaultAvatar } from '../../data/model';
 import { X } from 'lucide-react';
 import { useEffect, useId, useRef } from 'react';
-import { Flaticon, Logo } from '../ui/Flaticon';
+import { Logo } from '../ui/Flaticon';
 import { notices } from '../../data/notices';
 import { Button } from '../ui/Button';
 import { DialogPanel } from '../ui/Panel';
@@ -38,9 +38,7 @@ export function NoticeBoardDialog({ onClose }: { onClose: () => void }) {
       }}
     >
       <header className="notice-board-heading">
-        <Flaticon name="blackboard" size={24} />
-        <div>
-          <span>공원의 작은 소식</span>
+        <div className="notice-board-sign">
           <h2 id={title}>마을 게시판</h2>
         </div>
         <Button

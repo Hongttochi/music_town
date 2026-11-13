@@ -326,6 +326,16 @@ dialog.town-panel:is([data-panel='profile'], [data-panel='report']) {
   color: #385c49;
   box-shadow: 0 3px 12px #26351b20;
 }
+.bench-action.town-button.npc-action {
+  width: auto;
+  padding: 4px 9px;
+  gap: 5px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.bench-action.npc-action::after {
+  left: calc(50% - 4px);
+}
 .bench-action::after {
   content: '';
   position: absolute;
