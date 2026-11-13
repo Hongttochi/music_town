@@ -34,7 +34,7 @@ export function TownHeader({
           <img src="/icons/achievement-award.png" width={22} height={22} alt="" />
         </Button>
         <Button className="avatar-button" onClick={onProfile} aria-label="마이페이지">
-          <ProfileIcon id={profileIcon} avatar={avatar} size={10} />
+          <ProfileIcon id={profileIcon} avatar={avatar} size={18} />
         </Button>
         <Button className="icon-button" onClick={onSettings} aria-label="설정">
           <Flaticon name="setting" size={18} className="settings-button-icon" />

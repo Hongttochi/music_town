@@ -19,6 +19,8 @@ for (const [key, file] of Object.entries({
   features: 'features',
   hairExtra: 'hair-extra',
   featuresExtra: 'features-extra',
+  hairStyledA: 'hair-styled-a',
+  hairStyledB: 'hair-styled-b',
 }))
   layers[key] = await loadImage(`public/art/avatar-${file}.png`);
 const canvas = createCanvas(1024, 2560),
@@ -34,7 +36,13 @@ const looks = [
   { clothingStyle: 'plain', shirt: '#eee3ca', pants: '#459e96' },
   { clothingStyle: 'stripe', shirt: '#526b8b', pants: '#d1ba91' },
   { clothingStyle: 'pocket', shirt: '#db8c7a', pants: '#536b83' },
+  { clothingStyle: 'pleated-skirt', shirt: '#f2e8dc', pants: '#8798ad', facewear: 'white-mask' },
+  { clothingStyle: 'aline-skirt', shirt: '#f2e8dc', pants: '#b78e9b', facewear: 'black-mask' },
+  { clothingStyle: 'blouse', shirt: '#f2e8dc', pants: '#8d9ca8', wristwear: 'bracelet' },
+  { clothingStyle: 'cardigan-skirt', shirt: '#d7a2ad', pants: '#a19187', neckwear: 'cream-scarf' },
+  { clothingStyle: 'ribbon-dress', shirt: '#b6a6ca', pants: '#b6a6ca', neckwear: 'rose-scarf' },
 ];
+canvas.height = looks.length * 256;
 for (let i = 0; i < looks.length; i++) {
   const sprite = composeAvatar(layers, { hair: 0, ...looks[i] });
   ctx.fillStyle = '#e9eddb';
@@ -45,6 +53,9 @@ for (let i = 0; i < looks.length; i++) {
   ctx.fillText(looks[i].clothingStyle, 8, i * 256 + 18);
 }
 writeFileSync('tmp/clothing-preview.png', canvas.toBuffer('image/png'));
+const additions = createCanvas(1024, 1280);
+additions.getContext('2d').drawImage(canvas, 0, 2560, 1024, 1280, 0, 0, 1024, 1280);
+writeFileSync('tmp/qa/new-clothing.png', additions.toBuffer('image/png'));
 
 const tankCanvas = createCanvas(1024, 1024),
   tankCtx = tankCanvas.getContext('2d');

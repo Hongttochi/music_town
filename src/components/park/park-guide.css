@@ -6,6 +6,10 @@ dialog.town-panel.park-guide-dialog {
   overflow-y: auto;
 }
 .park-guide-welcome {
+  padding: 8px 10px;
+  border: 1px solid #ded8c4;
+  border-radius: 10px;
+  background: #fff;
   display: flex;
   align-items: center;
   gap: 10px;

@@ -19,7 +19,12 @@ dialog.town-panel.profile-dialog[data-panel='profile'][open] > .profile-sheet {
   flex: 0 0 60px;
   height: 60px;
   background: #e8edda;
-  border-radius: 20px;
+  border-radius: 8px;
+}
+.stage-performer-icon :is(.profile-person-badge, .profile-character-badge) {
+  border-radius: 6px;
+  background: transparent;
+  box-shadow: none;
 }
 .stage-performer-copy {
   min-width: 0;
@@ -54,6 +59,10 @@ dialog.town-panel.profile-dialog[data-panel='profile'][open] > .profile-sheet {
 }
 .stage-performer-bio {
   margin: -4px 0 0;
+  padding: 12px 14px;
+  border: 1px solid #e8dfcc;
+  border-radius: 8px;
+  background: #f2ecde;
   font-size: 12px;
   line-height: 1.7;
   color: #7c826c;
@@ -114,7 +123,7 @@ dialog.town-panel.profile-dialog[data-panel='profile'][open] > .profile-sheet {
   .stage-performer-icon {
     flex-basis: 48px;
     height: 48px;
-    border-radius: 16px;
+    border-radius: 8px;
   }
   .stage-performer-copy h3 {
     font-size: 20px;

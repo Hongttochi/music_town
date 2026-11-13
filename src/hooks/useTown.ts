@@ -1,4 +1,5 @@
 import { BAR_STAGE_ID, barStage } from '../data/bar';
+import { CHANNEL_COUNT } from '../data/channels';
 import { clampParkPosition } from '../utils/parkBounds';
 import { errorCode, logEvent } from '../services/telemetry';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -63,6 +64,12 @@ export function useTown(
   const request = useCallback(
     (action: string, channel?: number, stage?: number) => {
       const task = async () => {
+        if (
+          action === 'enter' &&
+          (channel === undefined || !Number.isInteger(channel) || channel < 0 || channel >= CHANNEL_COUNT)
+        ) {
+          throw new Error('입장할 수 없는 채널이에요. 다른 공원을 골라 주세요.');
+        }
         if (!supabase) throw new Error('로그인 연결을 확인해 주세요.');
         // Recover coordinates left outside the supported area by an older client.
         position.current = clampParkPosition(position.current);

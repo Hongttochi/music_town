@@ -1,0 +1,133 @@
+.resident-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 5;
+}
+.resident-labels .resident-chat {
+  pointer-events: auto;
+}
+.resident-chat img {
+  width: 18px;
+  height: 18px;
+}
+.resident-conversation .resident-portrait {
+  width: 39px;
+  height: 52px;
+  flex: none;
+}
+.resident-conversation .bar-dialogue-body p {
+  color: #222;
+}
+.resident-name {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 3px 8px;
+  border: 1px solid #d6dec7;
+  border-radius: 999px;
+  background: #fffaf0ed;
+  color: #53634b;
+  font: inherit;
+  font-size: 10px;
+  pointer-events: auto;
+  cursor: pointer;
+  min-height: 24px;
+}
+.resident-name:focus-visible {
+  outline: 2px solid #71865b;
+  outline-offset: 2px;
+}
+.resident-reaction {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 3px 7px;
+  border-radius: 9px;
+  background: #fffaf0;
+  color: #222;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.5;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px #344b3e18;
+}
+dialog.resident-dialogue {
+  position: fixed;
+  inset: auto 0 max(18px, env(safe-area-inset-bottom));
+  margin: 0 auto;
+  width: min(420px, calc(100vw - 24px));
+  max-height: calc(100dvh - 32px);
+  box-sizing: border-box;
+  padding: 16px;
+  border: 1px solid #b7c59d;
+  border-radius: 12px;
+  background: #fff9e9;
+  color: #53634b;
+  box-shadow: 0 8px 30px #344b3e25;
+}
+dialog.resident-dialogue[open] {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+dialog.resident-dialogue::backdrop {
+  background: #243b291c;
+}
+.resident-portrait {
+  width: 70px;
+  height: 100px;
+  flex: 0 0 70px;
+  background-image: url('/art/park-residents.png');
+  background-size: 400% auto;
+  background-repeat: no-repeat;
+}
+.resident-dialogue-copy {
+  flex: 1;
+  min-width: 0;
+}
+.resident-dialogue-copy h2 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.resident-dialogue-copy small {
+  font-size: 9px;
+  font-weight: 400;
+  color: #8a947c;
+}
+.resident-dialogue-copy p {
+  min-height: 30px;
+  margin: 8px 0;
+  color: #222;
+  font-size: 11px;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+.resident-dialogue-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.resident-dialogue-actions button {
+  padding: 6px 10px;
+  border: 1px solid #ded8c4;
+  border-radius: 999px;
+  background: white;
+  color: #65744e;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+@media (pointer: coarse) {
+  .resident-dialogue-actions button {
+    min-height: 36px;
+  }
+  .resident-name {
+    min-height: 30px;
+  }
+}

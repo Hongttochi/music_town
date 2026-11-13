@@ -12,7 +12,7 @@ LiveKit의 WebRTC 음성 서버를 사용합니다. Vercel은 접속 토큰만 �
 3. 기존 `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`도 서버 함수에서 사용합니다. 별도의 service_role 키는 필요하지 않습니다.
 4. Production 환경에 저장하고 재배포합니다. 키에 `VITE_` 접두사를 붙이지 않습니다.
 
-`npm run dev`는 Vite 화면만 실행합니다. 토큰 함수까지 로컬에서 실행하려면 위 환경 변수를 설정한 Vercel 개발 환경을 사용하거나 Vercel Preview에서 검증합니다.
+`npm run dev`는 Vite 화면과 `/api/voice-token` 개발용 미들웨어를 함께 실행합니다. 로컬 `.env`에 위 LiveKit 환경 변수와 Supabase 설정을 넣어야 합니다. 서버 전용 값은 브라우저에 전달하지 않으며, `VITE_` 접두사를 붙이면 안 됩니다. `npm run preview`는 정적 화면만 제공하므로 음성 API까지 검증하려면 개발 서버 또는 Vercel Preview를 사용합니다.
 
 ## 동작
 

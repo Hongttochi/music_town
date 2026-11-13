@@ -65,6 +65,12 @@ dialog.bar-dialogue::backdrop {
   line-height: 1.4;
 }
 .bar-dialogue-name small {
+  border: 1px solid #ded8c4;
+  margin-top: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #fff;
+  white-space: nowrap;
   display: block;
   font-size: 8px;
   font-weight: 400;
@@ -92,17 +98,17 @@ dialog.bar-dialogue::backdrop {
   position: absolute;
   right: 0;
   bottom: 0;
-  border: 0;
-  background: transparent;
+  border: 1px solid #ded8c4;
+  background: #fff;
   color: #65744e;
   font: inherit;
   font-size: 11px;
-  padding: 5px 8px;
-  border-radius: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
   cursor: pointer;
 }
 .bar-dialogue-body button:hover {
-  background: #e9e8d5;
+  background: #f8faf3;
 }
 .bar-dialogue-body button:focus-visible {
   outline: 2px solid #879967;

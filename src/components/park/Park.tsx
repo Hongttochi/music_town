@@ -1,7 +1,7 @@
 import { isParkNight } from '../../utils/time';
 import { BarDialogue } from './BarDialogue';
+import { ResidentDialogue } from './ResidentDialogue';
 import { BarDrinkDialog } from './BarDrinkDialog';
-import { Moon } from 'lucide-react';
 import './night-bar.css';
 import { ParkGuideDialog } from './ParkGuideDialog';
 import { useParkScene } from '../../hooks/useParkScene';
@@ -14,6 +14,8 @@ import { Flaticon } from '../ui/Flaticon';
 import { findCoffee } from '../../data/coffeeMenu';
 export function Park(props: ParkProps) {
   const {
+    residentTalk,
+    setResidentTalk,
     canvas,
     barBubble,
     useBar,
@@ -44,6 +46,13 @@ export function Park(props: ParkProps) {
 
   return (
     <>
+      {residentTalk && (
+        <ResidentDialogue
+          key={residentTalk.id}
+          talk={residentTalk}
+          onClose={() => setResidentTalk(null)}
+        />
+      )}
       <canvas
         ref={canvas}
         id="park"
@@ -66,7 +75,7 @@ export function Park(props: ParkProps) {
           {barAction === 'talk' ? (
             <Flaticon name="chat" size={18} />
           ) : barAction === 'closed' ? (
-            <Moon size={18} />
+            <Flaticon name="crescent-moon" size={18} />
           ) : (
             <Flaticon name="wine-glass" size={18} />
           )}
@@ -101,6 +110,7 @@ export function Park(props: ParkProps) {
           onClick={() => setGuideOpen(true)}
         >
           <Flaticon name="chat" size={18} />
+          <span>모리</span>
         </Button>
       )}
       {noticeBoardOpen && <NoticeBoardDialog onClose={() => setNoticeBoardOpen(false)} />}

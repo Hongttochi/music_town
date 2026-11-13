@@ -1,4 +1,4 @@
-﻿import { build } from 'esbuild';
+import { build } from 'esbuild';
 import { createCanvas, loadImage } from '@napi-rs/canvas';
 import { writeFileSync } from 'node:fs';
 globalThis.document = { createElement: () => createCanvas(1, 1) };
@@ -19,6 +19,8 @@ for (const [key, file] of Object.entries({
   features: 'features',
   hairExtra: 'hair-extra',
   featuresExtra: 'features-extra',
+  hairStyledA: 'hair-styled-a',
+  hairStyledB: 'hair-styled-b',
 }))
   layers[key] = await loadImage(`public/art/avatar-${file}.png`);
 const sprite = composeAvatar(layers, { hair: 0, eyeShape: 0, noseShape: 0, instrument: 'guitar' });

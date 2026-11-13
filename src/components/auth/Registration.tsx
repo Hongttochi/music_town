@@ -76,7 +76,7 @@ export function Registration({
           (!validLink(draft.instagram, 'instagram.com') ||
             !validLink(draft.soundcloud, 'soundcloud.com'))
         ) {
-          setError('인스타그램과 사운드클라우드의 https:// 프로필 주소를 입력해 주세요.');
+          setError('Instagram과 SoundCloud의 https:// 프로필 주소를 입력해 주세요.');
           return;
         }
         if (saving) return;
@@ -133,7 +133,7 @@ export function Registration({
                   alt=""
                   aria-hidden="true"
                 />
-                인스타그램
+                Instagram
               </span>
             </label>
             <input
@@ -152,7 +152,7 @@ export function Registration({
                   alt=""
                   aria-hidden="true"
                 />
-                사운드클라우드
+                SoundCloud
               </span>
             </label>
             <input

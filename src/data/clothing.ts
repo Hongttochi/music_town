@@ -2,6 +2,19 @@ import type { Avatar } from './model';
 import { hexRgb } from './appearance';
 
 export const outfits = [
+  { label: '플리츠 스커트', clothingStyle: 'pleated-skirt', shirt: '#f2e8dc', pants: '#8798ad' },
+  { label: 'A라인 스커트', clothingStyle: 'aline-skirt', shirt: '#f2e8dc', pants: '#b78e9b' },
+  { label: '리본 블라우스', clothingStyle: 'blouse', shirt: '#f2e8dc', pants: '#8d9ca8' },
+  {
+    label: '가디건 · 플리츠 스커트',
+    clothingStyle: 'cardigan-skirt',
+    shirt: '#d7a2ad',
+    pants: '#a19187',
+  },
+  { label: '리본 원피스', clothingStyle: 'ribbon-dress', shirt: '#b6a6ca', pants: '#b6a6ca' },
+  { label: '후드티', clothingStyle: 'hoodie', shirt: '#a7b8a0', pants: '#536b83' },
+  { label: '교복', clothingStyle: 'uniform', shirt: '#465368', pants: '#465368' },
+  { label: '한복', clothingStyle: 'hanbok', shirt: '#f2dfbd', pants: '#bf8194' },
   { label: '정장', clothingStyle: 'suit', shirt: '#465368', pants: '#465368' },
   { label: '힙한 옷', clothingStyle: 'street', shirt: '#6b638b', pants: '#536b83' },
   { label: '패딩', clothingStyle: 'puffer', shirt: '#758d82', pants: '#565761' },

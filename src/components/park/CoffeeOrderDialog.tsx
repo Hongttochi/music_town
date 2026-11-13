@@ -31,9 +31,11 @@ export function CoffeeOrderDialog({
       }}
     >
       <header className="coffee-menu-heading">
-        <p>PARK COFFEE</p>
+        <div className="park-coffee-brand">
+          <img src="/art/park-coffee-face.png" width={40} height={40} alt="" />
+          <p>PARK COFFEE</p>
+        </div>
         <h2 id={title}>Coffee Menu</h2>
-        <span>공원에서 쉬어가는 한 잔</span>
         <Button
           className="coffee-menu-close"
           variant="ghost"

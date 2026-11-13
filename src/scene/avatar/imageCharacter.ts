@@ -5,6 +5,7 @@ import { drawDrinkingPose } from './drinkingAvatar';
 import type { Avatar } from '../../data/model';
 import { composeSeatedAvatar } from './seatedAvatar';
 import { loadAvatarLayers, composeAvatar } from './modularAvatar';
+import { composeWalkingAvatar, WALK_FRAMES } from './walkingAvatar';
 
 /** Six character rows, each with front/right/back/left views. */
 export function createImageCharacters(renderer: THREE.WebGLRenderer) {
@@ -18,6 +19,8 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
     standingImage?: HTMLCanvasElement;
     seatedImage?: HTMLCanvasElement;
     seated?: boolean;
+    walkTexture?: THREE.CanvasTexture;
+    walkStarted?: number;
     drinkAtlas?: HTMLCanvasElement;
     drinkTexture?: THREE.CanvasTexture;
     drinkSource?: HTMLCanvasElement;
@@ -72,6 +75,7 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
   function update(player: THREE.Group, moving: boolean, time: number) {
     for (const actor of actors) {
       if (!actor.group.parent) {
+        actor.walkTexture?.dispose();
         actor.drinkTexture?.dispose();
         actor.texture.dispose();
         actor.sprite.material.dispose();
@@ -191,17 +195,36 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
               ? 1
               : 3;
       actor.texture.offset.set(cell * 0.25, 0);
+      const walking = !seated && drinking === undefined &&
+        (actor.group === player ? moving : actor.group.userData.walking === true);
+      if (walking && actor.standingImage) {
+        if (!actor.walkTexture) {
+          const texture = new THREE.CanvasTexture(composeWalkingAvatar(actor.standingImage));
+          texture.colorSpace = THREE.SRGBColorSpace;
+          texture.generateMipmaps = false;
+          texture.minFilter = texture.magFilter = THREE.LinearFilter;
+          texture.repeat.set(0.25, 1 / WALK_FRAMES);
+          actor.walkTexture = texture;
+        }
+        actor.walkStarted ??= time;
+        const frame = Math.floor((time - actor.walkStarted) / 85) % WALK_FRAMES;
+        actor.walkTexture.offset.set(cell * 0.25, 1 - (frame + 1) / WALK_FRAMES);
+        actor.sprite.material.map = actor.walkTexture;
+      } else {
+        actor.walkStarted = undefined;
+      }
       actor.sprite.material.rotation =
         drinking !== undefined
           ? -drinking * 0.035
-          : (actor.group === player ? moving : actor.group.userData.walking === true)
-            ? Math.sin(time / 130) * 0.045
+          : walking
+            ? Math.sin(((time - (actor.walkStarted ?? time)) / 680) * Math.PI * 2) * 0.012
             : 0;
     }
   }
   function dispose() {
     disposed = true;
     actors.forEach((actor) => {
+      actor.walkTexture?.dispose();
       actor.drinkTexture?.dispose();
       actor.texture.dispose();
       actor.sprite.material.dispose();

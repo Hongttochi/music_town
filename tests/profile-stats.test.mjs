@@ -38,6 +38,12 @@ async function fixture() {
       'utf8',
     ),
   );
+  await db.exec(
+    await readFile(
+      new URL('../supabase/migrations/202611130001_ranking_history.sql', import.meta.url),
+      'utf8',
+    ),
+  );
   await db.exec(`set role authenticated; set request.jwt.claim.sub='${a}';`);
   return db;
 }
@@ -112,6 +118,37 @@ test('weekly rankings preserve lifetime hearts, use KST Monday boundaries, and r
     await db.close();
   }
 });
+test('historical rankings select KST weeks, preserve ties and reject future or anonymous requests', async () => {
+  const db = await fixture();
+  const history = async (day) =>
+    (await db.query('select musician_rankings_week($1::date) as result', [day])).rows[0].result;
+  try {
+    await stats(db, b, 'heart');
+    await db.exec(`set request.jwt.claim.sub='${c}'`);
+    await stats(db, a, 'heart');
+    await db.exec(`reset role;
+      update profile_fans set created_at='2025-12-28T15:00:00Z' where kind='heart';
+      set role authenticated;`);
+    const result = await history('2026-01-01');
+    assert.deepEqual(
+      result.entries.map((p) => p.rank),
+      [1, 1],
+    );
+    assert.equal(new Date(result.weekStart).toISOString(), '2025-12-28T15:00:00.000Z');
+    assert.equal(new Date(result.weekEnd).toISOString(), '2026-01-04T15:00:00.000Z');
+    assert.deepEqual((await history('2025-12-28')).entries, []);
+    assert.deepEqual((await history('2026-01-05')).entries, []);
+    await assert.rejects(history('2999-01-01'), /INVALID_WEEK/);
+    await assert.rejects(history(null), /INVALID_WEEK/);
+    await db.exec("set request.jwt.claim.sub=''");
+    await assert.rejects(history('2026-01-01'), /AUTH_REQUIRED/);
+    await db.exec('reset role; set role anon');
+    await assert.rejects(history('2026-01-01'), /permission denied/);
+  } finally {
+    await db.close();
+  }
+});
+
 test('fan counts are per account, private, idempotent and cannot impersonate another account', async () => {
   const db = await fixture();
   try {

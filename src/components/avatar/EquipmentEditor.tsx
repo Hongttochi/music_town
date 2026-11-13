@@ -58,11 +58,31 @@ export function EquipmentEditor({
 
 const accessoryGroups = [
   {
+    key: 'facewear',
+    label: '마스크',
+    items: [
+      ['none', '벗기'],
+      ['white-mask', '화이트 마스크'],
+      ['black-mask', '블랙 마스크'],
+    ],
+  },
+  {
+    key: 'neckwear',
+    label: '목도리',
+    items: [
+      ['none', '풀기'],
+      ['cream-scarf', '크림 니트 목도리'],
+      ['rose-scarf', '로즈 니트 목도리'],
+    ],
+  },
+  {
     key: 'headwear',
     label: '모자',
     items: [
       ['none', '벗기'],
       ['snapback', '스냅백'],
+      ['backward-cap', '뒤로 쓴 모자'],
+      ['satgat', '삿갓'],
       ['beanie', '비니'],
       ['bucket', '버킷햇'],
     ],

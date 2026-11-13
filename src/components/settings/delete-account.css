@@ -1,0 +1,94 @@
+dialog.town-panel.delete-account-dialog[open] {
+  width: min(360px, calc(100vw - 28px));
+  max-height: calc(var(--visible-height, 100dvh) - 24px);
+  padding: 22px 24px;
+  overflow-y: auto;
+  border: 1px solid #a6b780;
+  border-radius: 12px;
+  background: #fff9e9;
+  color: #625b50;
+  text-align: center;
+  box-shadow: 0 12px 40px #3e372529;
+}
+.delete-account-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px 14px;
+  border-bottom: 1px solid #d9dfc5;
+}
+.delete-account-art {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 76px;
+  flex: 0 0 auto;
+  margin: 0;
+  background: none;
+}
+.delete-account-art img {
+  display: block;
+  width: 64px;
+  height: 76px;
+  object-fit: contain;
+}
+dialog.town-panel.delete-account-dialog[open] h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #5e584b;
+}
+.delete-account-dialog .delete-account-description {
+  margin: 0;
+  padding: 15px 4px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #8b8071;
+  line-height: 1.8;
+  word-break: keep-all;
+}
+.delete-account-dialog .delete-account-actions {
+  gap: 8px;
+  margin-top: 16px;
+}
+.delete-account-dialog .delete-account-actions > .town-button {
+  min-height: 36px;
+  border-radius: 8px;
+  font-size: 11px;
+  box-shadow: none;
+}
+.delete-account-dialog .delete-account-actions > .town-button:first-child {
+  background: #fffaf0;
+  border-color: #d9d0bf;
+  color: #817767;
+}
+.delete-account-dialog .delete-account-actions > .delete-account-confirm {
+  background: #ab6b60;
+  border-color: #ab6b60;
+  color: #fffaf4;
+}
+.delete-account-dialog .delete-account-actions > .delete-account-confirm:hover:not(:disabled) {
+  background: #975c52;
+  border-color: #975c52;
+}
+@media (max-height: 420px) {
+  dialog.town-panel.delete-account-dialog[open] {
+    padding: 12px 18px;
+  }
+  .delete-account-art {
+    width: 54px;
+    height: 64px;
+  }
+  .delete-account-art img {
+    width: 54px;
+    height: 64px;
+  }
+  .delete-account-dialog .delete-account-description {
+    padding: 8px 10px;
+  }
+  .delete-account-dialog .delete-account-actions {
+    margin-top: 10px;
+  }
+}

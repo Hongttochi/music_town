@@ -15,8 +15,10 @@ export function AccountPanel({
   onEditProfile,
   onChooseIcon,
   fanStats,
+  fanCounts,
 }: {
   fanStats?: React.ReactNode;
+  fanCounts?: React.ReactNode;
   avatar: Avatar;
   onCustomize: () => void;
   profile: MemberProfile;
@@ -46,7 +48,10 @@ export function AccountPanel({
         <div className="account-name">
           <span className="account-role">{profile.role === 'musician' ? '뮤지션' : '관람객'}</span>
           <div className="profile-name-line">
-            <strong>{avatar.name}</strong>
+            <div className="account-name-summary">
+              <strong>{avatar.name}</strong>
+              {fanCounts}
+            </div>
             {profile.role === 'musician' && (
               <ProfileSocialLinks
                 instagram={profile.instagram}

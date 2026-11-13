@@ -1,8 +1,8 @@
 dialog.town-panel.coffee-order-dialog {
-  width: min(440px, calc(100vw - 24px));
+  width: min(380px, calc(100vw - 24px));
   max-height: calc(var(--visible-height, 100dvh) - 24px);
   margin: auto;
-  padding: 24px 28px 20px;
+  padding: 18px 22px 16px;
   overflow-y: auto;
   border: 1px solid #d5c7b3;
   border-radius: 4px;
@@ -12,12 +12,25 @@ dialog.town-panel.coffee-order-dialog {
 }
 .coffee-menu-heading {
   position: relative;
-  padding: 12px 28px 22px;
+  padding: 6px 24px 16px;
   border-bottom: 1px solid #cbbba5;
   text-align: center;
 }
-.coffee-menu-heading p {
-  margin: 0 0 8px;
+.park-coffee-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.park-coffee-brand img {
+  display: block;
+  width: 32px;
+  height: 32px;
+  flex: none;
+}
+.coffee-menu-heading .park-coffee-brand p {
+  margin: 0;
   font-size: 10px;
   letter-spacing: 0.22em;
   color: #806a55;
@@ -25,7 +38,7 @@ dialog.town-panel.coffee-order-dialog {
 dialog.town-panel.coffee-order-dialog .coffee-menu-heading h2 {
   margin: 0;
   font-family: Georgia, 'Times New Roman', serif;
-  font-size: 32px;
+  font-size: 27px;
   font-weight: 400;
   line-height: 1.2;
   letter-spacing: 0.03em;
@@ -33,7 +46,7 @@ dialog.town-panel.coffee-order-dialog .coffee-menu-heading h2 {
 }
 .coffee-menu-heading > span {
   display: block;
-  margin-top: 10px;
+  margin-top: 8px;
   font-size: 10px;
   letter-spacing: 0.06em;
   color: #8b7865;
@@ -43,6 +56,22 @@ dialog.town-panel.coffee-order-dialog .coffee-menu-heading h2 {
   top: -8px;
   right: -14px;
   color: #806a55;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+.coffee-menu-heading .coffee-menu-close:hover,
+.coffee-menu-heading .coffee-menu-close:focus,
+.coffee-menu-heading .coffee-menu-close:active {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: #583c2f;
+}
+.coffee-menu-heading .coffee-menu-close:focus-visible {
+  outline: 1px solid #a48b70;
+  outline-offset: 2px;
+  border-color: transparent;
 }
 .coffee-menu {
   display: grid;
@@ -54,10 +83,10 @@ dialog.town-panel.coffee-order-dialog .coffee-menu-heading h2 {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 18px;
+  gap: 8px;
   min-width: 0;
-  min-height: 96px;
-  padding: 12px 26px 12px 4px;
+  min-height: 62px;
+  padding: 5px 22px 5px 4px;
   text-align: left;
   border: 0;
   border-bottom: 1px dotted #cbbba5;
@@ -77,8 +106,8 @@ dialog.town-panel.coffee-order-dialog .coffee-menu-heading h2 {
   outline-offset: -2px;
 }
 .coffee-menu-icon {
-  width: 68px;
-  height: 72px;
+  width: 40px;
+  height: 44px;
   object-fit: contain;
   flex: none;
 }
@@ -89,9 +118,9 @@ dialog.town-panel.coffee-order-dialog .coffee-menu-heading h2 {
 }
 .coffee-menu-english {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 3px;
   font-family: Georgia, 'Times New Roman', serif;
-  font-size: 15px;
+  font-size: 11px;
   font-weight: 400;
   line-height: 1.3;
   letter-spacing: 0.055em;
@@ -100,14 +129,14 @@ dialog.town-panel.coffee-order-dialog .coffee-menu-heading h2 {
 }
 dialog.town-panel.coffee-order-dialog .coffee-menu-item strong {
   display: block;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
   color: #725a45;
 }
 dialog.town-panel.coffee-order-dialog .coffee-menu-item small {
   display: block;
-  margin-top: 5px;
-  font-size: 10px;
+  margin-top: 3px;
+  font-size: 9px;
   font-weight: 400;
   line-height: 1.5;
   color: #93816c;
@@ -121,14 +150,23 @@ dialog.town-panel.coffee-order-dialog .coffee-menu-item small {
   place-items: center;
   width: 18px;
   height: 18px;
+  box-sizing: border-box;
+  border: 1px solid #b9a88f;
+  border-radius: 4px;
+  background: #fffaf1;
   color: #6c704e;
+}
+.coffee-menu-item[aria-pressed='true'] .coffee-selection-mark {
+  border-color: #6d563f;
+  background: #6d563f;
+  color: #fffaf1;
 }
 .coffee-order-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 18px;
+  margin-top: 12px;
 }
 dialog.town-panel.coffee-order-dialog .coffee-order-actions > .town-button {
   flex: none;
@@ -141,35 +179,36 @@ dialog.town-panel.coffee-order-dialog .coffee-order-actions > .town-button {
   color: #806a55;
 }
 dialog.town-panel.coffee-order-dialog .coffee-order-actions > .town-button--primary {
+  border-radius: 999px;
   border: 1px solid #68503c;
   background: #68503c;
   color: #fff8ed;
 }
 @media (max-width: 360px) {
   dialog.town-panel.coffee-order-dialog {
-    padding: 16px 18px;
+    padding: 14px 18px;
   }
   .coffee-order-dialog .coffee-menu > .coffee-menu-item.town-button {
-    gap: 12px;
+    gap: 8px;
   }
   .coffee-menu-english {
-    font-size: 13px;
+    font-size: 11px;
   }
   .coffee-menu-icon {
-    width: 54px;
-    height: 62px;
+    width: 36px;
+    height: 40px;
   }
 }
 @media (max-height: 600px) and (min-width: 600px) {
   dialog.town-panel.coffee-order-dialog {
-    width: 580px;
-    padding: 12px 24px;
+    width: 520px;
+    padding: 12px 20px;
   }
   .coffee-menu-heading {
     padding: 4px 24px 12px;
   }
   dialog.town-panel.coffee-order-dialog .coffee-menu-heading h2 {
-    font-size: 26px;
+    font-size: 24px;
   }
   .coffee-menu {
     grid-template-columns: 1fr 1fr;
@@ -177,14 +216,14 @@ dialog.town-panel.coffee-order-dialog .coffee-order-actions > .town-button--prim
   }
   .coffee-order-dialog .coffee-menu > .coffee-menu-item.town-button {
     gap: 10px;
-    min-height: 90px;
+    min-height: 62px;
   }
   .coffee-menu-icon {
-    width: 50px;
-    height: 64px;
+    width: 36px;
+    height: 40px;
   }
   .coffee-menu-english {
-    font-size: 12px;
+    font-size: 11px;
   }
   .coffee-order-actions {
     margin-top: 12px;

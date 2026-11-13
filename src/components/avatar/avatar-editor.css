@@ -375,3 +375,78 @@ dialog.town-panel[data-panel='avatar'] .part-tabs .town-button {
     padding-inline: 8px;
   }
 }
+
+/* Reserve a real footer row: the confirm action never covers catalog choices. */
+dialog.town-panel[data-panel='avatar'][open] {
+  display: flex;
+  flex-direction: column;
+  height: min(760px, calc(var(--visible-height, 100dvh) - 24px));
+  max-height: calc(var(--visible-height, 100dvh) - 24px);
+  overflow: hidden;
+}
+dialog.town-panel[data-panel='avatar'] > .panel-heading {
+  flex: none;
+}
+dialog.town-panel[data-panel='avatar'] .character-workshop {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-items: stretch;
+  row-gap: 10px;
+}
+dialog.town-panel[data-panel='avatar'] .character-workshop > .village-confirm {
+  grid-column: 1 / -1;
+  position: static;
+  width: 100%;
+  min-height: 40px;
+  margin: 0;
+  box-shadow: none;
+}
+dialog.town-panel[data-panel='avatar'] .workshop-mirror {
+  position: static;
+  width: auto;
+  overflow: auto;
+  justify-content: flex-start;
+  padding: 4px;
+}
+dialog.town-panel[data-panel='avatar'] .workshop-mirror .avatar-turntable-wrap,
+dialog.town-panel[data-panel='avatar'] .workshop-mirror .avatar-turntable .modular-portrait {
+  width: 100%;
+  max-width: 210px;
+}
+dialog.town-panel[data-panel='avatar'] .workshop-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #b5bea1 transparent;
+  padding-bottom: 12px;
+}
+@media (max-height: 500px) {
+  dialog.town-panel[data-panel='avatar'][open] {
+    padding: 10px 14px;
+  }
+  dialog.town-panel[data-panel='avatar'] .character-workshop {
+    grid-template-columns: minmax(72px, 23%) minmax(0, 1fr);
+    column-gap: 10px;
+    row-gap: 6px;
+  }
+  dialog.town-panel[data-panel='avatar'] .workshop-mirror .avatar-turntable-wrap {
+    max-width: clamp(64px, calc(var(--visible-height, 100dvh) - 175px), 150px);
+  }
+  dialog.town-panel[data-panel='avatar'] .workshop-mirror > p {
+    margin-top: 3px;
+    padding: 3px 7px;
+    font-size: 10px;
+  }
+  dialog.town-panel[data-panel='avatar'] .part-catalog .modular-portrait {
+    height: 48px;
+  }
+  dialog.town-panel[data-panel='avatar'] .workshop-desk .part-tabs {
+    margin-bottom: 4px;
+    padding: 2px;
+  }
+}
+@media (pointer: coarse) {
+  dialog.town-panel[data-panel='avatar'] .nickname-input {
+    font-size: 16px;
+  }
+}
