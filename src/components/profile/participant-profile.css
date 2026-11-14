@@ -162,12 +162,7 @@ dialog.profile-dialog[data-panel='participant'] > .profile-sheet {
 .participant-profile .activity-summary-time {
   font-size: 10px;
 }
-.participant-profile .activity-expanded .activity-metrics > .town-button {
-  min-height: 26px;
-  height: 26px;
-  padding: 3px 10px;
-  border-radius: 8px;
-}
+
 .participant-profile .participant-socials {
   grid-column: 1;
   margin: 0;

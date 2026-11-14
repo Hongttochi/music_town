@@ -101,6 +101,7 @@ export function createSchool(scene: T.Scene) {
   let lastMinute = -1;
   return {
     npcPosition: rabbit.sprite.position,
+    npcSprite: rabbit.sprite,
     update(time: number, paused = false) {
       const minute = Math.floor(Date.now() / 60000);
       if (minute !== lastMinute) {

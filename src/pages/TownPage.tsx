@@ -69,6 +69,7 @@ type Panel =
 export function TownPage({ account, initial }: { account: Account; initial: SavedProfile | null }) {
   const [enteringChannel, setEnteringChannel] = useState<number | null>(null);
   const entryPending = useRef(false);
+  const entryTargetRevision = useRef(0);
   const [entrySceneReady, setEntrySceneReady] = useState(false);
   const [entryRevision, setEntryRevision] = useState(0);
   const [entered, setEntered] = useState(false);
@@ -107,6 +108,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
   const [selectedPerson, setSelectedPerson] = useState<Participant | null>(null);
   const [now, setNow] = useState(new Date());
   const dialog = useRef<HTMLDialogElement>(null);
+  const fountainPosition = useRef<{ x: number; z: number } | null>(null);
   const position = useRef<Position>({ x: 650, y: 470 });
   const mapPositions = useRef(new Map<string, Position>());
   const motion = useRef<Position>({ x: 0, y: 0 });
@@ -215,6 +217,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
     town.state.performances.some(
       (item) => item.stage_id === BAR_STAGE_ID && Date.parse(item.ends_at) > now.getTime(),
     ),
+    fountainPosition,
   );
   const stages = account.demo ? demoStages : town.stages;
   const populations = account.demo ? demoPopulations : town.state.channels.map((c) => c.count);
@@ -300,6 +303,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
   const changeChannel = async (id: number) => {
     if (entryPending.current) return;
     entryPending.current = true;
+    entryTargetRevision.current += 1;
     setEntrySceneReady(false);
     setEnteringChannel(id);
     try {
@@ -307,7 +311,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
         requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
       );
       if (!account.demo) await town.act('enter', id);
-      setEntryRevision((value) => value + 1);
+      setEntryRevision(entryTargetRevision.current);
       setEntered(true);
       setChannel(id);
       setNear(null);
@@ -343,7 +347,9 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
         {entered && (
           <>
             <Park
-              onReady={() => setEntrySceneReady(true)}
+              onReady={() => {
+                if (entryRevision === entryTargetRevision.current) setEntrySceneReady(true);
+              }}
               key={`${entryRevision}|${timeTransition.revision}|${channel}|${stages.map((s) => `${s.id}:${s.x}:${s.y}`).join('|')}`}
               night={night}
               timeTransition={timeTransition.active}
@@ -353,6 +359,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
               liveStages={stages}
               participants={town.state.participants.filter((p) => p.id !== account.id)}
               demo={account.demo}
+              fountainPosition={fountainPosition}
               position={position}
               motion={motion}
               onMove={move}

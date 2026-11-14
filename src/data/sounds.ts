@@ -1,3 +1,8 @@
+import grassWalk from '../sounds/grass_walk.mp3';
+import barWalk from '../sounds/bar_walk.mp3';
+import conversationStart from '../sounds/conversation_start.mp3';
+import conversationEnd from '../sounds/conversation_end.mp3';
+import error from '../sounds/error.mp3';
 import timeChange from '../sounds/time_change.mp3';
 import screenChange from '../sounds/screen_change.mp3';
 import clap from '../sounds/clap.mp3';
@@ -14,6 +19,11 @@ import drink from '../sounds/drink.mp3';
 import sitdown from '../sounds/sitdown.mp3';
 
 export const sources = {
+  grassWalk,
+  barWalk,
+  conversationStart,
+  conversationEnd,
+  error,
   timeChange,
   screenChange,
   clap,

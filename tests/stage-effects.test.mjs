@@ -64,7 +64,8 @@ test('processed voice plays locally, preserves the outgoing stream, and disconne
     createGain: node,
     createDelay: node,
     createConvolver: node,
-    createDynamicsCompressor: node,
+    createDynamicsCompressor: () => Object.assign(node(), { kind: 'compressor' }),
+    createWaveShaper: () => Object.assign(node(), { kind: 'limiter' }),
     createBuffer: () => ({ getChannelData: () => new Float32Array(140) }),
     createMediaStreamDestination: () => Object.assign(node(), { stream }),
   };
@@ -81,7 +82,19 @@ test('processed voice plays locally, preserves the outgoing stream, and disconne
   const monitors = nodes.filter((n) => n.connections.includes(ctx.destination));
   assert.equal(monitors.length, 1);
   const outgoing = nodes.find((n) => n.stream === stream);
-  assert.ok(monitors[0].connections.includes(outgoing));
+  const monitor = monitors[0];
+  const compressor = nodes.find((n) => n.kind === 'compressor');
+  assert.equal(monitor.kind, 'limiter');
+  assert.equal(monitor.oversample, 'none');
+  assert.ok(!compressor.connections.includes(ctx.destination));
+  assert.ok(compressor.connections.includes(outgoing));
+  assert.ok(
+    nodes.some((n) => n.connections.includes(monitor) && n.connections.includes(compressor)),
+    'both paths receive the same effects and volume before limiting',
+  );
+  assert.ok(Array.from(monitor.curve).every((v) => Math.abs(v) <= 0.981));
+  assert.equal(monitor.curve[2048], 0);
+  assert.equal(monitor.curve[3072], 0.5, 'ordinary levels pass through unchanged');
   graph.dispose();
   assert.equal(outputStopped, 1);
   assert.ok(nodes.every((n) => n.connections.length === 0));

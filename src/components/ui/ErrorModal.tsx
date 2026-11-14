@@ -1,3 +1,4 @@
+import { useSoundEffects } from '../../hooks/useSoundEffects';
 import { useEffect, useId, useRef } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { Button } from './Button';
@@ -14,6 +15,8 @@ export function ErrorModal({
   onClose: () => void;
   onRetry?: () => void;
 }) {
+  const play = useSoundEffects();
+  useEffect(() => play('error'), [play]);
   const ref = useRef<HTMLDialogElement>(null);
   const id = useId();
   useEffect(() => {

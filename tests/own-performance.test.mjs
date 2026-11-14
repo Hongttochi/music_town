@@ -28,8 +28,8 @@ new Function('require', 'module', 'exports', compiled.outputFiles[0].text)(
   mod.exports,
 );
 test('own performance hides audience actions while other performances retain them', () => {
-  assert.doesNotMatch(mod.exports.stage(true), /무대 앞에서 듣기|음소거|공연 대기|신고/);
-  for (const label of ['무대 앞에서 듣기', '음소거', '공연 대기', '신고']) {
+  assert.doesNotMatch(mod.exports.stage(true), /무대 앞에서 듣기|음소거|대기|신고/);
+  for (const label of ['무대 앞에서 듣기', '음소거', '대기', '신고']) {
     assert.ok(mod.exports.stage(false).includes(label));
   }
 });

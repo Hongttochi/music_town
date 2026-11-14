@@ -1,0 +1,16 @@
+Generated with built-in imagegen (transparent_background=true).
+
+Saved assets:
+public/art/park-residents-simple.png
+public/art/park-residents-extra-simple.png
+
+Common prompt:
+Game character sprite atlas. CRITICAL STYLE: match the FIRST reference human avatar: simple smooth matte toy/plastic 3D forms, large flat white oval eyes with black circular pupils, round low-detail silhouette, flat colored clothing, soft minimal shading. Absolutely NO fur, felt, knitting, fabric weave, realistic texture, embroidery or detailed clothing. Second reference ONLY defines animal species and outfit colors; do not copy its realism. Make 4 equal columns and 3 equal rows, all 12 figures full body and fully separated with 8% transparent margin per cell. ROW 1 FRONT view, ROW 2 strict RIGHT SIDE profile one near eye visible, ROW 3 BACK view no face. Same character in same column on every row, consistent scale and feet baseline. Neutral standing pose for all directions. Keep each view the same height. Background must be actual fully transparent alpha, no white/cream backdrop, no floor, no cast shadows, no grid, no text. Clean simple round paws/feet. Large head small body, matching the first reference.
+
+First atlas suffix:
+Columns left to right: brown bear in plain sage green cardigan with just 3 simple buttons and beige pants; orange fox in plain blue overalls and cream shirt with white-tipped tail; cream cat in plain muted pink pinafore dress over cream shirt, no flowers; yellow duck in plain lavender long sleeve sweater and orange webbed feet. Preserve species ears, snout/beak, tails. Output one 4x3 atlas.
+References: public/art/avatar-base.png, public/art/park-residents.png
+
+Second atlas suffix:
+Columns left to right: brown squirrel with 2 simple head stripes, big smooth curled tail, plain cream cardigan and olive shorts; dark blue penguin with cream face/belly, plain tan jacket, simple blue scarf, yellow beak/feet; tan deer with simplified antlers and ears, plain lavender cardigan and cream pants; gray raccoon with simple dark eye patches and 3 striped tail, plain rust orange overalls and cream shirt. Output one 4x3 atlas.
+References: public/art/avatar-base.png, public/art/park-residents-extra.png

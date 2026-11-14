@@ -49,8 +49,20 @@ header.topbar {
   min-width: 32px;
   min-height: 32px;
   padding: 0;
-  border: 1px solid #a4b68b;
+  border: 0;
   border-radius: 50%;
-  background: #e8edda;
+  background: transparent;
+  box-shadow: none;
   overflow: hidden;
+}
+
+/* The button owns the outline; avoid a second ring inside the profile badge. */
+.topbar .avatar-button :is(.profile-person-badge, .profile-character-badge) {
+  box-shadow: none;
+  background: transparent;
+}
+
+.topbar .avatar-button .profile-person-badge svg {
+  width: 21px;
+  height: 21px;
 }
