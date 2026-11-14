@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/art/music-town-brand-v3.png" width="240" alt="MUSIC TOWN" />
+  <img src="public/art/busking-town-logo.png" width="240" alt="MUSIC TOWN" />
 </p>
 
 # 산책하다 만나는, 새로운 음악. MUSIC TOWN

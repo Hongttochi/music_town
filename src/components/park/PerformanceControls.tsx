@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Mic,
   MicOff,
@@ -6,12 +6,20 @@ import {
   SlidersHorizontal,
   Square,
   Play,
+  Pause,
   RefreshCw,
   Volume2,
+  CircleDot,
+  Download,
+  X,
 } from 'lucide-react';
 import { StageEffectsDialog } from './StageEffectsDialog';
 import { Button } from '../ui/Button';
 import { Flaticon } from '../ui/Flaticon';
+import {
+  formatRecordingDuration,
+  usePerformanceRecorder,
+} from '../../hooks/usePerformanceRecorder';
 import type { SoundEffect } from '../../data/sounds';
 import type { Stage } from '../../data/model';
 import type { useStageMicrophone } from '../../hooks/useStageMicrophone';
@@ -43,17 +51,35 @@ export function PerformanceControls({
   onReaction,
 }: Props) {
   const [effectsOpen, setEffectsOpen] = useState(false);
+  const [previewPlaying, setPreviewPlaying] = useState(false);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+  const recorder = usePerformanceRecorder(microphone.stream, performing !== null);
   useEffect(() => {
     if (performing === null) setEffectsOpen(false);
   }, [performing]);
+  useEffect(() => {
+    setPreviewPlaying(false);
+  }, [recorder.recorded?.url]);
+  const togglePreview = () => {
+    const audio = previewAudioRef.current;
+    if (!audio) return;
+    if (audio.paused) {
+      void audio.play().catch(() => setPreviewPlaying(false));
+    } else {
+      audio.pause();
+    }
+  };
   const micLabel =
     microphone.state === 'on'
       ? '마이크 끄기'
       : microphone.state === 'requesting'
         ? '권한 확인 중…'
         : '마이크 켜기';
+  const recordLabel = recorder.state === 'recording' ? '녹음 중지' : '공연 녹음';
   return (
-    <div className={`bottom-center${performing !== null ? ' performing-controls' : ''}`}>
+    <div
+      className={`bottom-center${performing !== null || recorder.recorded ? ' performing-controls' : ''}`}
+    >
       {queue !== null && performing === null && (
         <div id="queue-status">
           {stages.find((s) => s.id === queue)?.name} · 대기 {queuePlace}번
@@ -66,13 +92,15 @@ export function PerformanceControls({
             <strong>
               {microphone.effectsPaused
                 ? '마이크 소리 시작 필요'
-                : voice.status === 'live'
-                  ? '● LIVE · 송출 중'
-                  : voice.status === 'connecting' || voice.status === 'reconnecting'
-                    ? '음성 연결 중…'
-                    : voice.status === 'error'
-                      ? '음성 연결 필요'
-                      : '마이크 송출 대기'}
+                : recorder.state === 'recording'
+                  ? `● REC · ${formatRecordingDuration(recorder.elapsedSec)} 녹음 중`
+                  : voice.status === 'live'
+                    ? '● LIVE · 송출 중'
+                    : voice.status === 'connecting' || voice.status === 'reconnecting'
+                      ? '음성 연결 중…'
+                      : voice.status === 'error'
+                        ? '음성 연결 필요'
+                        : '마이크 송출 대기'}
             </strong>
             <span>
               {endsAt ? Math.max(0, Math.ceil((Date.parse(endsAt) - now.getTime()) / 1000)) : 0}초
@@ -94,6 +122,20 @@ export function PerformanceControls({
             ) : (
               <MicOff size={20} />
             )}
+          </Button>
+          <Button
+            size="icon"
+            aria-label={recordLabel}
+            title={recordLabel}
+            disabled={microphone.state !== 'on' || microphone.effectsPaused}
+            aria-pressed={recorder.state === 'recording'}
+            onClick={() => {
+              microphone.resumeEffects();
+              if (recorder.state === 'recording') recorder.stop();
+              else recorder.start();
+            }}
+          >
+            <CircleDot size={20} />
           </Button>
           <Button
             size="icon"
@@ -121,7 +163,10 @@ export function PerformanceControls({
             className="performance-finish"
             aria-label="공연 종료"
             title="공연 종료"
-            onClick={onFinish}
+            onClick={() => {
+              recorder.stop();
+              onFinish();
+            }}
           >
             <Square size={18} fill="currentColor" />
           </Button>
@@ -140,11 +185,59 @@ export function PerformanceControls({
               <Volume2 size={20} />
             </Button>
           )}
-          {voice.error && (
+          {(voice.error || recorder.error) && (
             <p className="performance-error" role="alert">
-              {voice.error}
+              {recorder.error || voice.error}
             </p>
           )}
+        </div>
+      )}
+      {recorder.recorded && (
+        <div className="performance-recording-ready" role="region" aria-label="녹음된 공연">
+          <audio
+            ref={previewAudioRef}
+            src={recorder.recorded.url}
+            preload="metadata"
+            hidden
+            onPlay={() => setPreviewPlaying(true)}
+            onPause={() => setPreviewPlaying(false)}
+            onEnded={() => setPreviewPlaying(false)}
+          />
+          <span className="performance-recording-badge" aria-hidden="true">
+            <Flaticon name="musical" size={18} />
+          </span>
+          <div className="performance-recording-copy">
+            <strong>내 버스킹 녹음본</strong>
+            <span>{formatRecordingDuration(recorder.recorded.durationSec)} · 음향 효과 포함</span>
+          </div>
+          <Button
+            variant="secondary"
+            aria-label={previewPlaying ? '미리듣기 일시정지' : '녹음 미리듣기'}
+            onClick={togglePreview}
+          >
+            {previewPlaying ? <Pause size={14} /> : <Play size={14} />}
+            <span>{previewPlaying ? '일시정지' : '들어보기'}</span>
+          </Button>
+          <a
+            className="town-button town-button--primary performance-download-link"
+            href={recorder.recorded.url}
+            download={recorder.recorded.filename}
+          >
+            <Download size={14} />
+            <span>저장</span>
+          </a>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="녹음 닫기"
+            title="녹음 닫기"
+            onClick={() => {
+              previewAudioRef.current?.pause();
+              recorder.clear();
+            }}
+          >
+            <X size={15} />
+          </Button>
         </div>
       )}
       {performing !== null && effectsOpen && (
