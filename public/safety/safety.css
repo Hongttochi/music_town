@@ -11,3 +11,5 @@
 .safety-art { position: absolute; bottom: 14px; right: 20px; width: 110px; height: 110px; }
 .safety-note { color: #657084; font-size: 13px; margin-top: 24px; }
 @media (max-width: 620px) { .safety-grid { grid-template-columns: 1fr; } .safety-card { min-height: 280px; padding: 22px 22px 112px; } }
+
+.safety-card.safety-card--text { min-height: 0; padding: 24px; }

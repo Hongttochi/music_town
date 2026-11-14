@@ -161,7 +161,7 @@ export function SoundEffectsProvider({ children }: { children: ReactNode }) {
             audio.active.get(name)?.stop();
             const source = audio.context.createBufferSource();
             const gain = audio.context.createGain();
-            gain.gain.value = 0.55;
+            gain.gain.value = name === 'grassWalk' || name === 'barWalk' ? 0.2 : 0.55;
             source.buffer = buffer;
             source.loop = loop;
             playing = source;
@@ -194,6 +194,7 @@ export function SoundEffectsProvider({ children }: { children: ReactNode }) {
       );
       if (!button || button.matches(':disabled, [aria-disabled="true"]')) return;
       const explicit = button.getAttribute('data-sound');
+      if (explicit === 'none') return;
       const label = (
         button.getAttribute('aria-label') ||
         button.textContent ||

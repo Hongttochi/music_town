@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Avatar } from '../../data/model';
 import { ModularPortrait } from '../avatar/ModularPortrait';
 import moriImage from '../../assets/npc/school-rabbit.webp';
@@ -16,16 +16,23 @@ export function ChannelEntryDialog({
   onComplete: () => void;
 }) {
   const started = useRef(Date.now());
+  const [revealing, setRevealing] = useState(false);
   const complete = useRef(onComplete);
   complete.current = onComplete;
   useEffect(() => {
     if (!ready) return;
     const timer = setTimeout(
-      () => complete.current(),
+      () => setRevealing(true),
       Math.max(0, 2500 - (Date.now() - started.current)),
     );
     return () => clearTimeout(timer);
   }, [ready]);
+  useEffect(() => {
+    if (!revealing) return;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const timer = setTimeout(() => complete.current(), reduced ? 0 : 240);
+    return () => clearTimeout(timer);
+  }, [revealing]);
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const dialog = ref.current!;
@@ -35,7 +42,7 @@ export function ChannelEntryDialog({
   return (
     <dialog
       ref={ref}
-      className="channel-entry"
+      className={`channel-entry${revealing ? ' is-revealing' : ''}`}
       aria-labelledby="channel-entry-title"
       aria-busy="true"
       onCancel={(event) => event.preventDefault()}

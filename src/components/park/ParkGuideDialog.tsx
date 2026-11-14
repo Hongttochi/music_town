@@ -1,3 +1,4 @@
+import { useConversationSounds } from '../../hooks/useConversationSounds';
 import { useEffect, useId, useRef, useState } from 'react';
 import { DialogPanel, PanelHeading } from '../ui/Panel';
 import { Button } from '../ui/Button';
@@ -52,6 +53,11 @@ const topics = [
   },
 ];
 export function ParkGuideDialog({ onClose }: { onClose: () => void }) {
+  const play = useConversationSounds();
+  const close = () => {
+    play('conversationStart');
+    onClose();
+  };
   const dialog = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const [selected, setSelected] = useState(0);
@@ -67,11 +73,11 @@ export function ParkGuideDialog({ onClose }: { onClose: () => void }) {
       aria-labelledby={titleId}
       onCancel={(event) => {
         event.preventDefault();
-        onClose();
+        close();
       }}
     >
       <div id={titleId}>
-        <PanelHeading title="모리의 공원 안내" onClose={onClose} />
+        <PanelHeading title="모리의 공원 안내" onClose={close} />
       </div>
       <div className="park-guide-welcome">
         <img src={rabbitImage} width={38} height={44} alt="" />
@@ -82,7 +88,11 @@ export function ParkGuideDialog({ onClose }: { onClose: () => void }) {
           <Button
             key={topic.title}
             aria-pressed={selected === index}
-            onClick={() => setSelected(index)}
+            data-sound="none"
+            onClick={() => {
+              play('conversationStart');
+              setSelected(index);
+            }}
           >
             {topic.title}
           </Button>

@@ -117,9 +117,7 @@ export function MusicianRankings({
               onClick={() => setCalendarOpen((open) => !open)}
             >
               <CalendarDays size={14} aria-hidden="true" />
-              <span>
-                {date(`${displayedWeek}T00:00:00+09:00`)}
-              </span>
+              <span>{date(`${displayedWeek}T00:00:00+09:00`)}</span>
               <span aria-hidden="true">~</span>
               <CalendarDays size={14} aria-hidden="true" />
               <span>
@@ -152,75 +150,86 @@ export function MusicianRankings({
               onClose={closeCalendar}
             />
           )}
-          {snapshot && !error && snapshot.entries.some((person) => person.rank === 1) && (
-            <div className="ranking-winners" aria-live="polite">
-              <Trophy size={16} aria-hidden="true" />
-              <span>
-                {historical ? '주간' : '이번 주'}{' '}
-                {snapshot.entries.filter((person) => person.rank === 1).length > 1
-                  ? '공동 1위'
-                  : '1위'}
-              </span>
-              <strong>
-                {snapshot.entries
-                  .filter((person) => person.rank === 1)
-                  .map((person) => person.avatar.name)
-                  .join(' · ')}
-              </strong>
-            </div>
-          )}
+          {!calendarOpen &&
+            snapshot &&
+            !error &&
+            snapshot.entries.some((person) => person.rank === 1) && (
+              <div className="ranking-winners" aria-live="polite">
+                <Trophy size={16} aria-hidden="true" />
+                <span>
+                  {historical ? '주간' : '이번 주'}{' '}
+                  {snapshot.entries.filter((person) => person.rank === 1).length > 1
+                    ? '공동 1위'
+                    : '1위'}
+                </span>
+                <strong>
+                  {snapshot.entries
+                    .filter((person) => person.rank === 1)
+                    .map((person) => person.avatar.name)
+                    .join(' · ')}
+                </strong>
+              </div>
+            )}
         </>
       )}
-      {demo ? (
-        <p role="status">로그인하면 뮤지션들의 랭킹을 볼 수 있어요.</p>
-      ) : error ? (
-        <p role="status">
-          {error}{' '}
-          <Button variant="ghost" onClick={() => setRetry((v) => v + 1)}>
-            다시 시도
-          </Button>
-        </p>
-      ) : !snapshot ? (
-        <div className="ranking-loading" role="status" aria-label="랭킹을 불러오고 있어요">
-          <span className="ranking-spinner" aria-hidden="true" />
-        </div>
-      ) : snapshot.entries.length === 0 ? (
-        <p className="ranking-empty" role="status">
-          {period === 'weekly' ? '선택한 주의 랭킹이 없습니다.' : '아직 랭킹이 없습니다.'}
-        </p>
-      ) : (
-        <ol className="ranking-list">
-          {snapshot.entries.map((person) => (
-            <li key={person.id}>
-              <Button
-                variant="choice"
-                onClick={() => onSelect(person)}
-                aria-label={`${person.rank}위 ${person.avatar.name} 프로필 보기`}
-              >
-                <strong className="ranking-position" data-top={person.rank <= 3}>
-                  {person.rank}
-                  <span>위</span>
-                </strong>
-                <span className="ranking-avatar" aria-hidden="true">
-                  <ModularPortrait avatar={person.avatar} lazy />
-                </span>
-                <span className="ranking-name">{person.avatar.name}</span>
-                <span className="ranking-hearts">
-                  <img
-                    src="/icons/profile-received-heart.png?v=20261110-flat"
-                    width={18}
-                    height={18}
-                    alt="하트"
-                  />
-                  {(period === 'weekly' ? person.weeklyHearts : person.hearts).toLocaleString(
-                    'ko-KR',
-                  )}
-                </span>
-              </Button>
-            </li>
-          ))}
-        </ol>
-      )}
+      <div className="ranking-results" hidden={period === 'weekly' && calendarOpen}>
+        {demo ? (
+          <p role="status">로그인하면 뮤지션들의 랭킹을 볼 수 있어요.</p>
+        ) : error ? (
+          <p role="status">
+            {error}{' '}
+            <Button variant="ghost" onClick={() => setRetry((v) => v + 1)}>
+              다시 시도
+            </Button>
+          </p>
+        ) : !snapshot ? (
+          <div className="ranking-loading" role="status" aria-label="랭킹을 불러오고 있어요">
+            <span className="ranking-spinner" aria-hidden="true" />
+          </div>
+        ) : snapshot.entries.length === 0 ? (
+          <div className="ranking-empty" role="status">
+            <Trophy size={24} strokeWidth={1.4} aria-hidden="true" />
+            <p>{period === 'weekly' ? '선택한 주에는 랭킹이 없어요' : '아직 랭킹이 없어요'}</p>
+            <span>
+              {period === 'weekly'
+                ? '다른 주를 선택해 기록을 확인해 보세요.'
+                : '뮤지션에게 첫 하트를 보내 보세요.'}
+            </span>
+          </div>
+        ) : (
+          <ol className="ranking-list">
+            {snapshot.entries.map((person) => (
+              <li key={person.id}>
+                <Button
+                  variant="choice"
+                  onClick={() => onSelect(person)}
+                  aria-label={`${person.rank}위 ${person.avatar.name} 프로필 보기`}
+                >
+                  <strong className="ranking-position" data-top={person.rank <= 3}>
+                    {person.rank}
+                    <span>위</span>
+                  </strong>
+                  <span className="ranking-avatar" aria-hidden="true">
+                    <ModularPortrait avatar={person.avatar} lazy />
+                  </span>
+                  <span className="ranking-name">{person.avatar.name}</span>
+                  <span className="ranking-hearts">
+                    <img
+                      src="/icons/profile-received-heart.png?v=20261110-flat"
+                      width={18}
+                      height={18}
+                      alt="하트"
+                    />
+                    {(period === 'weekly' ? person.weeklyHearts : person.hearts).toLocaleString(
+                      'ko-KR',
+                    )}
+                  </span>
+                </Button>
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
     </section>
   );
 }

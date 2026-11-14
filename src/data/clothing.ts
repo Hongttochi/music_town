@@ -56,6 +56,7 @@ export function dressBase(
   ctx.drawImage(skinBase, 0, 0);
   const image = ctx.getImageData(0, 0, output.width, output.height);
   const source = input.getContext('2d')!.getImageData(0, 0, input.width, input.height).data;
+  const tintedPixels = image.data.slice();
   const shirt = hexRgb(avatar.shirt || '') || [238, 227, 202];
   // Sample the already tinted arm so sleeveless garments share its skin and shading.
   const skin = [0, 0, 0];
@@ -92,13 +93,64 @@ export function dressBase(
       const top =
         ny > 0.52 && ny < 0.78 && r > 140 && g > 130 && b > 105 && r - g < 32 && g - b < 48;
       const bottom = ny > 0.73 && ny < 0.87 && g > r * 1.18 && b > r * 1.12;
+      if (avatar.clothingStyle === 'tank') {
+        const wx = 256 + (nx - 0.5) * bodyWidth;
+        const wy = 58 + ny * 418;
+        const side = direction === 1 || direction === 3;
+        if (side && wy > 280 && wy < 350) {
+          // Continue the existing forearm upward; do not paint a second offset arm.
+          const centerX = direction === 1 ? 253 : 258.5;
+          const distance = Math.hypot(wx - centerX, wy - Math.max(301, Math.min(350, wy)));
+          const coverage = Math.max(0, Math.min(1, 17.5 - distance));
+          if (coverage > 0) {
+            const sampleX = Math.round(
+              ((Math.max(centerX - 14, Math.min(centerX + 14, wx)) - 256) / bodyWidth + 0.5) *
+                output.width,
+            );
+            const sampleY = Math.round(((350 - 58) / 418) * output.height);
+            const sample = (sampleY * output.width + sampleX) * 4;
+            const shade = (r + g + b) / (3 * 232);
+            for (let c = 0; c < 3; c++)
+              d[i + c] = Math.round(
+                tintedPixels[sample + c] * coverage +
+                  (top ? shirt[c] * shade : tintedPixels[i + c]) * (1 - coverage),
+              );
+            continue;
+          }
+        }
+        // Preserve the widening torso all the way down to the waistband.
+        const torsoHalfWidth = 25 + Math.max(0, Math.min(1, (wy - 300) / 48)) * 20;
+        const sleeve = !side && wy > 280 && wy < 348 && Math.abs(wx - 256) > torsoHalfWidth;
+        if (sleeve) {
+          const right = wx > 256;
+          const ax = side ? 262 : right ? 287 : 225;
+          const bx = side ? 260 : right ? 308 : 204;
+          const ay = side ? 302 : 294,
+            by = 347;
+          const t = Math.max(
+            0,
+            Math.min(
+              1,
+              ((wx - ax) * (bx - ax) + (wy - ay) * (by - ay)) / ((bx - ax) ** 2 + (by - ay) ** 2),
+            ),
+          );
+          const distance = Math.hypot(wx - (ax + (bx - ax) * t), wy - (ay + (by - ay) * t));
+          const radius = 12 - t;
+          const coverage = Math.max(0, Math.min(1, radius + 0.5 - distance));
+          if (!side) d[i + 3] = Math.round(d[i + 3] * coverage);
+          const shade = 1.06 - 0.13 * Math.min(1, distance / radius) ** 2;
+          for (let c = 0; c < 3; c++) d[i + c] = Math.min(255, Math.round(armSkin[c] * shade));
+          continue;
+        }
+      }
       if (!top && !bottom) continue;
       let color: number[] = top ? shirt : pants;
       if (top && avatar.clothingStyle === 'tank') {
         const wx = 256 + (nx - 0.5) * bodyWidth,
           wy = 58 + ny * 418;
         const side = direction === 1 || direction === 3;
-        const bareArm = side ? wx > 241 && wx < 281 && wy > 296 && wy < 354 : wx < 223 || wx > 289;
+        const torsoHalfWidth = 25 + Math.max(0, Math.min(1, (wy - 300) / 48)) * 20;
+        const bareArm = !side && wy < 348 && Math.abs(wx - 256) > torsoHalfWidth;
         const neckline = !side && ((wx - 256) / 23) ** 2 + ((wy - 278) / 24) ** 2 < 1;
         if (bareArm || neckline) color = armSkin;
       }

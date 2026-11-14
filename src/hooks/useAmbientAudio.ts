@@ -1,3 +1,4 @@
+import fountain from '../sounds/fourtain.mp3';
 import { CAMPFIRE_SPOT } from '../scene/park/campfire';
 import fire from '../sounds/fire.mp3';
 import { resumeAudio } from '../utils/resumeAudio';
@@ -19,6 +20,7 @@ export function useAmbientAudio(
   quiet: boolean,
   parkNight?: boolean,
   barPerforming = false,
+  fountainPosition?: MutableRefObject<{ x: number; z: number } | null>,
 ) {
   const { ambientVolume: volume } = useSoundSettings();
   const enabled = volume > 0;
@@ -26,7 +28,7 @@ export function useAmbientAudio(
   settings.current = { enabled, volume, entered, quiet, parkNight, barPerforming };
   useEffect(() => {
     const context = new AudioContext();
-    const tracks = [morning, night, river, fire, jazz].map((url) => {
+    const tracks = [morning, night, river, fire, jazz, fountain].map((url) => {
       const audio = new Audio(url);
       audio.loop = true;
       audio.preload = 'auto';
@@ -67,6 +69,10 @@ export function useAmbientAudio(
         0,
         1 - Math.hypot(x - CAMPFIRE_SPOT.x, z - CAMPFIRE_SPOT.z) / 7,
       );
+      const fountainSpot = fountainPosition?.current;
+      const fountainProximity = fountainSpot
+        ? Math.max(0, 1 - Math.hypot(x - fountainSpot.x, z - fountainSpot.z) / 7)
+        : 0;
       const targets = ambientLevels({
         audible: s.entered && s.enabled && !document.hidden,
         volume: s.volume,
@@ -76,6 +82,7 @@ export function useAmbientAudio(
         barPerforming: s.barPerforming,
         riverMix: mix,
         fireProximity,
+        fountainProximity,
       });
       tracks.forEach(({ gain }, i) => {
         // Silence excluded rooms and jazz during a performance immediately.
@@ -109,5 +116,5 @@ export function useAmbientAudio(
       });
       void context.close().catch(() => {});
     };
-  }, [position]);
+  }, [position, fountainPosition]);
 }

@@ -1,10 +1,26 @@
+import {
+  composeResidentWalking,
+  RESIDENT_WALK_FRAMES,
+  RESIDENT_WALK_PERIOD,
+} from './residentWalking';
+import {
+  residentFrame,
+  residentPose,
+  residentDrinkPose,
+  faceResidentTexture,
+  type ResidentFrame,
+  type ResidentPose,
+} from './residentAnimation';
+import { residentFacing, residentSeatFacing } from './residentFacing';
+import { spriteHeadAnchor } from './spriteHeadAnchor';
 import * as T from 'three';
 import { parkResidents, type ResidentActivity, type ResidentTalk } from '../../data/parkResidents';
-import { residentRoute, type GroundPoint } from './residentNavigation';
+import { residentRoute, residentSafePosition, type GroundPoint } from './residentNavigation';
 
 export type ResidentSeat = { point: T.Vector3; approach: T.Vector3; facing: number; bar: boolean };
 type StageSpot = { id: number; point: T.Vector3 };
 type Context = {
+  talkingResidentId?: string;
   night: boolean;
   paused: boolean;
   stages: StageSpot[];
@@ -76,17 +92,24 @@ export function createParkResidents(options: Options) {
     scene.add(group);
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'town-button bench-action resident-chat';
+    button.className = 'town-button bench-action npc-action resident-chat';
     button.hidden = true;
     const chatIcon = document.createElement('img');
     chatIcon.src = '/icons/chat.png';
     chatIcon.width = chatIcon.height = 18;
     chatIcon.alt = '';
-    button.append(chatIcon);
+    const name = document.createElement('span');
+    name.textContent = definition.name;
+    button.append(chatIcon, name);
     button.setAttribute('aria-label', `${definition.name}, ${definition.species} 주민과 대화하기`);
     const reaction = document.createElement('span');
     reaction.className = 'resident-reaction';
     reaction.setAttribute('aria-hidden', 'true');
+    const reactionIcon = document.createElement('img');
+    reactionIcon.width = reactionIcon.height = 20;
+    reactionIcon.alt = '';
+    const reactionLabel = document.createElement('span');
+    reaction.append(reactionIcon, reactionLabel);
     layer.append(button, reaction);
     const resident = {
       definition,
@@ -95,19 +118,27 @@ export function createParkResidents(options: Options) {
       cup,
       button,
       reaction,
+      reactionIcon,
+      reactionLabel,
+      reactionText: '',
       route: [] as GroundPoint[],
       activity: 'walk' as ResidentActivity,
       seat: undefined as ResidentSeat | undefined,
       stage: undefined as number | undefined,
       until: i * 2000,
       nextPlan: i * 1700,
+      nextRecovery: 0,
       reactionUntil: 0,
       nextReaction: 0,
-      seatedTexture: undefined as T.Texture | undefined,
+      poses: {} as Partial<Record<ResidentPose, ResidentFrame>>,
+      animationTime: i * 613,
+      gait: {} as Record<number, ResidentFrame[]>,
       standingTexture: undefined as T.Texture | undefined,
       backTexture: undefined as T.Texture | undefined,
-      backSeatedTexture: undefined as T.Texture | undefined,
       facingBack: false,
+      facingSide: 0,
+      sideTexture: undefined as T.Texture | undefined,
+      sideWidth: 1.6,
       lastZ: starts[i][1],
       lastX: starts[i][0],
       baseWidth: 1.6,
@@ -120,98 +151,83 @@ export function createParkResidents(options: Options) {
     return resident;
   });
   const loader = new T.ImageLoader();
-  for (const [url, extra, rear] of [
-    ['/art/park-residents.png', false, false],
-    ['/art/park-residents-back.png', false, true],
-    ['/art/park-residents-extra.png', true, false],
-    ['/art/park-residents-extra.png', true, true],
-  ] as const)
+  for (const [url, extra, kind] of [
+    ['/art/park-residents-simple.png', false, 'base'],
+    ['/art/park-residents-extra-simple.png', true, 'base'],
+    ['/art/park-residents-motion.png', false, 'motion'],
+    ['/art/park-residents-extra-motion.png', true, 'motion'],
+    ['/art/park-residents-seated-side.png', false, 'seatedSide'],
+    ['/art/park-residents-seated-side.png', true, 'seatedSide'],
+    ['/art/park-residents-seated-back.png', false, 'seatedBack'],
+    ['/art/park-residents-seated-back.png', true, 'seatedBack'],
+    ['/art/park-residents-drinking.png', false, 'drink'],
+    ['/art/park-residents-drinking.png', true, 'drink'],
+  ] as const) {
     loader.load(url, (image) => {
       if (disposed) return;
-      const width = image.width / 4;
-      const height = image.height / (extra ? 2 : 1);
       residents
         .filter((resident) => 'extra' in resident.definition === extra)
         .forEach((resident) => {
-          const source = document.createElement('canvas');
-          source.width = width;
-          source.height = height;
-          const ctx = source.getContext('2d')!;
-          ctx.drawImage(
-            image,
-            resident.definition.column * width,
-            extra && rear ? height : 0,
-            width,
-            height,
-            0,
-            0,
-            width,
-            height,
-          );
-          const pixels = ctx.getImageData(0, 0, width, height).data;
-          let left = width,
-            right = 0,
-            top = height,
-            bottom = 0;
-          for (let y = 0; y < height; y++)
-            for (let x = 0; x < width; x++) {
-              if (pixels[(y * width + x) * 4 + 3] < 100) continue;
-              left = Math.min(left, x);
-              right = Math.max(right, x);
-              top = Math.min(top, y);
-              bottom = Math.max(bottom, y);
-            }
-          const cropped = document.createElement('canvas');
-          cropped.width = right - left + 1;
-          cropped.height = bottom - top + 1;
-          cropped
-            .getContext('2d')!
-            .drawImage(
-              source,
-              left,
-              top,
-              cropped.width,
-              cropped.height,
-              0,
-              0,
-              cropped.width,
-              cropped.height,
+          const rows =
+            kind === 'drink'
+              ? 4
+              : kind === 'motion'
+                ? 5
+                : kind === 'seatedSide' || kind === 'seatedBack'
+                  ? 2
+                  : 3;
+          for (let row = 0; row < rows; row++) {
+            if (kind === 'drink' && Math.floor(row / 2) !== (extra ? 1 : 0)) continue;
+            if ((kind === 'seatedSide' || kind === 'seatedBack') && row !== (extra ? 1 : 0))
+              continue;
+            const frame = residentFrame(
+              image,
+              resident.definition.column,
+              row,
+              rows,
+              kind === 'seatedSide' || kind === 'seatedBack' || (kind === 'motion' && row === 2)
+                ? 1.95
+                : 2.3,
             );
-          const texture = new T.CanvasTexture(cropped);
-          texture.colorSpace = T.SRGBColorSpace;
-          textures.push(texture);
-          if (rear) resident.backTexture = texture;
-          else resident.standingTexture = texture;
-          const seated = document.createElement('canvas');
-          seated.width = cropped.width;
-          seated.height = cropped.height;
-          const sit = seated.getContext('2d')!;
-          const hips = Math.round(cropped.height * 0.77);
-          sit.drawImage(cropped, 0, 0, cropped.width, hips, 0, 0, cropped.width, hips);
-          sit.drawImage(
-            cropped,
-            0,
-            hips,
-            cropped.width,
-            cropped.height - hips,
-            0,
-            hips,
-            cropped.width,
-            (cropped.height - hips) * 0.65,
-          );
-          const seatedTexture = new T.CanvasTexture(seated);
-          seatedTexture.colorSpace = T.SRGBColorSpace;
-          if (rear) resident.backSeatedTexture = seatedTexture;
-          else resident.seatedTexture = seatedTexture;
-          textures.push(seatedTexture);
-          if (rear) return;
-          resident.sprite.material.map = texture;
-          resident.sprite.material.needsUpdate = true;
-          resident.baseWidth = (2.3 * cropped.width) / cropped.height;
-          resident.sprite.scale.set(resident.baseWidth, 2.3, 1);
-          resident.sprite.visible = true;
+            textures.push(frame.texture);
+            if (kind === 'base') {
+              const legTop = extra
+                ? [row === 1 ? 0.92 : 0.9, 0.92, 0.84, 0.94][resident.definition.column]
+                : [0.81, 0.87, 0.87, 0.86][resident.definition.column];
+              resident.gait[row] = composeResidentWalking(
+                frame.texture.image as HTMLCanvasElement,
+                row === 1,
+                legTop,
+              ).map((canvas) => {
+                const texture = new T.CanvasTexture(canvas);
+                texture.colorSpace = T.SRGBColorSpace;
+                textures.push(texture);
+                return { texture, width: (2.3 * canvas.width) / canvas.height, height: 2.3 };
+              });
+            }
+            if (kind === 'drink') {
+              resident.poses[row % 2 === 0 ? 'drinkHold' : 'drinkSip'] = frame;
+            } else if (kind === 'seatedSide' || kind === 'seatedBack') {
+              resident.poses[kind === 'seatedSide' ? 'sitSide' : 'sitBack'] = frame;
+            } else if (kind === 'motion') {
+              const pose = (['walkA', 'walkB', 'sit', 'happy', 'blink'] as const)[row];
+              resident.poses[pose] = frame;
+            } else if (row === 1) {
+              resident.sideTexture = frame.texture;
+              resident.sideWidth = frame.width;
+            } else if (row === 2) resident.backTexture = frame.texture;
+            else {
+              resident.standingTexture = frame.texture;
+              resident.baseWidth = frame.width;
+              resident.sprite.material.map = frame.texture;
+              resident.sprite.material.needsUpdate = true;
+              resident.sprite.scale.set(frame.width, 2.3, 1);
+              resident.sprite.visible = true;
+            }
+          }
         });
     });
+  }
   const free = (seat: ResidentSeat, who: (typeof residents)[number], context: Context) =>
     !context.people.some((p) => p.distanceTo(seat.point) < 0.8) &&
     !residents.some((other) => other !== who && other.seat === seat);
@@ -312,9 +328,42 @@ export function createParkResidents(options: Options) {
         resident.until = 0;
       }
       if (!context.paused) {
+        // Seated sprites intentionally overlap furniture. Only recover walking/standing residents.
+        if (
+          (!resident.seat || resident.route.length) &&
+          time >= resident.nextRecovery &&
+          !options.clear(resident.group.position, context.night)
+        ) {
+          resident.nextRecovery = time + 1000;
+          const safe = residentSafePosition(
+            resident.group.position,
+            (point) => options.clear(point, context.night),
+            options.cross,
+          );
+          if (safe) {
+            resident.group.position.x = safe.x;
+            resident.group.position.z = safe.z;
+            resident.route = [];
+            resident.seat = undefined;
+            resident.stage = undefined;
+            resident.until = 0;
+            resident.nextPlan = 0;
+          }
+        }
         if (!resident.route.length && time > resident.until && time > resident.nextPlan)
           plan(resident, time, context);
-        const next = resident.route[0];
+        let next: GroundPoint | undefined = resident.route[0];
+        if (
+          next &&
+          (!options.clear(next, context.night) || !options.cross(resident.group.position, next))
+        ) {
+          resident.route = [];
+          resident.seat = undefined;
+          resident.stage = undefined;
+          resident.until = 0;
+          resident.nextPlan = time + 250;
+          next = undefined;
+        }
         if (next) {
           const dx = next.x - resident.group.position.x,
             dz = next.z - resident.group.position.z;
@@ -357,47 +406,105 @@ export function createParkResidents(options: Options) {
         !moving &&
         ((resident.activity === 'coffee' && time - resident.arrived > 4000) ||
           resident.activity === 'bar');
-      resident.cup.visible = drinking;
-      resident.cup.position.y =
-        1.05 +
-        (drinking && !reduced ? Math.max(0, Math.sin((time - resident.arrived) / 900)) * 0.25 : 0);
-      resident.cup.rotation.z =
-        drinking && !reduced ? Math.max(0, Math.sin((time - resident.arrived) / 900)) * 0.3 : 0;
+      resident.cup.visible = drinking && resident.sprite.visible;
       const dx = resident.group.position.x - resident.lastX;
       const dz = resident.group.position.z - resident.lastZ;
-      if (Math.abs(dz) > 0.001) resident.facingBack = dz < 0;
-      if (watching) resident.facingBack = true;
-      if (seated) resident.facingBack = Math.cos(resident.seat!.facing) < -0.5;
+      const facing = residentFacing(dx, dz, {
+        side: resident.facingSide,
+        back: resident.facingBack,
+      });
+      resident.facingSide = facing.side;
+      resident.facingBack = facing.back;
+      if (watching) {
+        resident.facingBack = true;
+        resident.facingSide = 0;
+      }
+      if (seated) {
+        const direction = residentSeatFacing(resident.seat!.facing);
+        resident.facingBack = direction.back;
+        resident.facingSide = direction.side;
+      }
       resident.lastZ = resident.group.position.z;
-      if (Math.abs(dx) > 0.0001) resident.sprite.scale.x = Math.sign(dx) * resident.baseWidth;
-      if (seated)
-        resident.sprite.scale.x =
-          (Math.sin(resident.seat!.facing) < 0 ? -1 : 1) * resident.baseWidth;
-      if (drinking) {
+      const talking = context.talkingResidentId === resident.definition.id;
+      if (!seated && (drinking || talking)) {
+        resident.facingSide = 0;
         resident.facingBack = false;
         resident.sprite.scale.x = resident.baseWidth;
       }
+      if (!context.paused && !reduced) resident.animationTime += dt * 1000;
+      const walking = moving && !context.paused;
+      const drinkingPose =
+        drinking && !seated ? residentDrinkPose(resident.animationTime, reduced) : undefined;
+      const drinkFrame = drinkingPose ? resident.poses[drinkingPose] : undefined;
+      const pose = residentPose(
+        resident.animationTime,
+        walking,
+        seated,
+        talking || resident.activity === 'chat',
+        !resident.facingBack && !resident.facingSide,
+        reduced,
+        !!resident.facingSide,
+      );
+      const gaitDirection = resident.facingSide ? 1 : resident.facingBack ? 2 : 0;
+      const gaitIndex =
+        Math.floor(resident.animationTime / (RESIDENT_WALK_PERIOD / RESIDENT_WALK_FRAMES)) %
+        RESIDENT_WALK_FRAMES;
+      const frame =
+        drinkFrame ??
+        (walking && !reduced
+          ? resident.gait[gaitDirection]?.[gaitIndex]
+          : pose
+            ? resident.poses[pose]
+            : undefined);
+      resident.cup.visible =
+        drinking && resident.sprite.visible && !drinkFrame && !resident.facingBack;
+      const texture =
+        frame?.texture ??
+        (resident.facingSide && resident.sideTexture
+          ? resident.sideTexture
+          : resident.facingBack
+            ? resident.backTexture
+            : resident.standingTexture) ??
+        resident.standingTexture;
+      const width = frame?.width ?? (resident.facingSide ? resident.sideWidth : resident.baseWidth);
+      resident.sprite.scale.set(width, frame?.height ?? 2.3, 1);
+      resident.sprite.material.map = texture ?? null;
+      if (texture) faceResidentTexture(texture, resident.facingSide < 0);
       resident.lastX = resident.group.position.x;
-      resident.sprite.material.map = seated
-        ? ((resident.facingBack ? resident.backSeatedTexture : resident.seatedTexture) ??
-          resident.seatedTexture ??
-          null)
-        : ((resident.facingBack ? resident.backTexture : resident.standingTexture) ??
-          resident.standingTexture ??
-          null);
-      resident.sprite.center.y = seated ? 0.22 : 0;
+      resident.sprite.center.y = seated ? 0.23 : 0;
       resident.sprite.position.y = seated
-        ? 0.64
-        : !reduced && moving
-          ? Math.abs(Math.sin(time / 140)) * 0.055
+        ? resident.seat!.bar
+          ? 1.03
+          : 0.705
+        : !reduced && walking
+          ? Math.abs(Math.sin((resident.animationTime / RESIDENT_WALK_PERIOD) * Math.PI * 2)) *
+            0.065
           : 0;
       resident.sprite.material.rotation = reduced
         ? 0
-        : moving
-          ? Math.sin(time / 140) * 0.035
-          : watching
-            ? Math.sin(time / 230) * 0.055
-            : 0;
+        : walking
+          ? Math.sin((resident.animationTime / RESIDENT_WALK_PERIOD) * Math.PI * 2) * 0.035
+          : drinkingPose === 'drinkSip' && drinkFrame
+            ? Math.sin((((resident.animationTime % 5200) - 2200) / 1600) * Math.PI) * 0.025
+            : watching
+              ? Math.sin(time / 230) * 0.055
+              : 0;
+      // The character is a camera-facing sprite: anchor the cup in that same
+      // plane at its hand, including the seated pivot, instead of world axes.
+      const cupX =
+        (seated ? width * 0.19 : resident.baseWidth * 0.32) * (resident.facingSide < 0 ? -1 : 1);
+      const cupY = ((seated ? 0.39 : 0.28) - resident.sprite.center.y) * resident.sprite.scale.y;
+      const angle = resident.sprite.material.rotation;
+      camera.getWorldQuaternion(resident.cup.quaternion);
+      resident.cup.position
+        .set(
+          cupX * Math.cos(angle) - cupY * Math.sin(angle),
+          cupX * Math.sin(angle) + cupY * Math.cos(angle),
+          0.08,
+        )
+        .applyQuaternion(resident.cup.quaternion)
+        .add(resident.sprite.position);
+      resident.cup.rotateZ(angle);
       resident.group.position.y = options.surface(resident.group.position);
       resident.sprite.material.color.set(context.night ? '#cbd1e6' : '#ffffff');
       if (!context.paused && !moving && time > resident.nextReaction) {
@@ -407,7 +514,7 @@ export function createParkResidents(options: Options) {
             !other.route.length &&
             other.group.position.distanceTo(resident.group.position) < 2.2,
         );
-        resident.reaction.textContent = watching
+        resident.reactionText = watching
           ? ['♥', '♪', '짝짝!'][Math.floor(Math.random() * 3)]
           : resident.activity === 'coffee'
             ? drinking
@@ -418,11 +525,20 @@ export function createParkResidents(options: Options) {
               : friend
                 ? '안녕!'
                 : '';
+        const reactionArt: Record<string, string> = {
+          '♥': '/icons/heart.png',
+          '♪': '/icons/music.png',
+          '짝짝!': '/icons/clap.png',
+        };
+        const icon = reactionArt[resident.reactionText];
+        resident.reactionIcon.hidden = !icon;
+        if (icon) resident.reactionIcon.src = icon;
+        resident.reactionLabel.textContent = icon ? '' : resident.reactionText;
+        resident.reactionLabel.hidden = !!icon;
         resident.reactionUntil = time + 2200;
         resident.nextReaction = time + 7000 + Math.random() * 7000;
       }
-      const projected = resident.group.position.clone();
-      projected.y += 2.55;
+      const projected = spriteHeadAnchor(resident.sprite, camera);
       projected.project(camera);
       const visible =
         !context.paused &&
@@ -434,19 +550,27 @@ export function createParkResidents(options: Options) {
         (!options.insideBar(resident.group.position) || context.insideBar);
       resident.group.visible = !options.insideBar(resident.group.position) || context.insideBar;
       const x = (projected.x * 0.5 + 0.5) * canvas.clientWidth,
-        y = (-projected.y * 0.5 + 0.5) * canvas.clientHeight;
+        y = (-projected.y * 0.5 + 0.5) * canvas.clientHeight - 16;
+      const reacting = visible && time < resident.reactionUntil && !!resident.reactionText;
       const nearby = context.people[0] && resident.group.position.distanceTo(context.people[0]) < 3;
-      resident.button.hidden = !(visible && nearby);
-      resident.button.style.display = visible && nearby ? 'flex' : 'none';
+      resident.button.hidden = !(visible && nearby && !reacting);
+      resident.button.style.display = visible && nearby && !reacting ? 'flex' : 'none';
       resident.button.style.left = `${x}px`;
       resident.button.style.top = `${y}px`;
-      resident.reaction.style.display =
-        visible && time < resident.reactionUntil && resident.reaction.textContent ? '' : 'none';
-      resident.reaction.style.transform = `translate(${x}px, ${y - 25}px) translate(-50%, -100%)`;
+      resident.reaction.style.display = reacting ? 'flex' : 'none';
+      resident.reaction.style.transform = `translate(${x}px, ${y + 10}px) translate(-50%, -100%)`;
     }
   }
   return {
     update,
+    positionOf(id: string) {
+      return residents.find((resident) => resident.definition.id === id)?.group.position;
+    },
+    occupiedSeats() {
+      return residents
+        .filter((resident) => resident.seat && !resident.route.length)
+        .map((resident) => resident.seat!.point);
+    },
     coffeeService(time: number) {
       const customer = residents.find((r) => r.activity === 'coffee' && !r.route.length);
       if (!customer) return null;

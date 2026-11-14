@@ -2,10 +2,13 @@ import type { Avatar, Stage } from '../data/model';
 import type { Participant } from '../hooks/useTown';
 export type Position = { x: number; y: number };
 export type ParkProps = {
+  fountainPosition?: React.MutableRefObject<{ x: number; z: number } | null>;
   onReady?: () => void;
   night?: boolean;
   timeTransition?: boolean;
   focusNpc?: boolean;
+  focusResident?: string;
+  focusHost?: boolean;
   mapPositions?: React.MutableRefObject<Map<string, Position>>;
   liveStages: Stage[];
   participants: Participant[];

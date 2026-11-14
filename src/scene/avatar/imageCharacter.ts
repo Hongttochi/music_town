@@ -177,14 +177,17 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
           }
         }
       }
-      if (drinking !== undefined && actor.drinkTexture) {
+      // The drinking atlas is a front view. Keep the seated back/side view at
+      // the counter instead of turning the character around for every sip.
+      const frontFacingDrink = !seated || Math.cos(actor.group.rotation.y) > Math.SQRT1_2;
+      if (drinking !== undefined && actor.drinkTexture && frontFacingDrink) {
         const frame = Math.round(Math.max(0, Math.min(1, drinking)) * 31);
         actor.drinkTexture.offset.set((frame % 8) / 8, 1 - (Math.floor(frame / 8) + 1) / 4);
         actor.sprite.material.map = actor.drinkTexture;
       } else actor.sprite.material.map = actor.texture;
       // Anchor the hips to the seat rather than anchoring seated feet to the ground.
       actor.sprite.center.set(0.5, seated ? 0.25 : 0.05);
-      actor.sprite.position.y = seated ? 0.68 : 0;
+      actor.sprite.position.y = seated ? (actor.group.userData.seatHeight ?? 0.68) : 0;
       const angle = Math.atan2(Math.sin(actor.group.rotation.y), Math.cos(actor.group.rotation.y));
       const cell =
         Math.abs(angle) < Math.PI / 4
@@ -195,7 +198,9 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
               ? 1
               : 3;
       actor.texture.offset.set(cell * 0.25, 0);
-      const walking = !seated && drinking === undefined &&
+      const walking =
+        !seated &&
+        drinking === undefined &&
         (actor.group === player ? moving : actor.group.userData.walking === true);
       if (walking && actor.standingImage) {
         if (!actor.walkTexture) {

@@ -67,6 +67,7 @@ export function createStageEffectChain(context: BaseAudioContext, initial: Stage
   return {
     input: source,
     output: compressor,
+    monitorOutput: volume,
     update,
     dispose() {
       if (stopped) return;
@@ -88,15 +89,24 @@ export function createStageEffects(
   const destination = context.createMediaStreamDestination();
   source.connect(chain.input);
   chain.output.connect(destination);
-  // Monitor the same processed voice locally without a network round trip.
-  // Disposing the chain disconnects both the local monitor and outgoing stream.
-  chain.output.connect(context.destination);
+  // Keep the effects and volume, but skip the broadcast compressor's look-ahead
+  // on the local monitor. A memoryless limiter bounds peaks without buffering.
+  const monitorLimiter = context.createWaveShaper();
+  const curve = new Float32Array(4097);
+  for (let i = 0; i < curve.length; i++) {
+    const input = (i / (curve.length - 1)) * 2 - 1;
+    curve[i] = Math.max(-0.98, Math.min(0.98, input));
+  }
+  monitorLimiter.curve = curve;
+  monitorLimiter.oversample = 'none';
+  chain.monitorOutput.connect(monitorLimiter).connect(context.destination);
   return {
     stream: destination.stream,
     update: chain.update,
     dispose() {
       source.disconnect();
       chain.dispose();
+      monitorLimiter.disconnect();
       destination.disconnect();
       destination.stream.getTracks().forEach((track) => track.stop());
     },

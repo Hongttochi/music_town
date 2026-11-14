@@ -1,5 +1,6 @@
 .channel-entry {
   outline: none;
+  transition: opacity 240ms ease;
   width: 220px;
   max-width: calc(100vw - 32px);
   max-height: calc(100dvh - 24px);
@@ -12,8 +13,8 @@
   box-shadow: 0 18px 60px #25371e30;
 }
 .channel-entry::backdrop {
-  background: #25371e55;
-  backdrop-filter: blur(4px);
+  background: #e8edda;
+  transition: opacity 240ms ease;
 }
 .channel-entry-art {
   position: relative;
@@ -96,5 +97,16 @@
   .channel-entry-mori,
   .channel-entry-spinner {
     animation: none;
+  }
+}
+
+.channel-entry.is-revealing,
+.channel-entry.is-revealing::backdrop {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .channel-entry,
+  .channel-entry::backdrop {
+    transition: none;
   }
 }
