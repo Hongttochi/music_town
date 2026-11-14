@@ -83,20 +83,16 @@ export function ActivityChart({ stats }: { stats: FanStats | null }) {
                   aria-label={`최근 7일 ${metric === 'onlineSeconds' ? '접속' : '무대'} 시간. 날짜별 값은 아래 버튼에서 확인할 수 있어요.`}
                 >
                   <path d="M24 28H308 M24 64H308 M24 100H308" className="activity-grid" />
-                  <polyline
-                    points={points.map((p) => `${p.x},${p.y}`).join(' ')}
-                    className="activity-line"
-                  />
                   {points.map((p) => (
-                    <circle
+                    <rect
                       key={p.day.date}
-                      cx={p.x}
-                      cy={p.y}
-                      r={p.day.date === selected?.date ? 3 : 2}
+                      x={p.x - 7}
+                      y={p.y}
+                      width={14}
+                      height={Math.max(0, 100 - p.y)}
+                      rx={4}
                       className={
-                        p.day.date === selected?.date
-                          ? 'activity-point is-selected'
-                          : 'activity-point'
+                        p.day.date === selected?.date ? 'activity-bar is-selected' : 'activity-bar'
                       }
                     />
                   ))}

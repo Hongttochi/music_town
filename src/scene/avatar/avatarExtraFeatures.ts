@@ -9,7 +9,8 @@ export function drawExtraEyes(
   const centers = direction === 1 ? [342] : direction === 3 ? [171] : [222, 290];
   ctx.save();
   for (const x of centers) {
-    const left = x < 256;
+    // Keep the same anatomical eye when turning, including asymmetric winks.
+    const left = direction === 1 || (direction === 0 && x < 256);
     const y = 197;
     const curve = (from: number, control: number, end: number) => {
       ctx.beginPath();

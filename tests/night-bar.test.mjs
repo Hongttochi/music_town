@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+import { createCanvas } from '@napi-rs/canvas';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -8,6 +10,7 @@ const require = createRequire(import.meta.url);
 function load(file) {
   const context = {
     exports: {},
+    document: { createElement: () => createCanvas(1, 1) },
     require: (id) => (id === '../../data/bar' ? load('../src/data/bar.ts') : require(id)),
   };
   vm.runInNewContext(
@@ -134,4 +137,28 @@ test('exterior stays closed visually and the solid facade keeps avatar clearance
   assert.equal(isAtBarDoorway({ x: 32, z: -1.3 }), true);
   assert.equal(isAtBarDoorway({ x: 35, z: -1.3 }), false);
   assert.equal(overlapsBar({ x: 35, z: -1.5 }, 0.35, true), true);
+});
+
+test('occupied stools remain visible while the character can cover intersecting parts', () => {
+  const { createNightBar } = load('../src/scene/park/nightBar.ts');
+  const scene = new THREE.Scene();
+  const bar = createNightBar(scene);
+  const posts = [],
+    tops = [];
+  scene.traverse((object) => {
+    const p = object.geometry?.parameters;
+    if (p?.width === 0.12 && p?.height === 0.9) posts.push(object);
+    if (p?.width === 0.65 && p?.height === 0.15) tops.push(object);
+  });
+  assert.equal(posts.length, BAR_SEATS.length);
+  bar.setOccupied([BAR_SEATS[0]]);
+  assert.ok(posts.every((p) => p.visible) && tops.every((p) => p.visible));
+  assert.equal(posts.filter((p) => !p.material.depthWrite).length, 1);
+  assert.equal(tops.filter((p) => !p.material.depthWrite).length, 1);
+  assert.equal(new Set(posts.map((p) => p.material)).size, BAR_SEATS.length);
+  assert.ok(posts.every((p) => !p.material.transparent && p.material.depthTest));
+  bar.setOccupied([]);
+  assert.ok(posts.every((p) => p.visible && p.material.depthWrite));
+  assert.ok(tops.every((p) => p.visible && p.material.depthWrite));
+  bar.dispose();
 });

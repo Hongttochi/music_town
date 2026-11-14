@@ -1,0 +1,27 @@
+Built-in imagegen, transparent_background=true.
+
+Assets:
+public/art/park-residents-motion.png
+public/art/park-residents-extra-motion.png
+public/art/park-residents-walk.png
+public/art/park-residents-extra-walk.png
+
+Motion/expression prompt (used once per source atlas):
+Use case: identity-preserve. Create a transparent GAME ANIMATION ATLAS for the exact four smooth simple toy animal characters in the reference. Preserve all identities, proportions, clothing colors and simple matte untextured style. EXACTLY 4 equal columns and 5 equal rows (20 isolated full-body characters). Each column is the same reference character in the same left-to-right order. ROW 1: strict RIGHT PROFILE WALK pose A, near foot forward, far foot back, arms counter-swing. ROW 2: strict RIGHT PROFILE WALK pose B, near foot back, far foot forward, arms counter-swing (opposite stride). ROW 3: FRONT SEATED pose with hips resting on an invisible seat, thighs extending forward, knees bent 90 degrees and lower legs dangling down, relaxed hands on thighs. Do NOT draw any chair or ground. Must look seated, not standing or cross-legged. ROW 4: FRONT STANDING delighted laughing expression, eyes shaped happy crescents and small open smiling mouth. ROW 5: FRONT STANDING with eyes gently closed mid-blink, neutral relaxed mouth. All figures whole body, ears antlers tails and feet fully within their own cell, generous transparent separation. Consistent character size and head size across all frames; seated figures naturally shorter. TRUE fully transparent alpha background, no shadows on background, no labels, no grid, no floor. No textures, fur, knitting. This is a complete uniform grid atlas, keep the exact row order. Make portrait-oriented 4:5 sheet.
+
+Front/back walk prompt (used once per source atlas):
+Create transparent game animation sprite atlas for EXACT four smooth simple toy animal characters in the reference, preserving their identities, clothing colors and proportions. Four equal columns, FOUR equal rows, sixteen full-body sprites, transparent margins, no background or floor or shadows or text or grid. ROW 1: FRONT-facing walking stride A with left leg stepping forward, right leg back, arms counter-swing. ROW 2: FRONT-facing walking stride B with opposite leg forward, opposite arm swing. ROW 3: BACK-facing walking stride A, left leg stepping forward. ROW 4: BACK-facing walking stride B, opposite leg forward. First two rows faces directly toward viewer, last two rows directly away with no face visible. No side views. Strongly distinguish the alternating feet and arms but keep the body/head aligned and same size in all rows. Exactly reference characters in same column order. Simple smooth matte plastic shading, no fur or fabric detail. True transparent alpha background. All ears, tails, antlers, feet fully inside each cell. Do not crop.
+
+Source atlases:
+public/art/park-residents-simple.png
+public/art/park-residents-extra-simple.png
+
+
+Seated side views (built-in imagegen, 2026-11-14):
+References: park-residents-simple.png and park-residents-extra-simple.png.
+Transparent four-column/two-row sheet. First row bear, fox, cat, duck; second squirrel, penguin, deer, raccoon. Preserve simple matte toy style, outfits and proportions. All facing right, sitting on an invisible chair: upright torso, horizontal thighs, bent knees, dangling lower legs, hands on lap. Entire ears, tails and feet visible, wide transparent gutters. No furniture, text or shadows.
+Output: public/art/park-residents-seated-side.png
+
+2026-11-14 follow-up, built-in imagegen using original simple/extra-simple references:
+- park-residents-seated-back.png: four columns, two rows with bear/fox/cat/duck then squirrel/penguin/deer/raccoon. Seated true back views facing bartender, complete dangling feet, no furniture, same outfits, alpha transparency.
+- park-residents-drinking.png: four columns, four rows. Primary four residents hold coffee at chest then sip with rim at mouth, followed by extra four residents in same two poses. Both paws grasp the cup; eyes close during sip. Preserve proportions, full feet/tails, simple matte style, alpha transparency, no furniture/text/shadows.

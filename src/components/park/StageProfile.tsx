@@ -32,6 +32,18 @@ export function StageProfile({
 }: Props) {
   return (
     <section className="stage-profile-card" aria-label="공연 정보">
+      {!own && (
+        <div className="stage-top-controls">
+          <Button variant="ghost" onClick={onMute} aria-pressed={muted}>
+            {muted ? <Volume2 size={15} /> : <VolumeX size={15} />}
+            {muted ? '음소거 해제' : '음소거'}
+          </Button>
+          <Button variant="ghost" onClick={onReport}>
+            <Flaticon name="siren" size={14} />
+            신고
+          </Button>
+        </div>
+      )}
       <div className="stage-performer">
         <div className="stage-performer-icon">
           <ProfileIcon id={performerAvatar?.profileIcon} avatar={performerAvatar} size={32} />
@@ -73,17 +85,9 @@ export function StageProfile({
             무대 앞에서 듣기
           </Button>
           <div className="stage-secondary-controls">
-            <Button variant="ghost" onClick={onMute} aria-pressed={muted}>
-              {muted ? <Volume2 size={15} /> : <VolumeX size={15} />}
-              {muted ? '음소거 해제' : '음소거'}
-            </Button>
             <Button variant="ghost" onClick={onQueue}>
               <ListPlus size={15} />
-              공연 대기
-            </Button>
-            <Button variant="ghost" onClick={onReport}>
-              <Flaticon name="siren" size={14} />
-              신고
+              대기
             </Button>
           </div>
         </>

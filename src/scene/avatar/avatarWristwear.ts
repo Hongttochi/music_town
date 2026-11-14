@@ -11,34 +11,36 @@ export function drawWristwear(
   // In the right-facing profile this arm is behind the body, so hide it instead
   // of transferring the accessory to the visible microphone arm.
   // Place the band at the narrow wrist just above the palm, below long cuffs.
-  const x = [188, 0, 324, 250][direction];
+  const x = [195, 0, 317, 256][direction];
   const side = direction === 1 || direction === 3;
   ctx.save();
-  ctx.translate(x, 367);
+  ctx.translate(x, 350);
   ctx.rotate(direction === 0 ? 0.28 : direction === 2 ? -0.28 : 0);
   if (side) ctx.scale(0.85, 1);
   ctx.lineWidth = 1.4;
   if (style === 'bracelet') {
+    // Keep the band on the wrist silhouette, including its slanted outer edge.
+    ctx.globalCompositeOperation = 'source-atop';
     ctx.strokeStyle = '#9f7846';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.ellipse(0, 0, 11, 3.5, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, 15.5, 4, 0, 0, Math.PI);
     ctx.stroke();
     for (let i = 0; i < 7; i++) {
       const t = (i / 6) * Math.PI;
       const shade = ctx.createRadialGradient(
-        Math.cos(t) * 10 - 1,
-        Math.sin(t) * 2.5 - 1,
+        Math.cos(t) * 15 - 1,
+        Math.sin(t) * 3.5 - 1,
         0,
-        Math.cos(t) * 10,
-        Math.sin(t) * 2.5,
+        Math.cos(t) * 15,
+        Math.sin(t) * 3.5,
         2.5,
       );
       shade.addColorStop(0, '#f4dc9a');
       shade.addColorStop(1, '#af8352');
       ctx.fillStyle = shade;
       ctx.beginPath();
-      ctx.arc(Math.cos(t) * 10, Math.sin(t) * 2.5, 2.2, 0, Math.PI * 2);
+      ctx.arc(Math.cos(t) * 15, Math.sin(t) * 3.5, 2.2, 0, Math.PI * 2);
       ctx.fill();
     }
   } else if (style === 'watch' || style === 'apple-watch') {

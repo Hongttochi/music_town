@@ -68,7 +68,14 @@ function canvas(w: number, h: number) {
   return result;
 }
 /** Tight alpha bounds align independently generated parts without mutating source art. */
-function piece(image: HTMLImageElement, columns: number, rows: number, col: number, row: number, gutter = 0) {
+function piece(
+  image: HTMLImageElement,
+  columns: number,
+  rows: number,
+  col: number,
+  row: number,
+  gutter = 0,
+) {
   const key = [image.src, columns, rows, col, row, gutter].join('|');
   const prior = pieces.get(key);
   if (prior) return prior;
@@ -232,7 +239,11 @@ export function composeAvatar(
     const styledSource =
       p.hair >= 10 ? (p.hair < 15 ? layers.hairStyledA : layers.hairStyledB) : undefined;
     const hair = styledSource
-      ? tinted(piece(styledSource, 5, 4, (p.hair - 10) % 5, direction, p.hair === 13 ? 0.06 : 0), p.hairColor, 'hair')
+      ? tinted(
+          piece(styledSource, 5, 4, (p.hair - 10) % 5, direction, p.hair === 13 ? 0.06 : 0),
+          p.hairColor,
+          'hair',
+        )
       : p.hair < 9
         ? tinted(
             piece(
@@ -327,7 +338,8 @@ export function composeAvatar(
             const right = direction === 1;
             ctx.drawImage(
               eyes,
-              right ? eyes.width / 2 : 0,
+              // A right-facing profile exposes the eye on the left of the front view.
+              right ? 0 : eyes.width / 2,
               0,
               eyes.width / 2,
               eyes.height,

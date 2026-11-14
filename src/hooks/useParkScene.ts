@@ -11,7 +11,6 @@ export function useParkScene(props: ParkProps) {
   sound.current = playSound;
   const canvas = useRef<HTMLCanvasElement>(null),
     latest = useRef(props);
-  latest.current = props;
   const [error, setError] = useState(false);
   const [residentTalk, setResidentTalk] = useState<ResidentTalk | null>(null);
   const barBubble = useRef<HTMLButtonElement>(null);
@@ -33,6 +32,12 @@ export function useParkScene(props: ParkProps) {
   const coffeeBubble = useRef<HTMLButtonElement>(null);
   const [coffeeAction, setCoffeeAction] = useState<string | null>(null);
   const [coffeeMenuOpen, setCoffeeMenuOpen] = useState(false);
+  latest.current = {
+    ...props,
+    focusResident: residentTalk?.id,
+    focusNpc: props.focusNpc || guideOpen,
+    focusHost: barNotice,
+  };
   useEffect(() => {
     if (props.timeTransition) {
       setResidentTalk(null);

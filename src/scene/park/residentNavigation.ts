@@ -14,8 +14,10 @@ export function residentRoute(
   });
   const safeEdge = (a: GroundPoint, b: GroundPoint) => {
     if (!cross(a, b)) return false;
-    for (let i = 1; i <= 4; i++)
-      if (!clear({ x: a.x + ((b.x - a.x) * i) / 4, z: a.z + ((b.z - a.z) * i) / 4 })) return false;
+    const samples = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.z - a.z) / 0.1));
+    for (let i = 1; i <= samples; i++)
+      if (!clear({ x: a.x + ((b.x - a.x) * i) / samples, z: a.z + ((b.z - a.z) * i) / samples }))
+        return false;
     return true;
   };
   const start = snap(from);
@@ -55,6 +57,26 @@ export function residentRoute(
         continue;
       parents.set(key(next), current);
       queue.push(next);
+    }
+  }
+  return null;
+}
+
+/** Recover a spawn or displaced resident inside an obstacle's exclusion area.
+ * River/building boundary checks still apply; valid positions are never moved.
+ */
+export function residentSafePosition(
+  from: GroundPoint,
+  clear: (p: GroundPoint) => boolean,
+  cross: (a: GroundPoint, b: GroundPoint) => boolean,
+): GroundPoint | null {
+  if (clear(from)) return from;
+  for (let radius = 0.15; radius <= 4.05; radius += 0.15) {
+    for (let direction = 0; direction < 32; direction++) {
+      const angle = (direction * Math.PI) / 16;
+      const point = { x: from.x + Math.cos(angle) * radius, z: from.z + Math.sin(angle) * radius };
+      if (point.x < -18 || point.x > 38 || point.z < -12 || point.z > 13.5) continue;
+      if (clear(point) && cross(from, point)) return point;
     }
   }
   return null;

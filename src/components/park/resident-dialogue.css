@@ -13,8 +13,10 @@
   height: 18px;
 }
 .resident-conversation .resident-portrait {
-  width: 39px;
-  height: 52px;
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  background: none;
   flex: none;
 }
 .resident-conversation .bar-dialogue-body p {
@@ -40,6 +42,12 @@
   outline-offset: 2px;
 }
 .resident-reaction {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  min-height: 30px;
+  box-sizing: border-box;
   position: absolute;
   top: 0;
   left: 0;
@@ -130,4 +138,24 @@ dialog.resident-dialogue::backdrop {
   .resident-name {
     min-height: 30px;
   }
+}
+
+.resident-reaction img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+.resident-reaction img[hidden],
+.resident-reaction span[hidden] {
+  display: none;
+}
+.resident-reaction::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: calc(50% - 4px);
+  width: 8px;
+  height: 8px;
+  background: #fffaf0;
+  transform: rotate(45deg);
 }

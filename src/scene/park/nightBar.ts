@@ -186,9 +186,18 @@ export function createNightBar(scene: T.Scene) {
     box(x, 1.14, z, 0.56, 0.02, 3.9, cream);
   }
   const stoolTops: T.Mesh[] = [];
+  const stoolPosts: T.Mesh[] = [];
   for (const seat of BAR_SEATS) {
-    box(seat.x - BAR_SPOT.x, 0.45, seat.z - BAR_SPOT.z, 0.12, 0.9, 0.12, wood);
-    stoolTops.push(box(seat.x - BAR_SPOT.x, 0.94, seat.z - BAR_SPOT.z, 0.65, 0.15, 0.65, roofMat));
+    // Each stool needs its own depth settings; wood/roofMat are shared with the room.
+    const postMaterial = wood.clone();
+    const seatMaterial = roofMat.clone();
+    materials.push(postMaterial, seatMaterial);
+    stoolPosts.push(
+      box(seat.x - BAR_SPOT.x, 0.45, seat.z - BAR_SPOT.z, 0.12, 0.9, 0.12, postMaterial),
+    );
+    stoolTops.push(
+      box(seat.x - BAR_SPOT.x, 0.94, seat.z - BAR_SPOT.z, 0.65, 0.15, 0.65, seatMaterial),
+    );
   }
   // Stage instruments sit behind the singer, leaving the microphone area clear.
   const metal = makeMaterial('#b8a987'),
@@ -259,9 +268,14 @@ export function createNightBar(scene: T.Scene) {
     glass,
     setOccupied(points: { x: number; z: number }[]) {
       stoolTops.forEach((top, index) => {
-        top.visible = !points.some(
+        const occupied = points.some(
           (point) => Math.hypot(point.x - BAR_SEATS[index].x, point.z - BAR_SEATS[index].z) < 0.35,
         );
+        // Opaque stools render before the transparent character. Keep them visible,
+        // but let the seated silhouette cover them without the pole writing depth
+        // through the billboard. Exposed parts of the seat and post remain visible.
+        (top.material as T.Material).depthWrite = !occupied;
+        (stoolPosts[index].material as T.Material).depthWrite = !occupied;
       });
     },
     serve(id: BarDrinkId) {

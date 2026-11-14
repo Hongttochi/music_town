@@ -1,3 +1,4 @@
+import { useConversationSounds } from '../../hooks/useConversationSounds';
 import { useEffect, useRef, useState } from 'react';
 import dogImage from '../../assets/npc/bar-dog.webp';
 
@@ -13,6 +14,7 @@ export function BarDialogue({ onClose, night = false }: { onClose: () => void; n
   const lines = night ? nightLines : dayLines;
   const dialog = useRef<HTMLDialogElement>(null);
   const [page, setPage] = useState(0);
+  const play = useConversationSounds();
   const [letters, setLetters] = useState(0);
   const text = lines[page];
   const complete = letters >= text.length;
@@ -30,6 +32,7 @@ export function BarDialogue({ onClose, night = false }: { onClose: () => void; n
     return () => window.clearInterval(timer);
   }, [text]);
   function next() {
+    play(complete && page === lines.length - 1 ? 'conversationEnd' : 'conversationStart');
     if (!complete) setLetters(text.length);
     else if (page < lines.length - 1) {
       setPage(page + 1);
@@ -56,7 +59,7 @@ export function BarDialogue({ onClose, night = false }: { onClose: () => void; n
         <p aria-label={text}>
           <span aria-hidden="true">{text.slice(0, letters)}</span>
         </p>
-        <button type="button" onClick={next}>
+        <button type="button" data-sound="none" onClick={next}>
           {page === lines.length - 1 ? '알겠어요' : '다음'} <span aria-hidden="true">▸</span>
         </button>
       </div>
