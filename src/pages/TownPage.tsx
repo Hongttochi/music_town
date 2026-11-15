@@ -39,7 +39,6 @@ import { DialogPanel, PanelHeading } from '../components/ui/Panel';
 import { Button } from '../components/ui/Button';
 import { Flaticon } from '../components/ui/Flaticon';
 import { AvatarEditor } from '../components/avatar/AvatarEditor';
-import { MyRoom } from '../components/room/MyRoom';
 import { type Account } from './LoginPage';
 import { useEffect, useRef, useState } from 'react';
 import { Park, Position } from '../components/park/Park';
@@ -55,7 +54,6 @@ import {
 
 type Panel =
   | 'rankings'
-  | 'myroom'
   | 'role'
   | 'registration'
   | 'account'
@@ -89,6 +87,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
       ? 'channels'
       : 'role',
   );
+  const [avatarReturn, setAvatarReturn] = useState<'account' | null>('account');
   const [selectedStage, setSelected] = useState<Stage>(demoStages[0]);
   const [channel, setChannel] = useState(0);
   const [near, setNear] = useState<Stage | null>(null);
@@ -389,7 +388,10 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
               onProfile={() => setPanel('account')}
               onSettings={() => setPanel('settings')}
               onRankings={() => setPanel('rankings')}
-              onMyRoom={() => setPanel('myroom')}
+              onMyRoom={() => {
+                setAvatarReturn(null);
+                setPanel('avatar');
+              }}
             />
             <ParkIntroduction hour={hour} night={night} />
             <StageDirectory
@@ -546,7 +548,10 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
                   fanStats={content}
                   fanCounts={counts}
                   avatar={avatar}
-                  onCustomize={() => setPanel('avatar')}
+                  onCustomize={() => {
+                    setAvatarReturn('account');
+                    setPanel('avatar');
+                  }}
                   profile={memberProfile}
                   onEditProfile={() => setPanel('registration')}
                   onChooseIcon={async (id) => {
@@ -580,7 +585,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
                     return;
                   }
                 }
-                setPanel(entered ? 'account' : 'registration');
+                setPanel(entered ? avatarReturn : 'registration');
               }}
             />
           </>
@@ -619,12 +624,6 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
                 }
               }}
             />
-          </>
-        )}
-        {panel === 'myroom' && (
-          <>
-            {title('', '마이룸')}
-            <MyRoom storageKey={`${storagePrefix}-room`} />
           </>
         )}
         {panel === 'profile' && (
