@@ -1,4 +1,12 @@
 export type IconName =
+  | 'mute'
+  | 'volume-up'
+  | 'volume-down'
+  | 'profile-followers'
+  | 'hourglass'
+  | 'headset'
+  | 'smiling-face'
+  | 'sad'
   | 'crescent-moon'
   | 'siren'
   | 'wine-glass'
@@ -43,6 +51,7 @@ export function Flaticon({
   return (
     <img
       className={`flaticon ${className}`}
+      data-icon={name}
       src={`/icons/${name}.png`}
       width={size}
       height={size}

@@ -53,6 +53,17 @@ dialog.town-panel.delete-account-dialog[open] h2 {
   gap: 8px;
   margin-top: 16px;
 }
+.delete-account-retention {
+  margin: 10px 0 0;
+  font-size: 11px;
+  line-height: 1.7;
+  color: #8b8071;
+  word-break: keep-all;
+}
+.delete-account-retention a {
+  color: #61754b;
+  text-underline-offset: 2px;
+}
 .delete-account-dialog .delete-account-actions > .town-button {
   min-height: 36px;
   border-radius: 8px;

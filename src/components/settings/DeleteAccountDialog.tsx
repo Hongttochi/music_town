@@ -44,6 +44,14 @@ export function DeleteAccountDialog({
           ? '체험 모드에서는 삭제할 계정이 없어요.'
           : '계정이 삭제되고 로그아웃돼요. 삭제한 계정은 복구할 수 없어요.'}
       </p>
+      {!demo && (
+        <p className="delete-account-retention">
+          신고·분쟁 대응에 필요한 최소 기록은 계정과 분리하여 정해진 기간 동안 보관될 수 있어요.{' '}
+          <a href="/privacy/#privacy-3" target="_blank" rel="noopener noreferrer">
+            보관 기준
+          </a>
+        </p>
+      )}
       {error && (
         <p className="delete-account-error" role="alert">
           {error}
