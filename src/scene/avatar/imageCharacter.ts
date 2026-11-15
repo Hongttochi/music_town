@@ -6,6 +6,15 @@ import type { Avatar } from '../../data/model';
 import { composeSeatedAvatar } from './seatedAvatar';
 import { loadAvatarLayers, composeAvatar } from './modularAvatar';
 import { composeWalkingAvatar, WALK_FRAMES } from './walkingAvatar';
+import {
+  advanceGait,
+  createGaitState,
+  facingCell,
+  gaitBob,
+  gaitFrame,
+  gaitTilt,
+  type GaitState,
+} from './gait';
 
 /** Six character rows, each with front/right/back/left views. */
 export function createImageCharacters(renderer: THREE.WebGLRenderer) {
@@ -20,7 +29,8 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
     seatedImage?: HTMLCanvasElement;
     seated?: boolean;
     walkTexture?: THREE.CanvasTexture;
-    walkStarted?: number;
+    gait: GaitState;
+    facingCell?: number;
     drinkAtlas?: HTMLCanvasElement;
     drinkTexture?: THREE.CanvasTexture;
     drinkSource?: HTMLCanvasElement;
@@ -69,10 +79,10 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
     const group = new THREE.Group();
     group.add(sprite);
     group.userData.limbs = [];
-    actors.add({ group, sprite, texture, avatar, standingImage });
+    actors.add({ group, sprite, texture, avatar, standingImage, gait: createGaitState() });
     return group;
   }
-  function update(player: THREE.Group, moving: boolean, time: number) {
+  function update(player: THREE.Group, moving: boolean, dt: number, reducedMotion = false) {
     for (const actor of actors) {
       if (!actor.group.parent) {
         actor.walkTexture?.dispose();
@@ -189,20 +199,20 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
       actor.sprite.center.set(0.5, seated ? 0.25 : 0.05);
       actor.sprite.position.y = seated ? (actor.group.userData.seatHeight ?? 0.68) : 0;
       const angle = Math.atan2(Math.sin(actor.group.rotation.y), Math.cos(actor.group.rotation.y));
-      const cell =
-        Math.abs(angle) < Math.PI / 4
-          ? 0
-          : Math.abs(angle) > Math.PI * 0.75
-            ? 2
-            : angle > 0
-              ? 1
-              : 3;
+      actor.facingCell = facingCell(angle, actor.facingCell);
+      const cell = actor.facingCell;
       actor.texture.offset.set(cell * 0.25, 0);
       const walking =
         !seated &&
         drinking === undefined &&
         (actor.group === player ? moving : actor.group.userData.walking === true);
-      if (walking && actor.standingImage) {
+      // Seated characters have no ground gait, so drop residual bob before standing up.
+      if (seated && (actor.gait.phase !== 0 || actor.gait.settling || actor.gait.bobWeight !== 0))
+        actor.gait = createGaitState();
+      const distanceMoved = walking ? Number(actor.group.userData.walkDistance) || 0 : 0;
+      actor.gait = advanceGait(actor.gait, distanceMoved, dt, walking);
+      const gaitActive = !seated && drinking === undefined && (walking || actor.gait.settling);
+      if (gaitActive && actor.standingImage) {
         if (!actor.walkTexture) {
           const texture = new THREE.CanvasTexture(composeWalkingAvatar(actor.standingImage));
           texture.colorSpace = THREE.SRGBColorSpace;
@@ -211,18 +221,19 @@ export function createImageCharacters(renderer: THREE.WebGLRenderer) {
           texture.repeat.set(0.25, 1 / WALK_FRAMES);
           actor.walkTexture = texture;
         }
-        actor.walkStarted ??= time;
-        const frame = Math.floor((time - actor.walkStarted) / 85) % WALK_FRAMES;
+        const frame = gaitFrame(actor.gait.phase);
         actor.walkTexture.offset.set(cell * 0.25, 1 - (frame + 1) / WALK_FRAMES);
         actor.sprite.material.map = actor.walkTexture;
-      } else {
-        actor.walkStarted = undefined;
       }
+      actor.group.userData.gaitBob = reducedMotion
+        ? 0
+        : gaitBob(actor.gait.phase, actor.gait.bobWeight);
+      actor.group.userData.gaitBobWeight = actor.gait.bobWeight;
       actor.sprite.material.rotation =
         drinking !== undefined
           ? -drinking * 0.035
-          : walking
-            ? Math.sin(((time - (actor.walkStarted ?? time)) / 680) * Math.PI * 2) * 0.012
+          : gaitActive && !reducedMotion
+            ? gaitTilt(actor.gait.phase, actor.gait.bobWeight)
             : 0;
     }
   }
