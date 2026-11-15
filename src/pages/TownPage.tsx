@@ -39,6 +39,7 @@ import { DialogPanel, PanelHeading } from '../components/ui/Panel';
 import { Button } from '../components/ui/Button';
 import { Flaticon } from '../components/ui/Flaticon';
 import { AvatarEditor } from '../components/avatar/AvatarEditor';
+import { MyRoom } from '../components/room/MyRoom';
 import { type Account } from './LoginPage';
 import { useEffect, useRef, useState } from 'react';
 import { Park, Position } from '../components/park/Park';
@@ -54,6 +55,7 @@ import {
 
 type Panel =
   | 'rankings'
+  | 'myroom'
   | 'role'
   | 'registration'
   | 'account'
@@ -387,6 +389,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
               onProfile={() => setPanel('account')}
               onSettings={() => setPanel('settings')}
               onRankings={() => setPanel('rankings')}
+              onMyRoom={() => setPanel('myroom')}
             />
             <ParkIntroduction hour={hour} night={night} />
             <StageDirectory
@@ -616,6 +619,12 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
                 }
               }}
             />
+          </>
+        )}
+        {panel === 'myroom' && (
+          <>
+            {title('', '마이룸')}
+            <MyRoom storageKey={`${storagePrefix}-room`} />
           </>
         )}
         {panel === 'profile' && (
