@@ -1,10 +1,22 @@
-# README screenshots
+# README 화면 캡처
 
-- Captured: 2026-11-05
-- Source: local Vite development preview, no production account or database
-- Viewport: 932 × 430 CSS pixels, device scale factor 2, landscape touch emulation
-- Browser: Chromium headless
-- Profile and channel population: development demo fixtures
-- Files are original browser captures, not generated mockups.
+## 현재 README에 사용하는 이미지
 
-When the interface changes, recapture the corresponding screens rather than editing UI elements into an existing screenshot.
+| 파일         | 화면                           | 캡처 크기   |
+| ------------ | ------------------------------ | ----------- |
+| `park.png`   | 공원 메인 화면                 | 2560 × 1600 |
+| `avatar.png` | 의상을 고르는 캐릭터 편집 화면 | 1600 × 1600 |
+| `stage.png`  | 공연자 소개와 대기·듣기 버튼   | 960 × 960   |
+
+- 캡처일: 2026-11-15.
+- 소스: 로컬 Vite 개발 서버의 실제 앱 화면. 렌더링 코드 기준 `688ae39`와 동일한 `develop` 커밋 `73dd451`.
+- 브라우저: 별도 임시 프로필의 Chrome headless, PC 뷰포트 1280 × 800 CSS px, device scale factor 2.
+- 캐릭터 설정·공원 입장·공연 프로필 열기는 앱 UI를 통해 수행했다. 아바타/공연 이미지는 해당 화면의 사각 영역을 브라우저에서 직접 캡처했다.
+- 실제 운영 계정과 DB를 사용하지 않았다. 주민·뮤지션·관람 인원은 개발용 데모이며 실시간 송출 또는 실제 이용자 수의 증빙이 아니다.
+- UI 합성·이미지 생성·문구 덧씌우기 없이 촬영했다. README 수정은 문서와 캡처만 변경하며 앱 동작을 수정하지 않는다.
+
+## 이전 캡처
+
+`login.png`, `channels.png`, `profile.png`, `settings.png`, `terms.png`는 2026-11-05 개발용 모바일 가로 에뮬레이션(932 × 430 CSS px, DPR 2) 기록이다. 현재 README에는 사용하지 않는다.
+
+UI가 바뀌면 앱에서 다시 촬영한다. 기존 이미지의 UI를 편집해 최신 캡처처럼 표시하지 않는다.
