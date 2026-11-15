@@ -1,4 +1,5 @@
 import { useId, useState } from 'react';
+import './activity-chart.css';
 import { ChevronDown } from 'lucide-react';
 import type { FanStats } from '../../hooks/useFanStats';
 import { Button } from '../ui/Button';
@@ -19,12 +20,11 @@ export function ActivityChart({ stats }: { stats: FanStats | null }) {
   const [metric, setMetric] = useState<'onlineSeconds' | 'stageSeconds'>('onlineSeconds');
   const days = stats?.days ?? [];
   const selected = days.find((day) => day.date === chosen) ?? days.at(-1);
-  const max = Math.max(60, ...days.map((day) => day[metric]));
-  const points = days.map((day, index) => ({
-    x: (index + 0.5) * (332 / Math.max(1, days.length)),
-    y: 100 - (Math.max(0, day[metric]) / max) * 72,
-    day,
-  }));
+  const peak = Math.max(0, ...days.map((day) => day[metric]));
+  const step = peak <= 3600 ? 900 : 3600;
+  const ceiling = Math.max(step, Math.ceil(peak / step) * step);
+  const shortDate = (date: string) => `${Number(date.slice(5, 7))}.${Number(date.slice(8))}`;
+  const range = days.length ? `${shortDate(days[0].date)} – ${shortDate(days.at(-1)!.date)}` : '';
   return (
     <section className="activity-stats" data-expanded={expanded} data-metric={metric}>
       <Button
@@ -45,7 +45,9 @@ export function ActivityChart({ stats }: { stats: FanStats | null }) {
         <div className="activity-reveal-inner">
           <div className="activity-expanded">
             <div className="activity-chart-heading">
-              <span>최근 7일</span>
+              <span>
+                최근 7일 <small className="activity-date-range">{range}</small>
+              </span>
               <div className="activity-metrics" role="group" aria-label="그래프 항목">
                 <Button
                   variant="plain"
@@ -65,55 +67,58 @@ export function ActivityChart({ stats }: { stats: FanStats | null }) {
             </div>
             {stats && days.length ? (
               <>
-                <p className="activity-detail" aria-live="polite">
-                  <span key={selected?.date}>{selected?.date.replaceAll('-', '.')}</span>
-                  <strong key={`${selected?.date}-${metric}`}>
-                    <small>{metric === 'onlineSeconds' ? '접속' : '무대'} 시간</small>
-                    {selected ? formatActivity(selected[metric]) : '—'}
-                  </strong>
-                </p>
-                <p className="activity-scale-note">
-                  최근 7일 최장 {metric === 'onlineSeconds' ? '접속' : '무대'} ·{' '}
-                  {formatActivity(Math.max(0, ...days.map((day) => day[metric])))}
-                </p>
-                <svg
-                  className="activity-plot"
-                  viewBox="0 20 332 92"
-                  role="img"
-                  aria-label={`최근 7일 ${metric === 'onlineSeconds' ? '접속' : '무대'} 시간. 날짜별 값은 아래 버튼에서 확인할 수 있어요.`}
-                >
-                  <path d="M24 28H308 M24 64H308 M24 100H308" className="activity-grid" />
-                  {points.map((p) => (
-                    <rect
-                      key={p.day.date}
-                      x={p.x - 7}
-                      y={p.y}
-                      width={14}
-                      height={Math.max(0, 100 - p.y)}
-                      rx={4}
-                      className={
-                        p.day.date === selected?.date ? 'activity-bar is-selected' : 'activity-bar'
-                      }
-                    />
-                  ))}
-                </svg>
-                <div
-                  className="activity-dates"
-                  role="group"
-                  aria-label="날짜별 활동"
-                  style={{ gridTemplateColumns: `repeat(${days.length}, minmax(0, 1fr))` }}
-                >
-                  {days.map((day) => (
-                    <Button
-                      key={day.date}
-                      variant="plain"
-                      aria-pressed={selected?.date === day.date}
-                      aria-label={`${day.date}, 접속 ${formatActivity(day.onlineSeconds)}, 무대 ${formatActivity(day.stageSeconds)}`}
-                      onClick={() => setChosen(day.date)}
-                    >
-                      {Number(day.date.slice(5, 7))}/{Number(day.date.slice(8))}
-                    </Button>
-                  ))}
+                <div className="activity-selection" aria-live="polite">
+                  <span className="activity-selected-date">
+                    {selected?.date.replaceAll('-', '.')}
+                  </span>
+                  <div>
+                    <strong className="activity-selected-value">
+                      {selected ? formatActivity(selected[metric]) : '—'}
+                    </strong>
+                    <span className="activity-selected-metric">
+                      {metric === 'onlineSeconds' ? '접속 시간' : '무대 시간'}
+                    </span>
+                  </div>
+                </div>
+                <div className="activity-chart-body">
+                  <div className="activity-axis" aria-hidden="true">
+                    <span>{formatActivity(ceiling).replace('시간 0분', '시간')}</span>
+                    <span>{formatActivity(ceiling / 2).replace('시간 0분', '시간')}</span>
+                    <span>0</span>
+                  </div>
+                  <div
+                    className="activity-columns"
+                    role="group"
+                    aria-label="날짜별 활동"
+                    style={{ gridTemplateColumns: `repeat(${days.length}, minmax(0, 1fr))` }}
+                  >
+                    {days.map((day) => (
+                      <button
+                        type="button"
+                        className="activity-day"
+                        key={day.date}
+                        aria-pressed={selected?.date === day.date}
+                        aria-label={`${day.date}, 접속 ${formatActivity(day.onlineSeconds)}, 무대 ${formatActivity(day.stageSeconds)}`}
+                        onClick={() => setChosen(day.date)}
+                      >
+                        <span className="activity-bar-track" aria-hidden="true">
+                          <span
+                            className="activity-column-bar"
+                            data-empty={day[metric] <= 0}
+                            style={{ height: `${(Math.max(0, day[metric]) / ceiling) * 100}%` }}
+                          />
+                        </span>
+                        <span className="activity-day-label">{Number(day.date.slice(8))}</span>
+                        <span className="activity-weekday" aria-hidden="true">
+                          {
+                            ['일', '월', '화', '수', '목', '금', '토'][
+                              new Date(`${day.date}T00:00:00Z`).getUTCDay()
+                            ]
+                          }
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 {!days.some((day) => day[metric] > 0) && (
                   <p className="activity-empty">최근 7일 기록이 없어요.</p>

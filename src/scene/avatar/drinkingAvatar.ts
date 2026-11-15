@@ -6,11 +6,11 @@ export function drinkingArmPose(lift: number) {
   const amount = Math.max(0, Math.min(1, lift));
   const eased = amount * amount * (3 - 2 * amount);
   const handX = 329 + (271 - 329) * eased + Math.sin(eased * Math.PI) * 56;
-  const handY = 383 + (250 - 383) * eased;
-  const dx = handX - 310,
-    dy = handY - 306;
-  const upperLength = Math.hypot(20, 51),
-    lowerLength = 29;
+  const handY = 374 + (250 - 374) * eased;
+  const dx = handX - 291,
+    dy = handY - 294;
+  const upperLength = Math.hypot(20, 52),
+    lowerLength = Math.hypot(18, 28);
   const distance = Math.hypot(dx, dy);
   const bend = Math.acos(
     Math.max(
@@ -23,16 +23,46 @@ export function drinkingArmPose(lift: number) {
     ),
   );
   const angle = Math.atan2(dy, dx) - bend;
-  const elbowX = 310 + upperLength * Math.cos(angle);
-  const elbowY = 306 + upperLength * Math.sin(angle);
+  const elbowX = 291 + upperLength * Math.cos(angle);
+  const elbowY = 294 + upperLength * Math.sin(angle);
   return {
     handX,
     handY,
     elbowX,
     elbowY,
-    upperAngle: angle - Math.atan2(51, 20),
-    forearmAngle: Math.atan2(elbowX - handX, handY - elbowY),
+    upperAngle: angle - Math.atan2(52, 20),
+    forearmAngle: Math.atan2(handY - elbowY, handX - elbowX) - Math.atan2(28, 18),
   };
+}
+
+// Match the actual front-view arm silhouette; a rectangular cut also erases the shirt.
+function armOutline(ctx: CanvasRenderingContext2D) {
+  ctx.beginPath();
+  ctx.moveTo(279, 281);
+  ctx.lineTo(304, 280);
+  ctx.lineTo(325, 345);
+  ctx.lineTo(355, 347);
+  ctx.lineTo(357, 400);
+  ctx.lineTo(306, 400);
+  ctx.lineTo(298, 346);
+  ctx.lineTo(279, 296);
+  ctx.closePath();
+}
+const armLayers = new WeakMap<HTMLCanvasElement, HTMLCanvasElement>();
+function isolatedArm(source: HTMLCanvasElement) {
+  let arm = armLayers.get(source);
+  if (!arm) {
+    arm = document.createElement('canvas');
+    arm.width = arm.height = 512;
+    const ctx = arm.getContext('2d')!;
+    ctx.save();
+    armOutline(ctx);
+    ctx.clip();
+    ctx.drawImage(source, 0, 0);
+    ctx.restore();
+    armLayers.set(source, arm);
+  }
+  return arm;
 }
 
 /** Cup and fingers share the same transformed palm anchor in every animation frame. */
@@ -46,6 +76,7 @@ export function drawDrinkingPose(
   hairLayer?: HTMLCanvasElement,
 ) {
   const drink = findCoffee(coffee);
+  const arm = isolatedArm(armSource);
   const { upperAngle, forearmAngle, elbowX, elbowY, handX, handY } = drinkingArmPose(lift);
   {
     ctx.save();
@@ -55,12 +86,16 @@ export function drawDrinkingPose(
       ctx.clearRect(275, 324, 82, 82);
       ctx.drawImage(armSource, 275, 324, 32, 82, 275, 324, 32, 82);
     }
-    ctx.clearRect(306, 304, 48, 98);
+    ctx.save();
+    armOutline(ctx);
+    ctx.clip();
+    ctx.clearRect(275, 275, 85, 130);
+    ctx.restore();
     // Restore stationary hair erased with the resting arm, before drawing the moving arm.
     if (hairLayer) {
       ctx.save();
       ctx.beginPath();
-      ctx.rect(306, 304, 48, 98);
+      armOutline(ctx);
       if (barDrink) ctx.rect(275, 324, 82, 82);
       ctx.clip();
       ctx.drawImage(hairLayer, 0, 0);
@@ -68,14 +103,14 @@ export function drawDrinkingPose(
     }
     // The upper arm and forearm pivot separately; neither is stretched.
     ctx.save();
-    ctx.translate(310, 306);
+    ctx.translate(291, 294);
     ctx.rotate(upperAngle);
-    ctx.drawImage(armSource, 305, 304, 47, 59, -4, 0, 47, 59);
+    ctx.drawImage(arm, 279, 280, 55, 68, -12, -14, 55, 68);
     ctx.restore();
     ctx.save();
     ctx.translate(elbowX, elbowY);
     ctx.rotate(forearmAngle);
-    ctx.drawImage(armSource, 314, 355, 32, 42, -16, -4, 32, 42);
+    ctx.drawImage(arm, 301, 338, 56, 62, -10, -8, 56, 62);
     ctx.restore();
     ctx.save();
     ctx.translate(handX - 10, handY);
@@ -131,7 +166,7 @@ export function drawDrinkingPose(
     ctx.save();
     ctx.translate(elbowX, elbowY);
     ctx.rotate(forearmAngle);
-    ctx.drawImage(armSource, 322, 377, 14, 16, -8, 18, 14, 16);
+    ctx.drawImage(arm, 327, 361, 20, 28, 16, 15, 20, 28);
     ctx.restore();
     ctx.restore();
   }

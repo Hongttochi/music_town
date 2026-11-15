@@ -14,6 +14,8 @@ const { residentFrameCanvas } = await import(
   'data:text/javascript;base64,' + Buffer.from(bundle.outputFiles[0].text).toString('base64')
 );
 for (const [name, rows] of [
+  ['emotions', 5],
+  ['extra-emotions', 5],
   ['seated-side', 2],
   ['seated-back', 2],
   ['drinking', 4],

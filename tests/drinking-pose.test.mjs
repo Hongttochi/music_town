@@ -22,8 +22,10 @@ test('hand stays attached to both rigid arm segments throughout the sip', () => 
   let previous;
   for (let frame = 0; frame <= 100; frame++) {
     const p = drinkingArmPose(frame / 100);
-    assert.ok(Math.abs(Math.hypot(p.elbowX - 310, p.elbowY - 306) - Math.hypot(20, 51)) < 1e-6);
-    assert.ok(Math.abs(Math.hypot(p.handX - p.elbowX, p.handY - p.elbowY) - 29) < 1e-6);
+    assert.ok(Math.abs(Math.hypot(p.elbowX - 291, p.elbowY - 294) - Math.hypot(20, 52)) < 1e-6);
+    assert.ok(
+      Math.abs(Math.hypot(p.handX - p.elbowX, p.handY - p.elbowY) - Math.hypot(18, 28)) < 1e-6,
+    );
     if (previous) assert.ok(Math.hypot(p.handX - previous.handX, p.handY - previous.handY) < 3);
     previous = p;
   }

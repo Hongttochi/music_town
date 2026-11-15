@@ -11,7 +11,7 @@
    - `LOGFLARE_API_KEY`: 위 ingestion token. **VITE_ 접두사 금지**
    - `LOG_ALLOWED_ORIGINS`: 허용할 사이트 origin. 예: `https://music-town-hb2j.vercel.app`. 여러 개는 쉼표로 구분하고 경로나 마지막 `/`는 제외합니다. Preview URL도 명시적으로 추가합니다.
    - `VITE_LOGGING_ENABLED=true`: 브라우저 수집 활성화. 빌드 시 반영되므로 재배포합니다.
-4. Source의 Backend TTL과 처리 리전을 운영 정책에 맞게 확인하고 개인정보처리방침에 실제 보관 기간·처리 위치를 반영합니다. 현재 저장소에는 해당 계약 정보를 추정해 넣지 않았습니다.
+4. 진단 로그의 보관 목표는 30일입니다. Source의 Backend TTL을 30일 이하로 설정하고 처리 리전과 실제 만료 삭제를 확인한 뒤 개인정보처리방침에 반영합니다. 이 값은 운영 목표이며 저장소가 공급자의 TTL을 설정하거나 운영 적용을 확인한 것은 아닙니다. 가능한 최소 기간과 계약 조건이 다른 경우 확인 결과를 기록합니다.
 5. Vercel Firewall에서 `/api/logs`에 IP별 요청 제한을 적용합니다. 코드의 분당 600건 제한은 **인스턴스 단위**이므로 분산 공격에 대한 전역 제한이 아닙니다.
 6. 배포 후 채널 입장·퇴장을 실행하고 Network에서 `/api/logs`의 204, Logflare Source에서 `channel_enter`, `channel_leave`를 확인합니다. 환경변수 미설정은 503, origin 불일치는 403, upstream 실패는 502입니다. 브라우저 UI에 로그 전송 오류를 띄우지 않습니다.
 

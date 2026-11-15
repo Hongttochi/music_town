@@ -83,7 +83,11 @@ export function ReportForm({
       }}
     >
       <p className="report-target">
-        <ProfileIcon id={target.avatar.profileIcon || 'character'} avatar={target.avatar} size={24} />
+        <ProfileIcon
+          id={target.avatar.profileIcon || 'character'}
+          avatar={target.avatar}
+          size={24}
+        />
         <span>신고 대상</span>
         <strong>{target.avatar.name}</strong>
       </p>
@@ -118,7 +122,11 @@ export function ReportForm({
       <p className="report-disclosure">
         <LockKeyhole size={14} aria-hidden="true" />
         신고 대상·사유·설명·채널과 신고자 계정이 운영자 검토를 위해 저장됩니다. 다른 이용자는 신고
-        내용을 볼 수 없어요.
+        내용을 볼 수 없어요. 일반 신고는 처리 완료 후 90일, 보관 필요성과 근거가 확인된 위반·분쟁
+        기록은 최대 1년 보관해요.{' '}
+        <a href="/privacy/#privacy-3" target="_blank" rel="noopener noreferrer">
+          보관 기준 보기
+        </a>
       </p>
       {error && (
         <p role="alert" className="report-error">

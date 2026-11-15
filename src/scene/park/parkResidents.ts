@@ -1,3 +1,4 @@
+import { createResidentConversations } from './residentConversation';
 import {
   composeResidentWalking,
   RESIDENT_WALK_FRAMES,
@@ -5,6 +6,7 @@ import {
 } from './residentWalking';
 import {
   residentFrame,
+  residentMoodPresentation,
   residentPose,
   residentDrinkPose,
   faceResidentTexture,
@@ -21,6 +23,7 @@ export type ResidentSeat = { point: T.Vector3; approach: T.Vector3; facing: numb
 type StageSpot = { id: number; point: T.Vector3 };
 type Context = {
   talkingResidentId?: string;
+  interactionResidentId?: string | null;
   night: boolean;
   paused: boolean;
   stages: StageSpot[];
@@ -150,8 +153,11 @@ export function createParkResidents(options: Options) {
     };
     return resident;
   });
+  const conversations = createResidentConversations();
   const loader = new T.ImageLoader();
   for (const [url, extra, kind] of [
+    ['/art/park-residents-emotions.png', false, 'emotion'],
+    ['/art/park-residents-extra-emotions.png', true, 'emotion'],
     ['/art/park-residents-simple.png', false, 'base'],
     ['/art/park-residents-extra-simple.png', true, 'base'],
     ['/art/park-residents-motion.png', false, 'motion'],
@@ -171,7 +177,7 @@ export function createParkResidents(options: Options) {
           const rows =
             kind === 'drink'
               ? 4
-              : kind === 'motion'
+              : kind === 'motion' || kind === 'emotion'
                 ? 5
                 : kind === 'seatedSide' || kind === 'seatedBack'
                   ? 2
@@ -205,7 +211,12 @@ export function createParkResidents(options: Options) {
                 return { texture, width: (2.3 * canvas.width) / canvas.height, height: 2.3 };
               });
             }
-            if (kind === 'drink') {
+            if (kind === 'emotion') {
+              const pose = (['sad', 'sadSide', 'surprised', 'surprisedSide', 'happySide'] as const)[
+                row
+              ];
+              resident.poses[pose] = frame;
+            } else if (kind === 'drink') {
               resident.poses[row % 2 === 0 ? 'drinkHold' : 'drinkSip'] = frame;
             } else if (kind === 'seatedSide' || kind === 'seatedBack') {
               resident.poses[kind === 'seatedSide' ? 'sitSide' : 'sitBack'] = frame;
@@ -274,7 +285,7 @@ export function createParkResidents(options: Options) {
       );
       if (friend)
         destinations.push({
-          point: { x: friend.group.position.x + 1.2, z: friend.group.position.z },
+          point: { x: friend.group.position.x + 2.6, z: friend.group.position.z },
           activity: 'chat',
         });
     }
@@ -302,6 +313,7 @@ export function createParkResidents(options: Options) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   function update(time: number, dt: number, context: Context) {
     if (previousNight !== undefined && previousNight !== context.night) {
+      conversations.reset();
       residents.forEach((r) => {
         if (options.insideBar(r.group.position) && !context.night) r.group.position.set(32, 0, 3.5);
         r.route = [];
@@ -311,7 +323,80 @@ export function createParkResidents(options: Options) {
       });
     }
     previousNight = context.night;
+    camera.updateWorldMatrix(true, false);
+    const screenRight = new T.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+    screenRight.y = 0;
+    screenRight.normalize();
+    const clearSegment = (a: GroundPoint, b: GroundPoint) =>
+      options.cross(a, b) &&
+      Array.from({ length: 24 }, (_, i) => (i + 1) / 24).every((t) =>
+        options.clear({ x: a.x + (b.x - a.x) * t, z: a.z + (b.z - a.z) * t }, context.night),
+      );
+    const chats = conversations.update(
+      residents.map((r) => ({
+        id: r.definition.id,
+        x: r.group.position.x,
+        z: r.group.position.z,
+        available:
+          !r.route.length &&
+          !r.seat &&
+          (r.activity === 'walk' || r.activity === 'chat') &&
+          options.clear(r.group.position, context.night),
+      })),
+      dt,
+      context.paused,
+      context.talkingResidentId,
+      clearSegment,
+      (a, b) => {
+        const midpoint = { x: (a.x + b.x) / 2, z: (a.z + b.z) / 2 };
+        const sign = (b.x - a.x) * screenRight.x + (b.z - a.z) * screenRight.z >= 0 ? 1 : -1;
+        const targets: [GroundPoint, GroundPoint] = [-1, 1].map((side) => ({
+          x: midpoint.x + screenRight.x * 1.3 * side * sign,
+          z: midpoint.z + screenRight.z * 1.3 * side * sign,
+        })) as [GroundPoint, GroundPoint];
+        const occupied = targets.some(
+          (target) =>
+            context.people.some((p) => Math.hypot(p.x - target.x, p.z - target.z) < 1) ||
+            residents.some(
+              (r) =>
+                r.definition.id !== a.id &&
+                r.definition.id !== b.id &&
+                Math.hypot(r.group.position.x - target.x, r.group.position.z - target.z) < 1.4,
+            ),
+        );
+        return !occupied &&
+          clearSegment(a, targets[0]) &&
+          clearSegment(b, targets[1]) &&
+          clearSegment(targets[0], targets[1])
+          ? targets
+          : null;
+      },
+    );
+    // Move into separate conversation spots before the shared expression clock starts.
+    if (!context.paused)
+      for (const resident of residents) {
+        const target = chats.get(resident.definition.id)?.target;
+        if (!target) continue;
+        const p = resident.group.position;
+        const distance = Math.hypot(target.x - p.x, target.z - p.z);
+        const fraction = distance ? Math.min(1, (dt * 1.05) / distance) : 0;
+        const next = { x: p.x + (target.x - p.x) * fraction, z: p.z + (target.z - p.z) * fraction };
+        if (clearSegment(p, next)) {
+          p.x = next.x;
+          p.z = next.z;
+        }
+      }
     for (const resident of residents) {
+      const chat = chats.get(resident.definition.id);
+      if (chat) {
+        resident.activity = 'chat';
+        resident.until = time + 2500;
+      } else if (resident.activity === 'chat' && !resident.route.length) {
+        resident.activity = 'walk';
+        resident.reactionText = '';
+        resident.nextReaction = time + 7000;
+      }
+
       if (
         (resident.seat && !free(resident.seat, resident, context)) ||
         (resident.activity === 'coffee' &&
@@ -377,21 +462,6 @@ export function createParkResidents(options: Options) {
             resident.route.shift();
             if (!resident.route.length) {
               resident.arrived = time;
-              if (resident.activity === 'chat') {
-                const friend = residents.find(
-                  (other) =>
-                    other !== resident &&
-                    !other.route.length &&
-                    !other.seat &&
-                    other.group.position.distanceTo(resident.group.position) < 2,
-                );
-                if (friend) {
-                  friend.activity = 'chat';
-                  friend.until = time + 14000;
-                  friend.nextReaction = time;
-                  resident.nextReaction = time + 1200;
-                }
-              }
               resident.until =
                 time + (resident.activity === 'walk' ? 4000 : 18000) + Math.random() * 12000;
               if (resident.seat) resident.group.position.copy(resident.seat.point);
@@ -399,7 +469,7 @@ export function createParkResidents(options: Options) {
           }
         }
       }
-      const moving = resident.route.length > 0;
+      const moving = resident.route.length > 0 || (!!chat && !chat.ready);
       const seated = !!resident.seat && !moving;
       const watching = resident.activity === 'watch' && !moving;
       const drinking =
@@ -415,6 +485,12 @@ export function createParkResidents(options: Options) {
       });
       resident.facingSide = facing.side;
       resident.facingBack = facing.back;
+      if (chat?.ready) {
+        const partner = residents.find((r) => r.definition.id === chat.partner)!;
+        const toward = partner.group.position.clone().sub(resident.group.position).dot(screenRight);
+        resident.facingSide = toward < 0 ? -1 : 1;
+        resident.facingBack = false;
+      }
       if (watching) {
         resident.facingBack = true;
         resident.facingSide = 0;
@@ -440,7 +516,7 @@ export function createParkResidents(options: Options) {
         resident.animationTime,
         walking,
         seated,
-        talking || resident.activity === 'chat',
+        talking || chat?.mood === 'happy',
         !resident.facingBack && !resident.facingSide,
         reduced,
         !!resident.facingSide,
@@ -449,7 +525,10 @@ export function createParkResidents(options: Options) {
       const gaitIndex =
         Math.floor(resident.animationTime / (RESIDENT_WALK_PERIOD / RESIDENT_WALK_FRAMES)) %
         RESIDENT_WALK_FRAMES;
+      const emotion = residentMoodPresentation(chat?.mood, !!resident.facingSide);
+      const moodPose = emotion.pose;
       const frame =
+        (moodPose ? resident.poses[moodPose] : undefined) ??
         drinkFrame ??
         (walking && !reduced
           ? resident.gait[gaitDirection]?.[gaitIndex]
@@ -507,7 +586,7 @@ export function createParkResidents(options: Options) {
       resident.cup.rotateZ(angle);
       resident.group.position.y = options.surface(resident.group.position);
       resident.sprite.material.color.set(context.night ? '#cbd1e6' : '#ffffff');
-      if (!context.paused && !moving && time > resident.nextReaction) {
+      if (!chat && !context.paused && !moving && time > resident.nextReaction) {
         const friend = residents.find(
           (other) =>
             other !== resident &&
@@ -515,29 +594,37 @@ export function createParkResidents(options: Options) {
             other.group.position.distanceTo(resident.group.position) < 2.2,
         );
         resident.reactionText = watching
-          ? ['♥', '♪', '짝짝!'][Math.floor(Math.random() * 3)]
+          ? ['music', 'clap'][Math.floor(Math.random() * 2)]
           : resident.activity === 'coffee'
             ? drinking
               ? ''
-              : '☕ 커피 기다리는 중 ...'
+              : 'hourglass'
             : resident.activity === 'bar'
-              ? '🥂'
+              ? 'smiling-face'
               : friend
-                ? '안녕!'
+                ? 'smiling-face'
                 : '';
-        const reactionArt: Record<string, string> = {
-          '♥': '/icons/heart.png',
-          '♪': '/icons/music.png',
-          '짝짝!': '/icons/clap.png',
-        };
-        const icon = reactionArt[resident.reactionText];
-        resident.reactionIcon.hidden = !icon;
-        if (icon) resident.reactionIcon.src = icon;
-        resident.reactionLabel.textContent = icon ? '' : resident.reactionText;
-        resident.reactionLabel.hidden = !!icon;
+        resident.reactionIcon.hidden = !resident.reactionText;
+        if (resident.reactionText)
+          resident.reactionIcon.src = `/icons/${resident.reactionText}.png`;
+        resident.reactionLabel.textContent = '';
+        resident.reactionLabel.hidden = true;
         resident.reactionUntil = time + 2200;
         resident.nextReaction = time + 7000 + Math.random() * 7000;
       }
+      if (chat) {
+        resident.reactionText = chat.speaking ? emotion.icon : '';
+        resident.reactionIcon.hidden = !resident.reactionText;
+        if (resident.reactionText)
+          resident.reactionIcon.src = `/icons/${resident.reactionText}.png`;
+        resident.reactionLabel.hidden = true;
+        resident.reactionLabel.textContent = '';
+        resident.reactionUntil = time + 100;
+      }
+      resident.reaction.className = chat
+        ? 'resident-reaction resident-conversation'
+        : 'resident-reaction';
+      resident.reaction.setAttribute('data-mood', chat?.mood ?? 'neutral');
       const projected = spriteHeadAnchor(resident.sprite, camera);
       projected.project(camera);
       const visible =
@@ -552,7 +639,11 @@ export function createParkResidents(options: Options) {
       const x = (projected.x * 0.5 + 0.5) * canvas.clientWidth,
         y = (-projected.y * 0.5 + 0.5) * canvas.clientHeight - 16;
       const reacting = visible && time < resident.reactionUntil && !!resident.reactionText;
-      const nearby = context.people[0] && resident.group.position.distanceTo(context.people[0]) < 3;
+      const nearby =
+        context.people[0] &&
+        resident.group.position.distanceTo(context.people[0]) < 3 &&
+        (context.interactionResidentId === undefined ||
+          context.interactionResidentId === resident.definition.id);
       resident.button.hidden = !(visible && nearby && !reacting);
       resident.button.style.display = visible && nearby && !reacting ? 'flex' : 'none';
       resident.button.style.left = `${x}px`;
@@ -565,6 +656,16 @@ export function createParkResidents(options: Options) {
     update,
     positionOf(id: string) {
       return residents.find((resident) => resident.definition.id === id)?.group.position;
+    },
+    nearestTo(point: T.Vector3, insideBar: boolean) {
+      return residents
+        .filter((r) => r.sprite.visible && (!options.insideBar(r.group.position) || insideBar))
+        .map((r) => ({
+          id: r.definition.id,
+          distance: Math.hypot(r.group.position.x - point.x, r.group.position.z - point.z),
+        }))
+        .filter((r) => r.distance < 3)
+        .sort((a, b) => a.distance - b.distance)[0];
     },
     occupiedSeats() {
       return residents

@@ -1,4 +1,4 @@
-import { ChevronRight, Headphones, VolumeX, Volume2, Users, ListPlus } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { Flaticon } from '../ui/Flaticon';
 import { Button } from '../ui/Button';
 import { ProfileIcon } from '../profile/ProfileIcon';
@@ -32,19 +32,19 @@ export function StageProfile({
 }: Props) {
   return (
     <section className="stage-profile-card" aria-label="공연 정보">
-      {!own && (
-        <div className="stage-top-controls">
-          <Button variant="ghost" onClick={onMute} aria-pressed={muted}>
-            {muted ? <Volume2 size={15} /> : <VolumeX size={15} />}
-            {muted ? '음소거 해제' : '음소거'}
-          </Button>
-          <Button variant="ghost" onClick={onReport}>
-            <Flaticon name="siren" size={14} />
-            신고
-          </Button>
-        </div>
-      )}
       <div className="stage-performer">
+        {!own && (
+          <div className="stage-top-controls">
+            <Button variant="ghost" onClick={onMute} aria-pressed={muted}>
+              <Flaticon name={muted ? 'mute' : 'volume-up'} size={15} />
+              {muted ? '음소거 해제' : '음소거'}
+            </Button>
+            <Button variant="ghost" onClick={onReport}>
+              <Flaticon name="siren" size={14} />
+              신고
+            </Button>
+          </div>
+        )}
         <div className="stage-performer-icon">
           <ProfileIcon id={performerAvatar?.profileIcon} avatar={performerAvatar} size={32} />
         </div>
@@ -74,23 +74,21 @@ export function StageProfile({
       <div className="stage-location-row">
         <span>{selected.name}</span>
         <span className="stage-listeners">
-          <Users size={15} />
+          <Flaticon name="profile-followers" size={15} />
           <span>{selected.listeners}명 관람</span>
         </span>
       </div>
       {!own && (
-        <>
+        <div className="stage-action-row">
+          <Button variant="secondary" className="stage-queue-button" onClick={onQueue}>
+            <Flaticon name="hourglass" size={18} />
+            대기
+          </Button>
           <Button variant="primary" className="stage-listen-button" onClick={onListen}>
-            <Headphones size={19} />
+            <Flaticon name="headset" size={18} />
             무대 앞에서 듣기
           </Button>
-          <div className="stage-secondary-controls">
-            <Button variant="ghost" onClick={onQueue}>
-              <ListPlus size={15} />
-              대기
-            </Button>
-          </div>
-        </>
+        </div>
       )}
     </section>
   );
