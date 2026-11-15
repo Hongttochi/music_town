@@ -26,6 +26,7 @@ import { clampParkPosition } from '../../utils/parkBounds';
 import { createSchool, SCHOOL_SPOT, overlapsSchool } from './school';
 import { PARK_PATHS } from './parkPaths';
 import { remoteMovementStep } from '../../utils/remoteMovement';
+import { smoothVelocity, smoothVelocityDelta, WALK_SPEED } from '../avatar/gait';
 import type { useSoundEffects } from '../../hooks/useSoundEffects';
 import { createCampfire, CAMPFIRE_SPOT, CAMPFIRE_RADIUS } from './campfire';
 import { createNoticeBoard, NOTICE_BOARD_SPOT, NOTICE_BOARD_REACH } from './noticeBoard';
@@ -941,6 +942,7 @@ export function createParkScene({
   let frame = 0,
     last = 0,
     lastMove = 0;
+  let playerVelocity = { x: 0, z: 0 };
   const focus = world(latest.current.position.current),
     target = new T.Vector3(),
     cameraFocusGoal = new T.Vector3();
@@ -1033,6 +1035,8 @@ export function createParkScene({
         y: visitor.group.position.z * 25 + 450,
       });
       visitor.group.userData.walking = movement.walking && !performing;
+      visitor.group.userData.walkDistance =
+        movement.walking && !performing ? distance * movement.fraction : 0;
       const arrived = distance * (1 - movement.fraction) < 0.02;
       visitor.group.userData.seated =
         arrived &&
@@ -1087,6 +1091,7 @@ export function createParkScene({
     ) {
       dx = 0;
       dz = 0;
+      playerVelocity = { x: 0, z: 0 };
       keys.clear();
     }
     if (
@@ -1287,10 +1292,13 @@ export function createParkScene({
       dx /= len;
       dz /= len;
     }
+    const targetVelocity = { x: dx * WALK_SPEED, z: dz * WALK_SPEED };
+    const movementDelta = smoothVelocityDelta(playerVelocity, targetVelocity, dt);
+    playerVelocity = smoothVelocity(playerVelocity, targetVelocity, dt);
     const movementOrigin = { ...p.position.current };
     const next = clampParkPosition({
-        x: p.position.current.x + dx * 105 * dt,
-        y: p.position.current.y + dz * 105 * dt,
+        x: p.position.current.x + movementDelta.x * 25,
+        y: p.position.current.y + movementDelta.z * 25,
       }),
       point = world(next);
     if (
@@ -1309,7 +1317,11 @@ export function createParkScene({
       })
     )
       p.position.current = next;
-    if ((dx || dz) && time - lastMove > 70) {
+    const movedMap = Math.hypot(
+      p.position.current.x - movementOrigin.x,
+      p.position.current.y - movementOrigin.y,
+    );
+    if (movedMap > 0.001 && time - lastMove > 70) {
       p.onMove({ ...p.position.current });
       lastMove = time;
     }
@@ -1361,20 +1373,13 @@ export function createParkScene({
     else if (p.performing !== null || seatedBench || coffeePhase === 'drinking')
       player.rotation.y = 0;
     else if (dx || dz) player.rotation.y = Math.atan2(dx, dz);
-    const walking =
-      !!(dx || dz) &&
-      !seatedBench &&
-      Math.hypot(p.position.current.x - movementOrigin.x, p.position.current.y - movementOrigin.y) >
-        0.001;
+    const movedWorld = movedMap / 25;
+    player.userData.walkDistance = movedWorld;
+    const walking = !seatedBench && movedWorld > 0.0001;
     footsteps.update(walking, isInsideBar(world(p.position.current)));
     (player.userData.limbs as T.Object3D[]).forEach((l, i) => {
       l.rotation.x = walking ? Math.sin(time / 130 + (i < 2 ? 0 : Math.PI)) * 0.42 : 0;
     });
-    player.position.y += seatedBench
-      ? 0
-      : walking
-        ? Math.abs(Math.sin(time / 130)) * 0.055
-        : Math.sin(time / 700) * 0.012;
     if (entranceReady && entranceStart === null) entranceStart = time;
     const arrival = reducedMotion
       ? 1
@@ -1629,7 +1634,18 @@ export function createParkScene({
       asset.object.rotation.y = player.rotation.y + CHARACTER_ASSET.facingRadians;
       asset.update(dt, walking);
     }
-    imageCharacters.update(player, walking, time);
+    imageCharacters.update(player, walking, dt, reducedMotion);
+    if (!seatedBench && !reducedMotion) {
+      const weight = Number(player.userData.gaitBobWeight) || 0;
+      player.position.y +=
+        (Number(player.userData.gaitBob) || 0) + Math.sin(time / 700) * 0.012 * (1 - weight);
+    }
+    if (!reducedMotion) {
+      for (const visitor of visitors.values()) {
+        if (visitor.group.userData.seated) continue;
+        visitor.group.position.y += Number(visitor.group.userData.gaitBob) || 0;
+      }
+    }
     residents.update(time, dt, {
       talkingResidentId: p.focusResident,
       interactionResidentId,
