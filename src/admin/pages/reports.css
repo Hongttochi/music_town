@@ -1,0 +1,19 @@
+.a-detail p {
+  margin: 0 0 14px;
+  color: var(--a-sub);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.a-detail dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 14px;
+  margin: 0 0 18px;
+  font-size: 12.5px;
+}
+.a-detail dt {
+  color: var(--a-muted);
+}
+.a-detail dd {
+  margin: 0;
+}

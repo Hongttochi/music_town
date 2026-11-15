@@ -16,12 +16,13 @@ export const supabase = authConfigured
     })
   : null;
 
-export async function signIn(provider: 'google' | 'kakao') {
+// redirectPath: where to return after sign-in. The admin console uses '/admin/' (must be listed in Supabase Redirect URLs).
+export async function signIn(provider: 'google' | 'kakao', redirectPath = '/') {
   if (!supabase) throw new Error('로그인 서비스가 아직 연결되지 않았어요.');
   const { error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: window.location.origin + '/',
+      redirectTo: window.location.origin + redirectPath,
       // `scopes` adds to Supabase's defaults, including account_email.
       // Override the outgoing Kakao scope; also enable "Allow users without an email".
       queryParams: provider === 'kakao' ? { scope: 'profile_nickname,profile_image' } : undefined,
