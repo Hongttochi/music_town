@@ -1,3 +1,4 @@
+import type { ResidentMood } from './residentConversation';
 import * as T from 'three';
 import { residentFrameCanvas } from './residentFrames';
 
@@ -15,7 +16,12 @@ export type ResidentPose =
   | 'sitSide'
   | 'sit'
   | 'happy'
-  | 'blink';
+  | 'blink'
+  | 'sad'
+  | 'sadSide'
+  | 'surprised'
+  | 'surprisedSide'
+  | 'happySide';
 
 export function residentPose(
   time: number,
@@ -59,4 +65,12 @@ export function residentFrame(
 
 export function residentDrinkPose(time: number, reduced: boolean): ResidentPose {
   return !reduced && time % 5200 >= 2200 && time % 5200 < 3800 ? 'drinkSip' : 'drinkHold';
+}
+
+/** Use the same mood for the face and icon; surprise must never show a smiling icon. */
+export function residentMoodPresentation(mood: ResidentMood | undefined, side: boolean) {
+  const pose: ResidentPose | undefined =
+    !mood || mood === 'neutral' ? undefined : side ? `${mood}Side` : mood;
+  const icon = mood === 'happy' ? 'smiling-face' : mood === 'sad' ? 'sad' : '';
+  return { pose, icon };
 }

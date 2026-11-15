@@ -10,6 +10,9 @@ export function SoundEffectsSetting() {
   const [expanded, setExpanded] = useState(false);
   const id = useId();
   const percent = enabled ? Math.round(volume * 100) : 0;
+  const ambientPercent = Math.round(ambientVolume * 100);
+  const volumeIcon = (value: number) =>
+    value <= 0 ? 'mute' : value <= 50 ? 'volume-down' : 'volume-up';
   return (
     <div className="sound-effects-setting" data-expanded={expanded}>
       <Button
@@ -18,7 +21,7 @@ export function SoundEffectsSetting() {
         aria-controls={id}
         onClick={() => setExpanded(!expanded)}
       >
-        <Flaticon name="alarm" size={16} />
+        <Flaticon name={volumeIcon(Math.max(percent, ambientPercent))} size={16} />
         <span className="sound-effects-label">소리 설정</span>
         {expanded ? (
           <ChevronUp size={16} aria-hidden="true" />
@@ -30,7 +33,10 @@ export function SoundEffectsSetting() {
         <div className="sound-effects-reveal-inner">
           <div className="sound-settings-controls">
             <label className="sound-settings-row">
-              <span>배경음</span>
+              <span className="sound-settings-label">
+                <Flaticon name={volumeIcon(ambientPercent)} size={15} />
+                배경음
+              </span>
               <div className="sound-effects-slider">
                 <input
                   type="range"
@@ -48,7 +54,10 @@ export function SoundEffectsSetting() {
               </div>
             </label>
             <label className="sound-settings-row">
-              <span>선택·효과음</span>
+              <span className="sound-settings-label">
+                <Flaticon name={volumeIcon(percent)} size={15} />
+                선택·효과음
+              </span>
               <div className="sound-effects-slider">
                 <input
                   type="range"

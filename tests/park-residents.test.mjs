@@ -5,6 +5,7 @@ import { resolve, dirname } from 'node:path';
 import vm from 'node:vm';
 import ts from 'typescript';
 import * as THREE from 'three';
+import { createCanvas, loadImage } from '@napi-rs/canvas';
 
 function load(file, globals = {}, cache = new Map()) {
   file = resolve(file);
@@ -19,7 +20,9 @@ function load(file, globals = {}, cache = new Map()) {
         ? {
             ...THREE,
             ImageLoader: class {
-              load() {}
+              load(url, callback) {
+                if (globals.images?.has(url)) callback(globals.images.get(url));
+              }
             },
           }
         : load(resolve(dirname(file), name + '.ts'), globals, cache),
@@ -67,7 +70,7 @@ test('random dialogue does not immediately repeat', () => {
   );
 });
 
-function simulation(random = 0.1, seats = [], clear = () => true) {
+function simulation(random = 0.1, seats = [], clear = () => true, images) {
   const elements = [];
   const element = () => ({
     style: {},
@@ -88,8 +91,10 @@ function simulation(random = 0.1, seats = [], clear = () => true) {
   math.random = () => random;
   const { createParkResidents } = load('src/scene/park/parkResidents.ts', {
     Math: math,
+    images,
     document: {
-      createElement() {
+      createElement(tag) {
+        if (tag === 'canvas' && images) return createCanvas(1, 1);
         const e = element();
         elements.push(e);
         return e;
@@ -366,4 +371,58 @@ test('counter seating faces back and drinking alternates hold and sip without mo
   assert.equal(residentDrinkPose(2600, false), 'drinkSip');
   assert.equal(residentDrinkPose(4000, false), 'drinkHold');
   assert.equal(residentDrinkPose(2600, true), 'drinkHold');
+});
+
+test('neighboring residents separate, face one another and show actual sad/happy texture frames', async () => {
+  const images = new Map();
+  for (const name of ['simple', 'motion', 'emotions'])
+    images.set(
+      `/art/park-residents-${name}.png`,
+      await loadImage(`public/art/park-residents-${name}.png`),
+    );
+  const sim = simulation(0.3, [], () => true, images);
+  const a = sim.scene.children.find((g) => g.name === 'resident-bori');
+  const b = sim.scene.children.find((g) => g.name === 'resident-roa');
+  a.position.set(-10, 0, 4);
+  b.position.set(-10, 0, 4.5);
+  sim.system.update(0, 0, sim.context);
+  for (let t = 100; t <= 2000; t += 100) sim.system.update(t, 0.1, sim.context);
+  const reactions = sim.parent.children[0].children.filter((e) =>
+    e.className.includes('resident-conversation'),
+  );
+  assert.equal(reactions.length, 2);
+  assert.equal(reactions[0].children[0].src, '/icons/sad.png');
+  assert.ok(reactions.every((r) => r.children[1].hidden && !r.children[1].textContent));
+  const { residentFrame } = load('src/scene/park/residentAnimation.ts', {
+    document: { createElement: () => createCanvas(1, 1) },
+  });
+  const sad = residentFrame(images.get('/art/park-residents-emotions.png'), 0, 1, 5).texture.image;
+  const pixels = (canvas) =>
+    canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+  assert.deepEqual(
+    pixels(a.children[0].material.map.image),
+    pixels(sad),
+    'visible face must use the sad profile artwork',
+  );
+  assert.equal(a.children[0].material.map.repeat.x, 1);
+  assert.equal(b.children[0].material.map.repeat.x, -1);
+  assert.ok(Math.abs(a.position.z - b.position.z) < 0.08);
+  assert.ok(
+    b.position.x - a.position.x > 2.5,
+    'conversation starts with enough horizontal separation',
+  );
+  sim.system.update(13100, 11.1, sim.context);
+  assert.equal(reactions[1].children[0].src, '/icons/smiling-face.png');
+  const happy = residentFrame(images.get('/art/park-residents-emotions.png'), 1, 4, 5).texture
+    .image;
+  assert.deepEqual(
+    pixels(b.children[0].material.map.image),
+    pixels(happy),
+    'visible face must use the happy profile artwork',
+  );
+  sim.context.talkingResidentId = 'bori';
+  sim.context.paused = true;
+  sim.system.update(11200, 0.1, sim.context);
+  assert.ok(reactions.every((r) => r.className === 'resident-reaction'));
+  sim.system.dispose();
 });

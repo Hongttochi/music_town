@@ -75,3 +75,10 @@ dialog.town-panel .sound-settings-controls input[type='range'] {
   outline: 1px solid #8b9f76;
   outline-offset: 2px;
 }
+
+.sound-settings-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 3px;
+}
