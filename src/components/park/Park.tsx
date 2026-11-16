@@ -109,13 +109,13 @@ export function Park(props: ParkProps) {
       {nearOffice && !error && props.performing === null && (
         <Button
           ref={officeBubble}
-          className="bench-action office-action"
+          className="bench-action npc-action office-action"
           style={{ visibility: 'hidden' }}
           aria-label="동사무소 직원 솔과 편지 업무 보기"
           onClick={() => setOfficeOpen(true)}
         >
-          <Flaticon name="mail" size={18} />
-          <span>솔 · 동사무소</span>
+          <Flaticon name="chat" size={18} />
+          <span>솔</span>
         </Button>
       )}
       {nearNpc && !error && props.performing === null && (

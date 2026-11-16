@@ -24,7 +24,14 @@ import {
 } from './nightBar';
 import { clampParkPosition } from '../../utils/parkBounds';
 import { createSchool, SCHOOL_SPOT, overlapsSchool } from './school';
-import { createTownOffice, OFFICE_CLERK, overlapsOffice } from './townOffice';
+import {
+  createTownOffice,
+  OFFICE_CLERK,
+  OFFICE_SPOT,
+  overlapsOffice,
+  isInsideOffice,
+  isOfficeGround,
+} from './townOffice';
 import { PARK_PATHS } from './parkPaths';
 import { remoteMovementStep } from '../../utils/remoteMovement';
 import { smoothVelocity, smoothVelocityDelta, WALK_SPEED } from '../avatar/gait';
@@ -255,7 +262,9 @@ export function createParkScene({
   );
   const obstacles: { x: number; z: number; r: number }[] = [];
   function tree(x: number, z: number, s = 1) {
-    if (overlapsOffice({ x, z }, 2.5 * s) || Math.hypot(x - OFFICE_CLERK.x, z - OFFICE_CLERK.z) < 3) return;
+    // The former north border is now an open route into the expanded park.
+    if (z < -17) z -= 6;
+    if (isOfficeGround({ x, z }, 2.5 * s)) return;
     if (Math.abs(x - BAR_SPOT.x) < 9 && Math.abs(z - BAR_SPOT.z) < 9) return;
     if (Math.abs(x - SCHOOL_SPOT.x) < 4.5 && Math.abs(z - SCHOOL_SPOT.z) < 5) return;
     if (walkways.some((p) => Math.hypot(x - p.x, z - p.z) < p.width + s)) return;
@@ -412,6 +421,10 @@ export function createParkScene({
   };
   const school = createSchool(scene);
   const office = createTownOffice(scene);
+  const officeClerk = createBarNpc('/art/office-sol.png', 'office-clerk-sol');
+  officeClerk.group.position.copy(OFFICE_CLERK);
+  scene.add(officeClerk.group);
+  const officeSprite = officeClerk.group.children[0] as T.Sprite;
   obstacles.push({ x: OFFICE_CLERK.x, z: OFFICE_CLERK.z, r: 0.45 });
   let officeShown = false;
   obstacles.push({ x: SCHOOL_SPOT.x, z: SCHOOL_SPOT.z, r: 3.2 });
@@ -484,7 +497,15 @@ export function createParkScene({
     [-8, 12],
   ].forEach(([x, z]) => flowerBed(x, z));
 
-  for (let x = -20; x < 14; x += 3.4) scenery.prop(5, x, -17, 1.2);
+  // Move the old dividing fence to the expanded north boundary.
+  for (let x = -20; x < 14; x += 3.4) {
+    const z = -25.5;
+    if (
+      !isOfficeGround({ x, z }, 1.6) &&
+      !walkways.some((p) => Math.hypot(x - p.x, z - p.z) < p.width + 1.8)
+    )
+      scenery.prop(5, x, z, 1.2);
+  }
   // A small wooden footbridge makes the river part of the walk.
   for (let x = BRIDGE.left; x < BRIDGE.right; x += 0.45)
     box(x, BRIDGE.surfaceHeight - 0.1, BRIDGE.centerZ, 0.42, 0.2, BRIDGE.width, '#bd9767');
@@ -1264,12 +1285,15 @@ export function createParkScene({
       !seatedBench &&
       coffeePhase === 'idle' &&
       world(p.position.current).distanceTo(school.npcPosition) < 3;
-    office.update(time, p.night ?? isParkNight(), reducedMotion);
+    const insideOffice = isInsideOffice(world(p.position.current));
+    office.update(time, p.night ?? isParkNight(), reducedMotion, insideOffice);
+    officeClerk.group.visible = insideOffice;
     const nearOffice =
       p.performing === null &&
       !seatedBench &&
       coffeePhase === 'idle' &&
       !p.timeTransition &&
+      insideOffice &&
       world(p.position.current).distanceTo(OFFICE_CLERK) < 3;
     if (nearOffice !== officeShown) {
       officeShown = nearOffice;
@@ -1464,6 +1488,10 @@ export function createParkScene({
       cameraFocusGoal.copy(COFFEE_SPOT).lerp(player.position, 0.4);
       stageZoom = 2.1;
     }
+    if (insideOffice) {
+      cameraFocusGoal.copy(OFFICE_SPOT);
+      stageZoom = 1.6;
+    }
     if (insideBar) {
       cameraFocusGoal.copy(BAR_SPOT);
       stageZoom = 1.15;
@@ -1551,12 +1579,13 @@ export function createParkScene({
           : 'hidden';
     }
     if (officeBubble.current) {
-      const anchor = OFFICE_CLERK.clone();
-      anchor.y = 2.8;
+      const anchor = spriteHeadAnchor(officeSprite, camera);
       anchor.project(camera);
       officeBubble.current.style.left = `${(anchor.x * 0.5 + 0.5) * el.clientWidth}px`;
       officeBubble.current.style.top = `${(-anchor.y * 0.5 + 0.5) * el.clientHeight}px`;
       officeBubble.current.style.visibility =
+        nearOffice &&
+        officeSprite.visible &&
         Math.abs(anchor.x) < 0.95 &&
         Math.abs(anchor.y) < 0.9 &&
         Math.abs(anchor.z) < 1 &&
@@ -1746,6 +1775,7 @@ export function createParkScene({
     useBarDrink.current = () => {};
     dismissBarNotice.current = () => {};
     school.dispose();
+    officeClerk.dispose();
     office.dispose();
     coffeeShop.dispose();
     noticeBoard.dispose();
