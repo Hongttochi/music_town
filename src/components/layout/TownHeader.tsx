@@ -1,5 +1,4 @@
 import './town-header.css';
-import { House } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { ProfileIcon } from '../profile/ProfileIcon';
 import { Flaticon } from '../ui/Flaticon';
@@ -42,7 +41,7 @@ export function TownHeader({
           aria-label="마이룸"
           title="마이룸"
         >
-          <House size={18} aria-hidden="true" />
+          <Flaticon name="house" size={22} />
         </Button>
         <Button className="avatar-button" onClick={onProfile} aria-label="마이페이지">
           <ProfileIcon id={profileIcon} avatar={avatar} size={12} />
