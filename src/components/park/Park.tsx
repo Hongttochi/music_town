@@ -8,12 +8,17 @@ import { useParkScene } from '../../hooks/useParkScene';
 import type { ParkProps } from '../../types/park';
 export type { Position } from '../../types/park';
 import { NoticeBoardDialog } from './NoticeBoardDialog';
+import { TownOfficeDialog } from './TownOfficeDialog';
 import { CoffeeOrderDialog } from './CoffeeOrderDialog';
 import { Button } from '../ui/Button';
 import { Flaticon } from '../ui/Flaticon';
 import { findCoffee } from '../../data/coffeeMenu';
 export function Park(props: ParkProps) {
   const {
+    officeBubble,
+    nearOffice,
+    officeOpen,
+    setOfficeOpen,
     residentTalk,
     setResidentTalk,
     canvas,
@@ -100,6 +105,19 @@ export function Park(props: ParkProps) {
         />
       )}
       {guideOpen && <ParkGuideDialog onClose={() => setGuideOpen(false)} />}
+      {officeOpen && <TownOfficeDialog demo={props.demo} onClose={() => setOfficeOpen(false)} />}
+      {nearOffice && !error && props.performing === null && (
+        <Button
+          ref={officeBubble}
+          className="bench-action office-action"
+          style={{ visibility: 'hidden' }}
+          aria-label="동사무소 직원 솔과 편지 업무 보기"
+          onClick={() => setOfficeOpen(true)}
+        >
+          <Flaticon name="mail" size={18} />
+          <span>솔 · 동사무소</span>
+        </Button>
+      )}
       {nearNpc && !error && props.performing === null && (
         <Button
           ref={npcBubble}

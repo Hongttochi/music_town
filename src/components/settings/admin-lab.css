@@ -3,45 +3,6 @@
   gap: 20px;
   color: #39462f;
 }
-.admin-lab-intro {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 18px;
-  border: 1px solid #dce3cc;
-  border-radius: 16px;
-  background: linear-gradient(120deg, #eff3e4, #fff9ed);
-}
-.admin-lab-icon {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 60px;
-  height: 60px;
-  border-radius: 18px;
-  background: #fffdf5;
-  box-shadow: 0 3px 10px #526b3910;
-}
-.admin-lab-eyebrow {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: #71815d;
-}
-.admin-lab h3 {
-  margin: 5px 0;
-  font-size: 15px;
-  line-height: 1.5;
-}
-.admin-lab .admin-lab-intro p {
-  font-size: 12px;
-  color: #727a66;
-}
-.admin-lab p {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.7;
-}
 .admin-lab fieldset {
   margin: 0;
   padding: 0;
@@ -51,12 +12,6 @@
   margin-bottom: 10px;
   font-size: 14px;
   font-weight: 700;
-}
-.admin-lab legend span {
-  margin-left: 8px;
-  font-size: 11px;
-  font-weight: 400;
-  color: #7b816f;
 }
 .admin-lab-options {
   display: grid;
@@ -131,34 +86,16 @@
   min-height: 38px;
   padding: 8px;
 }
-.admin-lab .admin-lab-seasons .admin-lab-choice--auto svg {
-  width: 16px;
-  height: 16px;
+.admin-lab .admin-lab-seasons .admin-lab-choice--auto img {
+  width: 22px;
+  height: 22px;
 }
 .admin-lab .admin-lab-reset {
   width: 100%;
   min-height: 40px;
   border-radius: 10px;
 }
-.admin-lab .admin-lab-note {
-  font-size: 12px;
-  color: #68745d;
-  padding: 12px 14px;
-  background: #f3f4ec;
-  border-radius: 10px;
-}
 @media (max-width: 420px) {
-  .admin-lab-intro {
-    padding: 12px;
-    gap: 10px;
-  }
-  .admin-lab-icon {
-    width: 44px;
-    height: 48px;
-  }
-  .admin-lab h3 {
-    font-size: 13px;
-  }
   .admin-lab-options {
     gap: 6px;
   }

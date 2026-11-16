@@ -24,6 +24,7 @@ import {
 } from './nightBar';
 import { clampParkPosition } from '../../utils/parkBounds';
 import { createSchool, SCHOOL_SPOT, overlapsSchool } from './school';
+import { createTownOffice, OFFICE_CLERK, overlapsOffice } from './townOffice';
 import { PARK_PATHS } from './parkPaths';
 import { remoteMovementStep } from '../../utils/remoteMovement';
 import { smoothVelocity, smoothVelocityDelta, WALK_SPEED } from '../avatar/gait';
@@ -70,6 +71,8 @@ type ParkSceneBindings = {
   sound: React.MutableRefObject<ReturnType<typeof useSoundEffects>>;
   benchBubble: React.RefObject<HTMLButtonElement | null>;
   npcBubble: React.RefObject<HTMLButtonElement | null>;
+  officeBubble: React.RefObject<HTMLButtonElement | null>;
+  setNearOffice: (value: boolean) => void;
   setNearNpc: (value: boolean) => void;
   noticeBubble: React.RefObject<HTMLButtonElement | null>;
   coffeeBubble: React.RefObject<HTMLButtonElement | null>;
@@ -89,6 +92,8 @@ export function createParkScene({
   benchBubble,
   noticeBubble,
   npcBubble,
+  officeBubble,
+  setNearOffice,
   setNearNpc,
   coffeeBubble,
   useBench,
@@ -242,7 +247,7 @@ export function createParkScene({
     m.receiveShadow = true;
     scene.add(m);
   }
-  PARK_PATHS.slice(0, 2).forEach(({ points, width }) =>
+  [...PARK_PATHS.slice(0, 2), ...PARK_PATHS.slice(6)].forEach(({ points, width }) =>
     path(
       points.map(([x, z]) => new T.Vector3(x, 0, z)),
       width,
@@ -250,6 +255,7 @@ export function createParkScene({
   );
   const obstacles: { x: number; z: number; r: number }[] = [];
   function tree(x: number, z: number, s = 1) {
+    if (overlapsOffice({ x, z }, 2.5 * s) || Math.hypot(x - OFFICE_CLERK.x, z - OFFICE_CLERK.z) < 3) return;
     if (Math.abs(x - BAR_SPOT.x) < 9 && Math.abs(z - BAR_SPOT.z) < 9) return;
     if (Math.abs(x - SCHOOL_SPOT.x) < 4.5 && Math.abs(z - SCHOOL_SPOT.z) < 5) return;
     if (walkways.some((p) => Math.hypot(x - p.x, z - p.z) < p.width + s)) return;
@@ -405,6 +411,9 @@ export function createParkScene({
     p.onMove({ ...p.position.current });
   };
   const school = createSchool(scene);
+  const office = createTownOffice(scene);
+  obstacles.push({ x: OFFICE_CLERK.x, z: OFFICE_CLERK.z, r: 0.45 });
+  let officeShown = false;
   obstacles.push({ x: SCHOOL_SPOT.x, z: SCHOOL_SPOT.z, r: 3.2 });
   const npcObstacle = { x: school.npcPosition.x, z: school.npcPosition.z, r: 0.45 };
   obstacles.push(npcObstacle);
@@ -492,7 +501,7 @@ export function createParkScene({
     box(20, 1.12, z, 10.5, 0.09, 0.09, '#c6a476').material = bridgeRailMaterial;
   }
 
-  PARK_PATHS.slice(3).forEach(({ points, width }) =>
+  PARK_PATHS.slice(3, 6).forEach(({ points, width }) =>
     path(
       points.map(([x, z]) => new T.Vector3(x, 0, z)),
       width,
@@ -885,6 +894,7 @@ export function createParkScene({
       !benchFootprints.some((bench) => overlapsBench(point, bench)) &&
       !overlapsCoffeeMachine(point, PLAYER_RADIUS) &&
       !overlapsSchool(point, PLAYER_RADIUS) &&
+      !overlapsOffice(point, PLAYER_RADIUS) &&
       !overlapsBar(point, PLAYER_RADIUS, night) &&
       !obstacles.some((o) => Math.hypot(point.x - o.x, point.z - o.z) < o.r + PLAYER_RADIUS) &&
       !stageCenters.some((s) => Math.hypot(point.x - s.x, point.z - s.z) < STAGE_RADIUS + 1),
@@ -1250,6 +1260,17 @@ export function createParkScene({
       !seatedBench &&
       coffeePhase === 'idle' &&
       world(p.position.current).distanceTo(school.npcPosition) < 3;
+    office.update(time, p.night ?? isParkNight(), reducedMotion);
+    const nearOffice =
+      p.performing === null &&
+      !seatedBench &&
+      coffeePhase === 'idle' &&
+      !p.timeTransition &&
+      world(p.position.current).distanceTo(OFFICE_CLERK) < 3;
+    if (nearOffice !== officeShown) {
+      officeShown = nearOffice;
+      setNearOffice(nearOffice);
+    }
     if (nearNpc !== npcShown) {
       npcShown = nearNpc;
       setNearNpc(nearNpc);
@@ -1319,6 +1340,7 @@ export function createParkScene({
       canCrossRiver(world(p.position.current), point) &&
       !overlapsCoffeeMachine(point, PLAYER_RADIUS) &&
       !overlapsSchool(point, PLAYER_RADIUS) &&
+      !overlapsOffice(point, PLAYER_RADIUS) &&
       !overlapsBar(point, PLAYER_RADIUS, barNight) &&
       !benchFootprints.some((bench) =>
         blocksBenchStep(world(p.position.current), point, bench, PLAYER_RADIUS),
@@ -1524,6 +1546,20 @@ export function createParkScene({
           ? 'visible'
           : 'hidden';
     }
+    if (officeBubble.current) {
+      const anchor = OFFICE_CLERK.clone();
+      anchor.y = 2.8;
+      anchor.project(camera);
+      officeBubble.current.style.left = `${(anchor.x * 0.5 + 0.5) * el.clientWidth}px`;
+      officeBubble.current.style.top = `${(-anchor.y * 0.5 + 0.5) * el.clientHeight}px`;
+      officeBubble.current.style.visibility =
+        Math.abs(anchor.x) < 0.95 &&
+        Math.abs(anchor.y) < 0.9 &&
+        Math.abs(anchor.z) < 1 &&
+        !document.querySelector('dialog[open]')
+          ? 'visible'
+          : 'hidden';
+    }
     if (coffeeBubble.current) {
       const anchor = COFFEE_SPOT.clone();
       anchor.y = 2.8;
@@ -1706,6 +1742,7 @@ export function createParkScene({
     useBarDrink.current = () => {};
     dismissBarNotice.current = () => {};
     school.dispose();
+    office.dispose();
     coffeeShop.dispose();
     noticeBoard.dispose();
     campfire.dispose();
