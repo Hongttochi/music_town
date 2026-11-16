@@ -8,7 +8,7 @@ dialog.town-panel:is([data-panel='profile'], [data-panel='report']) {
   box-shadow: 0 18px 64px #26351b38;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-  scrollbar-color: #b5bea1 transparent;
+  scrollbar-color: #a3a3a3 transparent;
 }
 .town-panel:is([data-panel='profile'], [data-panel='report']) .panel-heading {
   position: sticky;

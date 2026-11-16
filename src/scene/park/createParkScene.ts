@@ -386,7 +386,7 @@ export function createParkScene({
   let barApproachHandled = false;
   let barNoticeShown = false;
   let barSipStarted: number | null = null;
-  let orderedBarDrink: BarDrinkId = 'beer';
+  let orderedBarDrink: BarDrinkId = 'grape';
   dismissBarNotice.current = () => {
     barTalkUntil = 0;
     barNoticeShown = false;

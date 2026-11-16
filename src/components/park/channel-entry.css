@@ -5,9 +5,9 @@
   max-width: calc(100vw - 32px);
   max-height: calc(100dvh - 24px);
   padding: 16px;
-  border: 1px solid #dce3cc;
+  border: 1px solid #111;
   border-radius: 18px;
-  background: #fffdf2;
+  background: #ffffff;
   color: #536447;
   text-align: center;
   box-shadow: 0 18px 60px #25371e30;

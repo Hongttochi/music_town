@@ -82,7 +82,7 @@ export function Park(props: ParkProps) {
           ) : barAction === 'closed' ? (
             <Flaticon name="crescent-moon" size={18} />
           ) : (
-            <Flaticon name="wine-glass" size={18} />
+            <span aria-hidden="true">🥤</span>
           )}
           <span>
             {barAction === 'talk' ? '루나' : barAction === 'closed' ? '19:00–06:00' : '문나잇 바'}
