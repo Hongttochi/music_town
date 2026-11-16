@@ -995,7 +995,11 @@ export function createParkScene({
   entranceRing.position.y = 0.04;
   scene.add(entranceRing);
   function animate(time: number) {
-    if (document.hidden || document.documentElement.dataset.deviceBlocked === 'true') {
+    if (
+      document.hidden ||
+      document.documentElement.dataset.deviceBlocked === 'true' ||
+      latest.current.paused
+    ) {
       clear();
       last = time;
       frame = requestAnimationFrame(animate);
