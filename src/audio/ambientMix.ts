@@ -8,6 +8,7 @@ type AmbientMix = {
   riverMix: number;
   fireProximity: number;
   fountainProximity: number;
+  frozenWater?: boolean;
 };
 
 export function ambientLevels(s: AmbientMix): number[] {
@@ -15,12 +16,13 @@ export function ambientLevels(s: AmbientMix): number[] {
   // Jazz is intentionally much softer than the outdoor ambience.
   if (s.insideBar) return [0, 0, 0, 0, s.night && !s.barPerforming ? s.volume * 0.0245 : 0, 0];
   const master = s.volume * (s.quiet ? 0.056 : 0.21);
+  const riverMix = s.frozenWater ? 0 : s.riverMix;
   return [
-    s.night ? 0 : master * (1 - s.riverMix * 0.65),
-    s.night ? master * (1 - s.riverMix * 0.65) : 0,
-    master * s.riverMix * 0.25,
+    s.night ? 0 : master * (1 - riverMix * 0.65),
+    s.night ? master * (1 - riverMix * 0.65) : 0,
+    master * riverMix * 0.25,
     s.night ? master * s.fireProximity * s.fireProximity : 0,
     0,
-    master * s.fountainProximity * s.fountainProximity,
+    s.frozenWater ? 0 : master * s.fountainProximity * s.fountainProximity,
   ];
 }

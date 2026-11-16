@@ -7,16 +7,24 @@ export function SettingsMenu({
   onSignOut,
   onDelete,
   signingOut,
+  onLab,
 }: {
   onChannels: () => void;
   onFollowing: () => void;
   onSignOut: () => void;
   onDelete: () => void;
   signingOut: boolean;
+  onLab?: () => void;
 }) {
   return (
     <div className="settings-menu">
       <SoundEffectsSetting />
+      {onLab && (
+        <Button variant="ghost" onClick={onLab}>
+          <Flaticon name="test-tubes" size={16} />
+          실험실
+        </Button>
+      )}
       <Button variant="ghost" onClick={onChannels}>
         <Flaticon name="map-3d" size={16} />
         채널 변경

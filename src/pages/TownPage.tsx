@@ -7,6 +7,8 @@ import { TimeTransition } from '../components/park/TimeTransition';
 import { PerformanceControls } from '../components/park/PerformanceControls';
 import { StageProfile } from '../components/park/StageProfile';
 import { SettingsMenu } from '../components/settings/SettingsMenu';
+import { AdminLab, type LabTime, type LabSeason } from '../components/settings/AdminLab';
+import { treeSeason } from '../scene/park/treeSeason';
 import { MovementJoystick } from '../components/park/MovementJoystick';
 import { StageLabels } from '../components/park/StageLabels';
 import { StageDirectory } from '../components/park/StageDirectory';
@@ -59,6 +61,7 @@ type Panel =
   | 'registration'
   | 'account'
   | 'settings'
+  | 'lab'
   | 'avatar'
   | 'channels'
   | 'profile'
@@ -95,7 +98,21 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
   const [near, setNear] = useState<Stage | null>(null);
   const [muted, setMuted] = useState<number[]>([]);
   const playSound = useSoundEffects();
-  const timeTransition = useParkTimeTransition(entered);
+  const [labTime, setLabTime] = useState<LabTime>('auto');
+  const [labSeason, setLabSeason] = useState<LabSeason>('auto');
+  const previewTime = account.isAdmin ? labTime : 'auto';
+  const previewSeason = account.isAdmin ? labSeason : 'auto';
+  const previewing = previewTime !== 'auto' || previewSeason !== 'auto';
+  const timeTransition = useParkTimeTransition(entered && previewTime === 'auto');
+  const night = previewTime === 'auto' ? timeTransition.night : previewTime === 'night';
+  const season = previewSeason === 'auto' ? treeSeason() : previewSeason;
+  useEffect(() => {
+    if (!account.isAdmin) {
+      setLabTime('auto');
+      setLabSeason('auto');
+      setPanel((value) => (value === 'lab' ? null : value));
+    }
+  }, [account.isAdmin]);
   useEffect(() => {
     if (timeTransition.active) {
       setPanel(null);
@@ -219,11 +236,12 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
     position,
     entered,
     timeTransition.active || microphone.state === 'on' || voice.status === 'listening',
-    timeTransition.night,
+    night,
     town.state.performances.some(
       (item) => item.stage_id === BAR_STAGE_ID && Date.parse(item.ends_at) > now.getTime(),
     ),
     fountainPosition,
+    season === 'winter',
   );
   const stages = account.demo ? demoStages : town.stages;
   const populations = account.demo ? demoPopulations : town.state.channels.map((c) => c.count);
@@ -335,8 +353,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
   const title = (_eyebrow: string, name: string) => (
     <PanelHeading title={name} onClose={entered ? () => setPanel(null) : undefined} />
   );
-  const hour = koreanHour();
-  const night = timeTransition.night;
+  const hour = previewTime === 'day' ? 12 : previewTime === 'night' ? 21 : koreanHour();
   return (
     <>
       <main id="app" className={entered ? '' : 'before-entry'}>
@@ -358,8 +375,9 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
               onReady={() => {
                 if (entryRevision === entryTargetRevision.current) setEntrySceneReady(true);
               }}
-              key={`${entryRevision}|${timeTransition.revision}|${channel}|${stages.map((s) => `${s.id}:${s.x}:${s.y}`).join('|')}`}
+              key={`${entryRevision}|${timeTransition.revision}|${night}|${season}|${channel}|${stages.map((s) => `${s.id}:${s.x}:${s.y}`).join('|')}`}
               night={night}
+              season={season}
               timeTransition={timeTransition.active}
               focusNpc={timeTransition.focusNpc}
               mapPositions={mapPositions}
@@ -414,6 +432,12 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
               }}
             />
             <ParkIntroduction hour={hour} night={night} />
+            {account.isAdmin && previewing && (
+              <button type="button" className="admin-lab-preview" onClick={() => setPanel('lab')}>
+                실험실 미리보기 · {night ? '밤' : '낮'} ·{' '}
+                {{ spring: '봄', summer: '여름', autumn: '가을', winter: '겨울' }[season]}
+              </button>
+            )}
             <StageDirectory
               stages={stages}
               population={populations[channel]}
@@ -573,6 +597,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
                     setPanel('avatar');
                   }}
                   profile={memberProfile}
+                  isAdmin={account.isAdmin}
                   onEditProfile={() => setPanel('registration')}
                   onChooseIcon={async (id) => {
                     const next = { ...avatar, profileIcon: id };
@@ -623,10 +648,26 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
             />
           </>
         )}
+        {panel === 'lab' && account.isAdmin && (
+          <>
+            {title('', '실험실')}
+            <AdminLab
+              time={labTime}
+              season={labSeason}
+              onTime={setLabTime}
+              onSeason={setLabSeason}
+              onReset={() => {
+                setLabTime('auto');
+                setLabSeason('auto');
+              }}
+            />
+          </>
+        )}
         {panel === 'settings' && (
           <>
             {title('', '설정')}
             <SettingsMenu
+              onLab={account.isAdmin ? () => setPanel('lab') : undefined}
               onChannels={() => setPanel('channels')}
               onFollowing={() => setPanel('following')}
               onDelete={() => setDeletingAccount(true)}
@@ -654,6 +695,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
               selectedMusician={selectedMusician}
               performerAvatar={selectedOwnPerformance ? avatar : selectedMusician?.avatar}
               own={selectedOwnPerformance}
+              isAdmin={selectedOwnPerformance && account.isAdmin}
               muted={muted.includes(selected.id)}
               onProfile={() => {
                 if (selectedMusician) {
@@ -739,6 +781,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
             {title('', '프로필')}
             <ParticipantProfile
               person={selectedPerson}
+              isAdmin={selectedPerson.id === account.id && account.isAdmin}
               onReport={() => {
                 if (selectedPerson.id !== account.id) setPanel('report');
               }}

@@ -21,11 +21,12 @@ export function useAmbientAudio(
   parkNight?: boolean,
   barPerforming = false,
   fountainPosition?: MutableRefObject<{ x: number; z: number } | null>,
+  frozenWater = false,
 ) {
   const { ambientVolume: volume } = useSoundSettings();
   const enabled = volume > 0;
-  const settings = useRef({ enabled, volume, entered, quiet, parkNight, barPerforming });
-  settings.current = { enabled, volume, entered, quiet, parkNight, barPerforming };
+  const settings = useRef({ enabled, volume, entered, quiet, parkNight, barPerforming, frozenWater });
+  settings.current = { enabled, volume, entered, quiet, parkNight, barPerforming, frozenWater };
   useEffect(() => {
     const context = new AudioContext();
     const tracks = [morning, night, river, fire, jazz, fountain].map((url) => {
@@ -83,6 +84,7 @@ export function useAmbientAudio(
         riverMix: mix,
         fireProximity,
         fountainProximity,
+        frozenWater: s.frozenWater,
       });
       tracks.forEach(({ gain }, i) => {
         // Silence excluded rooms and jazz during a performance immediately.

@@ -45,6 +45,7 @@ import { createImageCharacters } from '../avatar/imageCharacter';
 import { loadAvatarLayers } from '../avatar/modularAvatar';
 import { npcAppearance } from '../../data/avatarParts';
 import { createVillageProps } from './villageProps';
+import { treeSeason } from './treeSeason';
 import { createGardens } from './gardens';
 import {
   CHARACTER_ASSET,
@@ -199,7 +200,9 @@ export function createParkScene({
   ) {
     return mesh(new T.CylinderGeometry(r1, r2, height, 24), color, x, y, z, parent);
   }
-  const scenery = createVillageProps(scene);
+  const season = latest.current.season ?? treeSeason();
+  const frozenWater = season === 'winter';
+  const scenery = createVillageProps(scene, season);
   const ground = box(0, -0.35, 0, 100, 0.6, 100, '#ffffff');
   ground.castShadow = false;
   ground.material.map = scenery.ground;
@@ -283,22 +286,32 @@ export function createParkScene({
   waterCanvas.height = 1024;
   const waterCtx = waterCanvas.getContext('2d')!;
   const depth = waterCtx.createLinearGradient(0, 0, 512, 0);
-  depth.addColorStop(0, '#92cfc5');
-  depth.addColorStop(0.16, '#60b9bd');
-  depth.addColorStop(0.48, '#368fa8');
-  depth.addColorStop(0.8, '#59b4bb');
-  depth.addColorStop(1, '#a2d5c9');
+  depth.addColorStop(0, frozenWater ? '#eff8fa' : '#92cfc5');
+  depth.addColorStop(0.16, frozenWater ? '#d4eaf0' : '#60b9bd');
+  depth.addColorStop(0.48, frozenWater ? '#b6d6e3' : '#368fa8');
+  depth.addColorStop(0.8, frozenWater ? '#d8edf3' : '#59b4bb');
+  depth.addColorStop(1, frozenWater ? '#f2fafb' : '#a2d5c9');
   waterCtx.fillStyle = depth;
   waterCtx.fillRect(0, 0, 512, 1024);
   for (let i = 0; i < 240; i++) {
     const x = random() * 512,
       y = random() * 1024;
     const width = 14 + random() * 75;
-    waterCtx.strokeStyle = i % 3 === 0 ? 'rgba(224,251,230,0.28)' : 'rgba(24,105,137,0.13)';
+    waterCtx.strokeStyle = frozenWater
+      ? 'rgba(255,255,255,0.55)'
+      : i % 3 === 0
+        ? 'rgba(224,251,230,0.28)'
+        : 'rgba(24,105,137,0.13)';
     waterCtx.lineWidth = 1 + random() * 3;
     waterCtx.beginPath();
     waterCtx.moveTo(x, y);
-    waterCtx.quadraticCurveTo(x + width / 2, y - 5, x + width, y);
+    if (frozenWater) {
+      waterCtx.lineTo(x + width * 0.4, y + width * 0.3);
+      waterCtx.lineTo(x + width * 0.7, y + width * 0.15);
+      waterCtx.lineTo(x + width, y + width * 0.5);
+    } else {
+      waterCtx.quadraticCurveTo(x + width / 2, y - 5, x + width, y);
+    }
     waterCtx.stroke();
   }
   const waterTexture = new T.CanvasTexture(waterCanvas);
@@ -307,7 +320,7 @@ export function createParkScene({
   waterTexture.repeat.set(1, 8);
   water.material.color.set('#ffffff');
   water.material.map = waterTexture;
-  water.material.roughness = 0.38;
+  water.material.roughness = frozenWater ? 0.18 : 0.38;
   water.castShadow = false;
   // Raised irregular boulders catch light on top and cast shadows onto the shallows.
   function riverStone(x: number, z: number) {
@@ -516,6 +529,7 @@ export function createParkScene({
       !overlapsBar({ x, z }, radius + 1, false) &&
       !overlapsSchool({ x, z }, radius + 0.5) &&
       Math.hypot(x - COFFEE_BUILDING.x, z - COFFEE_BUILDING.z) > radius + 4,
+    frozenWater,
   );
   if (latest.current.fountainPosition)
     latest.current.fountainPosition.current = gardens.fountain ?? null;
@@ -983,7 +997,7 @@ export function createParkScene({
     }
     const dt = Math.min((time - last) / 1000, 0.04);
     last = time;
-    waterTexture.offset.y = (time * 0.000008) % 1;
+    if (!frozenWater) waterTexture.offset.y = (time * 0.000008) % 1;
     gardens.update(time);
     const p = latest.current,
       key = JSON.stringify(p.avatar);

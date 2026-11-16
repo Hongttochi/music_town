@@ -23,6 +23,16 @@ const base = {
   fountainProximity: 1,
 };
 const levels = (patch) => Array.from(ambientLevels({ ...base, ...patch }));
+
+test('winter silences river and fountain while preserving other ambience and restores water after thaw', () => {
+  const winter = levels({ frozenWater: true, riverMix: 1 });
+  assert.equal(winter[2], 0);
+  assert.equal(winter[5], 0);
+  assert.ok(winter[1] > 0 && winter[3] > 0);
+  assert.deepEqual(levels({ insideBar: true, frozenWater: true }), levels({ insideBar: true }));
+  const thaw = levels({ frozenWater: false, riverMix: 1 });
+  assert.ok(thaw[2] > 0 && thaw[5] > 0);
+});
 test('entering the bar silences all outdoor ambience and plays very quiet jazz', () => {
   const outside = levels({});
   const inside = levels({ insideBar: true });

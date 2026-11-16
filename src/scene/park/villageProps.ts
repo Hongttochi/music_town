@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { seasonalFoliage, treeSeason } from './treeSeason';
-export function createVillageProps(scene: THREE.Scene) {
+import { seasonalFoliage, seasonalGround, treeSeason, type TreeSeason } from './treeSeason';
+export function createVillageProps(scene: THREE.Scene, season: TreeSeason = treeSeason()) {
   const materials: THREE.SpriteMaterial[] = [],
     textures: THREE.Texture[] = [];
   let disposed = false;
@@ -20,7 +20,7 @@ export function createVillageProps(scene: THREE.Scene) {
       const ctx = cell.getContext('2d', { willReadFrequently: true })!;
       ctx.drawImage(image, col * 512, top, 512, height, 0, 0, 512, height);
       const pixels = ctx.getImageData(0, 0, 512, height);
-      if (kind === 0 || kind === 2) seasonalFoliage(pixels.data, treeSeason());
+      if (kind === 0 || kind === 2) seasonalFoliage(pixels.data, season);
       let left = 512,
         right = 0,
         up = height,
@@ -83,7 +83,27 @@ export function createVillageProps(scene: THREE.Scene) {
     waiting.push({ sprite, kind, height });
     return sprite;
   }
-  const ground = new THREE.TextureLoader().load('/art/grass.png');
+  const groundCanvas = document.createElement('canvas');
+  groundCanvas.width = groundCanvas.height = 1;
+  const groundContext = groundCanvas.getContext('2d')!;
+  groundContext.fillStyle = {
+    spring: '#f2cbd7',
+    summer: '#9bae74',
+    autumn: '#b48c63',
+    winter: '#f1f6fa',
+  }[season];
+  groundContext.fillRect(0, 0, 1, 1);
+  const ground = new THREE.CanvasTexture(groundCanvas);
+  loader.load('/art/grass.png', (image) => {
+    if (disposed) return;
+    groundCanvas.width = image.width;
+    groundCanvas.height = image.height;
+    groundContext.drawImage(image, 0, 0);
+    const pixels = groundContext.getImageData(0, 0, groundCanvas.width, groundCanvas.height);
+    seasonalGround(pixels.data, season);
+    groundContext.putImageData(pixels, 0, 0);
+    ground.needsUpdate = true;
+  });
   ground.colorSpace = THREE.SRGBColorSpace;
   ground.wrapS = ground.wrapT = THREE.RepeatWrapping;
   ground.repeat.set(14, 14);

@@ -6,6 +6,20 @@ import vm from 'node:vm';
 import ts from 'typescript';
 import * as T from 'three';
 const require = createRequire(import.meta.url);
+
+test('winter fountain has an ice surface without jets, droplets or moving ripples', () => {
+  const scene = new T.Scene();
+  const gardens = load()(scene, [], () => true, true);
+  const children = scene.children[0].children;
+  assert.ok(gardens.fountain);
+  assert.ok(children.some((mesh) => mesh.material.color.getHexString() === 'dceff5'));
+  assert.ok(!children.some((mesh) => mesh.userData.curve || mesh.geometry.type === 'TubeGeometry'));
+  const positions = children.map((mesh) => mesh.position.clone());
+  gardens.update(9000);
+  children.forEach((mesh, i) => assert.equal(mesh.position.distanceTo(positions[i]), 0));
+  gardens.dispose();
+  assert.equal(scene.children.length, 0);
+});
 function load(reduced = false) {
   const context = { exports: {}, require, matchMedia: () => ({ matches: reduced }) };
   vm.runInNewContext(
