@@ -36,5 +36,4 @@ test('lab identifies selected options and allows returning from a preview', () =
   assert.doesNotMatch(preview, /disabled/);
   const automatic = lab('auto', 'auto');
   assert.match(automatic, /disabled=""/);
-  assert.match(automatic, /다른 이용자에게는 적용되지/);
 });

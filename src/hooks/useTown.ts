@@ -73,7 +73,7 @@ export function useTown(
         if (!supabase) throw new Error('로그인 연결을 확인해 주세요.');
         // Recover coordinates left outside the supported area by an older client.
         position.current = clampParkPosition(position.current);
-        const { data, error: failure } = await supabase.rpc('town_action', {
+        const { data, error: failure } = await supabase.rpc('town_action_expanded', {
           action,
           client: client.current,
           channel: channel ?? null,
