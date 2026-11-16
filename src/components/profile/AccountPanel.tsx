@@ -12,6 +12,7 @@ export function AccountPanel({
   avatar,
   onCustomize,
   profile,
+  isAdmin = false,
   onEditProfile,
   onChooseIcon,
   fanStats,
@@ -22,6 +23,7 @@ export function AccountPanel({
   avatar: Avatar;
   onCustomize: () => void;
   profile: MemberProfile;
+  isAdmin?: boolean;
   onEditProfile: () => void;
   onChooseIcon: (id: string) => Promise<void>;
 }) {
@@ -46,7 +48,9 @@ export function AccountPanel({
           <ProfileIcon id={avatar.profileIcon} avatar={avatar} size={40} />
         </button>
         <div className="account-name">
-          <span className="account-role">{profile.role === 'musician' ? '뮤지션' : '관람객'}</span>
+          <span className="account-role">
+            {isAdmin ? 'GM' : profile.role === 'musician' ? '뮤지션' : '관람객'}
+          </span>
           <div className="profile-name-line">
             <div className="account-name-summary">
               <strong>{avatar.name}</strong>

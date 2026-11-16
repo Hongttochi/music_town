@@ -12,9 +12,11 @@ export function ParticipantProfile({
   onReport,
   own = false,
   demo = false,
+  isAdmin = false,
 }: {
   own?: boolean;
   demo?: boolean;
+  isAdmin?: boolean;
   person: Participant;
   onReport: () => void;
 }) {
@@ -26,7 +28,7 @@ export function ParticipantProfile({
             <ModularPortrait avatar={person.avatar} />
             <div className="participant-identity-details">
               <div className="participant-identity-topline">
-                <small>{person.role === 'musician' ? '뮤지션' : '관람객'}</small>
+                <small>{isAdmin ? 'GM' : person.role === 'musician' ? '뮤지션' : '관람객'}</small>
                 <div className="participant-profile-actions">{actions}</div>
               </div>
               <div className="profile-name-line">
