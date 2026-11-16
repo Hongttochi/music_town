@@ -2,6 +2,12 @@ header.topbar {
   height: 32px;
   align-items: flex-start;
 }
+.topbar > div.header-center,
+.topbar > div.header-right,
+.town-button.stage-toggle,
+.town-button.stage-toggle .pill {
+  background: #fff;
+}
 .topbar > .header-center {
   display: flex;
   align-items: center;

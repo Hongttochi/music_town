@@ -1,5 +1,4 @@
 import { treeSeason, type TreeSeason } from '../../scene/park/treeSeason';
-import { RotateCcw } from 'lucide-react';
 import { Button } from '../ui/Button';
 import './admin-lab.css';
 
@@ -77,7 +76,7 @@ export function AdminLab({
         disabled={time === 'auto' && season === 'auto'}
         onClick={onReset}
       >
-        <RotateCcw size={14} aria-hidden="true" />
+        <img src="/icons/refresh.png" width={16} height={16} alt="" />
         실제 시간·계절로 돌아가기
       </Button>
     </div>

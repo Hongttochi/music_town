@@ -546,7 +546,7 @@ kbd {
 }
 dialog {
   border: 1px solid #fff;
-  background: #fffdf2;
+  background: #fff;
   border-radius: 26px;
   color: #344b3e;
   max-width: min(540px, 92vw);

@@ -4,10 +4,10 @@ import { barDrinks, type BarDrinkId } from '../../data/bar';
 import { DialogPanel } from '../ui/Panel';
 
 const englishNames = {
-  beer: 'Draft Beer',
-  wine: 'Red Wine',
-  whisky: 'Whisky',
-  mocktail: 'Moonlight Ade',
+  grape: 'Grape Juice',
+  cola: 'Cola',
+  soda: 'Lemon-Lime Soda',
+  orange: 'Orange Juice',
 };
 export function BarDrinkDialog({
   onClose,
@@ -17,7 +17,7 @@ export function BarDrinkDialog({
   onOrder: (id: BarDrinkId) => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
-  const [selected, setSelected] = useState<BarDrinkId>('beer');
+  const [selected, setSelected] = useState<BarDrinkId>('grape');
   useEffect(() => {
     const dialog = ref.current!;
     dialog.showModal();
@@ -41,11 +41,11 @@ export function BarDrinkDialog({
           <section
             className="bar-menu-page"
             key={page}
-            aria-label={page === 0 ? '클래식 메뉴' : '스페셜 메뉴'}
+            aria-label={page === 0 ? '음료 메뉴 1' : '음료 메뉴 2'}
           >
             <header>
               <small>MOONNIGHT BAR</small>
-              <h2>{page === 0 ? 'The Classics' : 'After Dark'}</h2>
+              <h2>{page === 0 ? 'Drinks' : 'Refreshments'}</h2>
             </header>
             <div className="bar-drink-options">
               {drinks.map((drink) => (

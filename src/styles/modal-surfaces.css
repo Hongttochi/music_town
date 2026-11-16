@@ -1,0 +1,202 @@
+/* Shared modal surfaces; keep the full-screen profile wrapper transparent. */
+dialog.town-panel[open] .panel-heading {
+  border-bottom-color: #e1e4df;
+}
+dialog[open],
+dialog[open] * {
+  scrollbar-color: #a3a3a3 transparent;
+}
+dialog[open]::-webkit-scrollbar-thumb,
+dialog[open] *::-webkit-scrollbar-thumb {
+  background: #a3a3a3;
+  border-radius: 8px;
+}
+dialog[open]::-webkit-scrollbar-thumb:hover,
+dialog[open] *::-webkit-scrollbar-thumb:hover {
+  background: #808080;
+}
+dialog.town-panel[open],
+dialog.error-modal[open] {
+  --town-paper: #fff;
+}
+dialog.town-panel[open]:not(.profile-dialog):not([data-panel='channels']),
+dialog.town-panel.profile-dialog[open] > .profile-sheet,
+dialog.error-modal[open] {
+  background: #fff;
+}
+
+dialog.town-panel[open]
+  :is(
+    .town-surface,
+    .account-bio,
+    .participant-bio,
+    .activity-expanded,
+    .activity-metrics,
+    .ranking-winners,
+    .office-clerk,
+    .office-letter,
+    .office-letter-row,
+    .notice-paper,
+    .settings-menu,
+    .admin-lab-reset,
+    input:not([type='range']):not([type='checkbox']):not([type='radio']),
+    textarea,
+    select
+  ) {
+  background-color: #fff;
+}
+
+dialog.town-panel[open]
+  :is(
+    .town-button--secondary,
+    .town-button--ghost,
+    .town-button--choice,
+    .account-edit-actions > .town-button,
+    .settings-menu > .town-button,
+    .admin-lab-choice
+  ):not([aria-pressed='true']):not([aria-selected='true']):not(.active),
+dialog.town-panel[open] .admin-lab-choice--auto {
+  background: #fff;
+}
+
+/* A lightly ruled diary page for the profile introduction. */
+dialog.town-panel[open][data-panel='account'] .account-panel .account-bio {
+  padding: 12px 14px 12px 28px;
+  min-height: 96px;
+  line-height: 24px;
+  border-color: #deded6;
+  border-radius: 3px 8px 8px 3px;
+  background:
+    linear-gradient(90deg, transparent 19px, #eacaca 19px 20px, transparent 20px),
+    repeating-linear-gradient(to bottom, transparent 0 23px, #e5e8ed 23px 24px) 0 12px / 100% 24px,
+    #fffefa;
+  box-shadow: 2px 2px 0 #f1f0ea;
+}
+
+dialog.town-panel[open][data-panel='rankings'] {
+  border-color: #d6d6d6;
+  color: #111;
+}
+dialog.town-panel[open][data-panel='rankings'] .panel-heading {
+  border-color: #e1e4df;
+}
+dialog.town-panel[open][data-panel='rankings'] :is(.modal-title, .panel-heading button) {
+  color: #111;
+}
+dialog.town-panel[open][data-panel='rankings'] .ranking-periods {
+  background: #fff;
+  gap: 8px;
+  padding: 0;
+}
+dialog.town-panel[open][data-panel='rankings'] .ranking-periods > .town-button {
+  height: 34px;
+  border: 1px solid #e1e4df;
+  border-radius: 8px;
+  background: #fff;
+  color: #111;
+}
+dialog.town-panel[open][data-panel='rankings']
+  .ranking-periods
+  > .town-button[aria-pressed='true'] {
+  border-color: #92988e;
+  font-weight: 700;
+  box-shadow: none;
+}
+.ranking-login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 180px;
+  margin-top: 16px;
+  padding: 24px 12px;
+  border: 1px solid #eceee9;
+  border-radius: 12px;
+  color: #111;
+  text-align: center;
+}
+.ranking-login p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+dialog.town-panel[open][data-panel='settings'] {
+  border-color: #d6d6d6;
+  color: #111;
+}
+dialog.town-panel[open][data-panel='settings'] :is(h2, span, a, button, label, output) {
+  color: #111;
+}
+dialog.town-panel[open][data-panel='settings'] :is(.panel-heading, .settings-policy-links) {
+  border-color: #e1e4df;
+}
+
+dialog.town-panel.profile-dialog[open][data-panel='account'] > .profile-sheet {
+  background: #fff;
+  border-color: #d6d6d6;
+  color: #111;
+}
+dialog.town-panel[open][data-panel='account']
+  :is(h2, h3, p, span, strong, small, dt, dd, a, button, label) {
+  color: #111;
+}
+dialog.town-panel[open][data-panel='account']
+  :is(
+    .panel-heading,
+    .account-identity,
+    .account-bio,
+    .activity-stats,
+    .activity-toggle,
+    .activity-expanded,
+    .account-edit-actions > .town-button
+  ) {
+  border-color: #e1e4df;
+}
+dialog.town-panel[open][data-panel='account'] .account-edit-actions > .town-button {
+  background: #fff;
+  border-color: #111;
+}
+
+dialog.town-panel.notice-board-dialog[open] {
+  color: var(--town-ink);
+  border: 1px solid var(--town-line);
+  box-shadow: 0 16px 55px #26351b30;
+}
+dialog.town-panel.notice-board-dialog[open]
+  :is(.notice-board-heading h2, .notice-board-heading span, .notice-board-close) {
+  color: var(--town-ink);
+}
+
+/* Only the outer frame is heavy; dividers and control borders stay light. */
+dialog.town-panel[open]:not(.profile-dialog):not([data-panel='channels']),
+dialog.town-panel.profile-dialog[open] > .profile-sheet,
+dialog.error-modal[open] {
+  border-width: 3px;
+  border-style: solid;
+  border-color: #d6d6d6;
+}
+
+@media (hover: hover) {
+  dialog.town-panel[open]:not([data-panel='channels'])
+    :is(
+      .town-button--secondary,
+      .town-button--ghost,
+      .town-button--choice,
+      .account-edit-actions > .town-button,
+      .settings-menu > .town-button,
+      .ranking-periods > .town-button,
+      .activity-metrics > .town-button,
+      .admin-lab-choice,
+      .settings-policy-links a
+    ):not(:disabled):hover {
+    background-color: #f1f2f0;
+    border-color: #92988e;
+  }
+}
+
+dialog.town-panel[open] .town-button:focus-visible {
+  outline: 2px solid #92988e;
+  outline-offset: 2px;
+}

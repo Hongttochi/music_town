@@ -81,6 +81,7 @@
   filter: brightness(0.97);
 }
 .admin-lab .admin-lab-seasons .admin-lab-choice--auto {
+  background: #ffffff;
   grid-column: 1 / -1;
   flex-direction: row;
   min-height: 38px;
@@ -91,6 +92,7 @@
   height: 18px;
 }
 .admin-lab .admin-lab-reset {
+  background: #ffffff;
   width: 100%;
   min-height: 40px;
   border-radius: 10px;

@@ -417,7 +417,7 @@ dialog.town-panel[data-panel='avatar'] .workshop-mirror .avatar-turntable .modul
 }
 dialog.town-panel[data-panel='avatar'] .workshop-scroll {
   scrollbar-width: thin;
-  scrollbar-color: #b5bea1 transparent;
+  scrollbar-color: #a3a3a3 transparent;
   padding-bottom: 12px;
 }
 @media (max-height: 500px) {
