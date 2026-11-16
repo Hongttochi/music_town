@@ -1,4 +1,5 @@
 import { errorCode, logEvent } from '../services/telemetry';
+import { useAdminRole } from '../hooks/useAdminRole';
 import { ErrorModal } from '../components/ui/ErrorModal';
 import { Button } from '../components/ui/Button';
 import { Logo } from '../components/ui/Flaticon';
@@ -12,6 +13,7 @@ import { LegalLinks } from '../components/legal/LegalLinks';
 export type Account = {
   id: string;
   demo: boolean;
+  isAdmin: boolean;
   signOut: () => Promise<void>;
   deleteAccount: () => Promise<void>;
 };
@@ -24,6 +26,7 @@ export function LoginPage({ children }: { children: (account: Account) => ReactN
     return () => window.clearTimeout(timer);
   }, []);
   const [demo, setDemo] = useState(false);
+  const isAdmin = useAdminRole(demo ? undefined : session?.access_token);
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState('');
   useEffect(() => {
@@ -162,7 +165,13 @@ export function LoginPage({ children }: { children: (account: Account) => ReactN
       </main>
     );
   if (session || demo)
-    return children({ id: session?.user.id ?? 'local-preview', demo, signOut, deleteAccount });
+    return children({
+      id: session?.user.id ?? 'local-preview',
+      demo,
+      isAdmin,
+      signOut,
+      deleteAccount,
+    });
   return (
     <main className="login-page login-simple">
       <section className="login-simple-content" aria-label="MUSIC TOWN 로그인">

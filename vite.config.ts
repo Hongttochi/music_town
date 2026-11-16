@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 import { createVoiceMiddleware } from './scripts/dev-voice-api.mjs';
+import { createAdminMiddleware } from './scripts/dev-admin-api.mjs';
 
 // Serve policy documents before the SPA fallback, without starting authentication.
 function legalDocuments(): Plugin {
@@ -23,6 +24,9 @@ export default defineConfig(({ mode }) => ({
     {
       name: 'dev-voice-api',
       configureServer(server) {
+        server.middlewares.use(
+          createAdminMiddleware({ ...loadEnv(mode, process.cwd(), ''), ...process.env }),
+        );
         server.middlewares.use(
           createVoiceMiddleware({ ...loadEnv(mode, process.cwd(), ''), ...process.env }),
         );
