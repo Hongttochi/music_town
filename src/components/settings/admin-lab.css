@@ -1,6 +1,41 @@
 .admin-lab {
   display: grid;
   gap: 20px;
+  color: #39462f;
+}
+.admin-lab-intro {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid #dce3cc;
+  border-radius: 16px;
+  background: linear-gradient(120deg, #eff3e4, #fff9ed);
+}
+.admin-lab-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+  background: #fffdf5;
+  box-shadow: 0 3px 10px #526b3910;
+}
+.admin-lab-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #71815d;
+}
+.admin-lab h3 {
+  margin: 5px 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.admin-lab .admin-lab-intro p {
+  font-size: 12px;
+  color: #727a66;
 }
 .admin-lab p {
   margin: 0;
@@ -17,14 +52,119 @@
   font-size: 14px;
   font-weight: 700;
 }
+.admin-lab legend span {
+  margin-left: 8px;
+  font-size: 11px;
+  font-weight: 400;
+  color: #7b816f;
+}
 .admin-lab-options {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+}
+.admin-lab-seasons {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.admin-lab .town-button.admin-lab-choice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 9px;
+  min-height: 82px;
+  padding: 14px 6px;
+  border: 1px solid #e0e3d6;
+  border-radius: 12px;
+  background: #fafbf5;
+  color: #5e6b50;
+  box-shadow: none;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.admin-lab .town-button.admin-lab-choice--spring {
+  background: #fff2f4;
+  color: #a75d75;
+}
+.admin-lab .town-button.admin-lab-choice--summer {
+  background: #edf5e8;
+  color: #597444;
+}
+.admin-lab .town-button.admin-lab-choice--autumn {
+  background: #faf0e2;
+  color: #9a693b;
+}
+.admin-lab .town-button.admin-lab-choice--winter {
+  background: #eef5f8;
+  color: #597c95;
+}
+.admin-lab .town-button.admin-lab-choice--day {
+  background: #fff8e5;
+  color: #977523;
+}
+.admin-lab .town-button.admin-lab-choice--night {
+  background: #eff0f8;
+  color: #666c94;
+}
+.admin-lab .town-button.admin-lab-choice[aria-pressed='true'] {
+  border-color: #687e4c;
+  box-shadow: inset 0 0 0 1px #687e4c;
+  font-weight: 700;
+}
+.admin-lab .town-button.admin-lab-choice[aria-pressed='true']::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #687e4c;
+}
+.admin-lab .town-button.admin-lab-choice:hover {
+  filter: brightness(0.97);
+}
+.admin-lab .admin-lab-seasons .admin-lab-choice--auto {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  min-height: 38px;
+  padding: 8px;
+}
+.admin-lab .admin-lab-seasons .admin-lab-choice--auto svg {
+  width: 16px;
+  height: 16px;
+}
+.admin-lab .admin-lab-reset {
+  width: 100%;
+  min-height: 40px;
+  border-radius: 10px;
 }
 .admin-lab .admin-lab-note {
   font-size: 12px;
   color: #68745d;
+  padding: 12px 14px;
+  background: #f3f4ec;
+  border-radius: 10px;
+}
+@media (max-width: 420px) {
+  .admin-lab-intro {
+    padding: 12px;
+    gap: 10px;
+  }
+  .admin-lab-icon {
+    width: 44px;
+    height: 48px;
+  }
+  .admin-lab h3 {
+    font-size: 13px;
+  }
+  .admin-lab-options {
+    gap: 6px;
+  }
+  .admin-lab .town-button.admin-lab-choice {
+    font-size: 12px;
+  }
 }
 .admin-lab-preview {
   position: fixed;

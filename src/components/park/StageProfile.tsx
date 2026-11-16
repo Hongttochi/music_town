@@ -11,6 +11,7 @@ type Props = {
   selectedMusician: Participant | undefined;
   performerAvatar?: Avatar;
   own: boolean;
+  isAdmin?: boolean;
   muted: boolean;
   onProfile: () => void;
   onListen: () => void;
@@ -23,6 +24,7 @@ export function StageProfile({
   selectedMusician,
   performerAvatar,
   own,
+  isAdmin = false,
   muted,
   onProfile,
   onListen,
@@ -51,7 +53,7 @@ export function StageProfile({
         <div className="stage-performer-copy">
           <p className="stage-live-label">
             <span aria-hidden="true" />
-            뮤지션
+            {isAdmin ? 'GM' : '뮤지션'}
           </p>
           <h3>{selected.artist || '공연자'}</h3>
         </div>

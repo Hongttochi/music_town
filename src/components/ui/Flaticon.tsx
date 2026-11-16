@@ -1,4 +1,5 @@
 export type IconName =
+  | 'test-tubes'
   | 'mute'
   | 'volume-up'
   | 'volume-down'
