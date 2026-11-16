@@ -3,6 +3,7 @@ import type { TreeSeason } from '../scene/park/treeSeason';
 import type { Participant } from '../hooks/useTown';
 export type Position = { x: number; y: number };
 export type ParkProps = {
+  paused?: boolean;
   fountainPosition?: React.MutableRefObject<{ x: number; z: number } | null>;
   onReady?: () => void;
   night?: boolean;
