@@ -1,7 +1,7 @@
 import * as T from 'three';
 
-// At the north end of the central walk, beside the café and away from busking.
-export const NOTICE_BOARD_SPOT = new T.Vector3(-0.1, 0, -13.3);
+// Left of the café, clear of the central path and the office approach.
+export const NOTICE_BOARD_SPOT = new T.Vector3(-11, 0, -14);
 export const NOTICE_BOARD_REACH = 3.3;
 
 export function createNoticeBoard(scene: T.Scene) {

@@ -1,4 +1,8 @@
 export type IconName =
+  | 'house'
+  | 'email_open'
+  | 'email'
+  | 'send-mail'
   | 'test-tubes'
   | 'mute'
   | 'volume-up'

@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { Mail, Send, Inbox, ArrowLeft, RefreshCw } from 'lucide-react';
+import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { Flaticon } from '../ui/Flaticon';
 import { DialogPanel, PanelHeading } from '../ui/Panel';
 import { Button } from '../ui/Button';
 import {
@@ -119,24 +120,33 @@ export function TownOfficeDialog({ demo, onClose }: { demo: boolean; onClose: ()
       }}
     >
       <div id={titleId}>
-        <PanelHeading
-          title="동사무소"
-          icon={<Mail size={19} />}
-          onClose={sending ? undefined : close}
-        />
+        <PanelHeading title="동사무소" onClose={sending ? undefined : close} />
       </div>
       <div className="office-clerk">
-        <span className="office-clerk-badge">직원 · 솔</span>
-        <p>팔로우한 주민에게 편지를 보내거나 도착한 편지를 확인하세요.</p>
+        <img
+          className="office-clerk-portrait"
+          src="/art/office-sol.png"
+          width={60}
+          height={72}
+          alt=""
+        />
+        <div className="office-clerk-copy">
+          <span className="office-clerk-badge">직원 · 솔</span>
+          <p>
+            편지를 전해드릴게요.
+            <br />
+            팔로우한 주민에게 마음을 남겨보세요.
+          </p>
+        </div>
       </div>
       <div className="office-tabs" role="group" aria-label="편지함 선택">
         {(
           [
-            ['inbox', '받은 편지', Inbox],
-            ['sent', '보낸 편지', Send],
-            ['compose', '편지 쓰기', Mail],
+            ['inbox', '받은 편지', 'email_open'],
+            ['sent', '보낸 편지', 'send-mail'],
+            ['compose', '편지 쓰기', 'email'],
           ] as const
-        ).map(([value, label, Icon]) => (
+        ).map(([value, label, icon]) => (
           <Button
             key={value}
             variant="choice"
@@ -144,7 +154,7 @@ export function TownOfficeDialog({ demo, onClose }: { demo: boolean; onClose: ()
             disabled={sending}
             onClick={() => changeTab(value)}
           >
-            <Icon size={15} />
+            <Flaticon name={icon} size={20} />
             {label}
           </Button>
         ))}
@@ -268,7 +278,7 @@ export function TownOfficeDialog({ demo, onClose }: { demo: boolean; onClose: ()
                   variant="primary"
                   disabled={busy || sending || !recipient || !subject.trim() || !body.trim()}
                 >
-                  <Send size={15} />
+                  <Flaticon name="send-mail" size={20} />
                   {sending ? '보내는 중…' : '편지 보내기'}
                 </Button>
               </div>
@@ -298,7 +308,7 @@ export function TownOfficeDialog({ demo, onClose }: { demo: boolean; onClose: ()
                       className="office-letter-row"
                       onClick={() => void openLetter(letter)}
                     >
-                      <Mail size={20} />
+                      <Flaticon name={letter.readAt ? 'email_open' : 'email'} size={24} />
                       <span>
                         <strong>{letter.subject}</strong>
                         <small>
