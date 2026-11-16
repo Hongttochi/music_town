@@ -74,7 +74,7 @@ dialog.town-panel[open][data-panel='account'] .account-panel .account-bio {
 }
 
 dialog.town-panel[open][data-panel='rankings'] {
-  border-color: #111;
+  border-color: #d6d6d6;
   color: #111;
 }
 dialog.town-panel[open][data-panel='rankings'] .panel-heading {
@@ -123,7 +123,7 @@ dialog.town-panel[open][data-panel='rankings']
 }
 
 dialog.town-panel[open][data-panel='settings'] {
-  border-color: #111;
+  border-color: #d6d6d6;
   color: #111;
 }
 dialog.town-panel[open][data-panel='settings'] :is(h2, span, a, button, label, output) {
@@ -135,7 +135,7 @@ dialog.town-panel[open][data-panel='settings'] :is(.panel-heading, .settings-pol
 
 dialog.town-panel.profile-dialog[open][data-panel='account'] > .profile-sheet {
   background: #fff;
-  border-color: #111;
+  border-color: #d6d6d6;
   color: #111;
 }
 dialog.town-panel[open][data-panel='account']
@@ -172,11 +172,10 @@ dialog.town-panel.notice-board-dialog[open]
 /* Only the outer frame is heavy; dividers and control borders stay light. */
 dialog.town-panel[open]:not(.profile-dialog):not([data-panel='channels']),
 dialog.town-panel.profile-dialog[open] > .profile-sheet,
-dialog.error-modal[open],
-dialog.channel-entry[open] {
+dialog.error-modal[open] {
   border-width: 3px;
   border-style: solid;
-  border-color: #111;
+  border-color: #d6d6d6;
 }
 
 @media (hover: hover) {
