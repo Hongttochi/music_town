@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 import { createVoiceMiddleware } from './scripts/dev-voice-api.mjs';
+import { createAdminMiddleware } from './scripts/dev-admin-api.mjs';
 import { resolve } from 'node:path';
 
 // Serve policy documents before the SPA fallback, without starting authentication.
