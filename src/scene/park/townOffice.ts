@@ -2,6 +2,33 @@ import * as T from 'three';
 
 export const OFFICE_SPOT = new T.Vector3(5, 0, -20);
 export const OFFICE_CLERK = new T.Vector3(5, 0, -22.3);
+export const OFFICE_FLOOR_HEIGHT = 0.065;
+type Point = { x: number; z: number };
+function overlapsOfficeDesk(point: Point, radius: number) {
+  const z = point.z - OFFICE_SPOT.z;
+  // Include the countertop overhang and the camera-facing sprite's front clearance.
+  return (
+    Math.abs(point.x - OFFICE_SPOT.x) < 3.7 + radius && z > -1.75 - radius && z < -0.2 + radius
+  );
+}
+export function recoverOfficeDeskPosition(point: Point, radius: number): Point {
+  return overlapsOfficeDesk(point, radius)
+    ? { x: point.x, z: OFFICE_SPOT.z - 0.2 + radius + 0.02 }
+    : point;
+}
+export function blocksOfficeStep(from: Point, to: Point, radius: number) {
+  const steps = Math.max(1, Math.ceil(Math.hypot(to.x - from.x, to.z - from.z) / 0.15));
+  for (let i = 1; i <= steps; i++) {
+    if (
+      overlapsOffice(
+        { x: from.x + ((to.x - from.x) * i) / steps, z: from.z + ((to.z - from.z) * i) / steps },
+        radius,
+      )
+    )
+      return true;
+  }
+  return false;
+}
 export function isInsideOffice(point: { x: number; z: number }) {
   return Math.abs(point.x - OFFICE_SPOT.x) < 4.8 && Math.abs(point.z - OFFICE_SPOT.z) < 3.8;
 }
@@ -20,7 +47,7 @@ export function overlapsOffice(point: { x: number; z: number }, radius: number) 
   if (x > 4.8 - radius || z < -3.8 + radius) return true;
   // A wide door on the south facade; both directions remain walkable.
   if (z > 3.8 - radius && x > 1.4 - radius) return true;
-  if (x < 3.55 + radius && Math.abs(z + 1.2) < 0.45 + radius) return true;
+  if (overlapsOfficeDesk(point, radius)) return true;
   if (x > 3.9 - radius && z < -1.6 + radius) return true;
   return [-2.5, 2.5].some(
     (seat) => Math.hypot(point.x - OFFICE_SPOT.x - seat, z - 0.5) < 0.4 + radius,

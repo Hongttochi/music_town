@@ -31,6 +31,9 @@ import {
   overlapsOffice,
   isInsideOffice,
   isOfficeGround,
+  OFFICE_FLOOR_HEIGHT,
+  blocksOfficeStep,
+  recoverOfficeDeskPosition,
 } from './townOffice';
 import { PARK_PATHS } from './parkPaths';
 import { remoteMovementStep } from '../../utils/remoteMovement';
@@ -264,6 +267,7 @@ export function createParkScene({
   function tree(x: number, z: number, s = 1) {
     // The former north border is now an open route into the expanded park.
     if (z < -17) z -= 6;
+    if (Math.hypot(x - NOTICE_BOARD_SPOT.x, z - NOTICE_BOARD_SPOT.z) < 2.8 * s) return;
     if (isOfficeGround({ x, z }, 2.5 * s)) return;
     if (Math.abs(x - BAR_SPOT.x) < 9 && Math.abs(z - BAR_SPOT.z) < 9) return;
     if (Math.abs(x - SCHOOL_SPOT.x) < 4.5 && Math.abs(z - SCHOOL_SPOT.z) < 5) return;
@@ -690,17 +694,19 @@ export function createParkScene({
     }
   };
   const surfaceHeight = (position: T.Vector3, footprint = 0) =>
-    isOnBridge(position)
-      ? BRIDGE.surfaceHeight
-      : latest.current.liveStages.some((stage) => {
-            const center = world(stage);
-            return (
-              Math.hypot(position.x - center.x, position.z - center.z) <=
-              (stage.id === BAR_STAGE_ID ? 1.7 : STAGE_RADIUS) + footprint
-            );
-          })
-        ? STAGE_SURFACE_HEIGHT
-        : 0;
+    isInsideOffice(position)
+      ? OFFICE_FLOOR_HEIGHT
+      : isOnBridge(position)
+        ? BRIDGE.surfaceHeight
+        : latest.current.liveStages.some((stage) => {
+              const center = world(stage);
+              return (
+                Math.hypot(position.x - center.x, position.z - center.z) <=
+                (stage.id === BAR_STAGE_ID ? 1.7 : STAGE_RADIUS) + footprint
+              );
+            })
+          ? STAGE_SURFACE_HEIGHT
+          : 0;
   // Shared soft glow for lantern halos and the pools of light beneath them.
   const glowCanvas = document.createElement('canvas');
   glowCanvas.width = glowCanvas.height = 128;
@@ -1339,6 +1345,14 @@ export function createParkScene({
     // Recover older saved positions and teleports into furniture, but never move a sitter
     // or performer off their intentional seat/stage position.
     const currentPoint = world(p.position.current);
+    if (!seatedBench && p.performing === null) {
+      const safe = recoverOfficeDeskPosition(currentPoint, PLAYER_RADIUS);
+      if (safe !== currentPoint) {
+        p.position.current = { x: safe.x * 25 + 700, y: safe.z * 25 + 450 };
+        currentPoint.set(safe.x, 0, safe.z);
+        p.onMove({ ...p.position.current });
+      }
+    }
     if (
       barNight &&
       !seatedBench &&
@@ -1368,7 +1382,7 @@ export function createParkScene({
       canCrossRiver(world(p.position.current), point) &&
       !overlapsCoffeeMachine(point, PLAYER_RADIUS) &&
       !overlapsSchool(point, PLAYER_RADIUS) &&
-      !overlapsOffice(point, PLAYER_RADIUS) &&
+      !blocksOfficeStep(currentPoint, point, PLAYER_RADIUS) &&
       !overlapsBar(point, PLAYER_RADIUS, barNight) &&
       !benchFootprints.some((bench) =>
         blocksBenchStep(world(p.position.current), point, bench, PLAYER_RADIUS),
