@@ -97,6 +97,34 @@ const reports = [
 }));
 for (const r of reports) r.targetTotal = reports.filter((x) => x.target === r.target).length;
 
+type DemoMember = {
+  id: string;
+  name: string;
+  provider: string;
+  joinedAt: string;
+  lastVisit: string | null;
+  role: 'master' | 'admin' | null;
+};
+const dayAgo = (d: number) => new Date(Date.now() - d * 86400000).toISOString().slice(0, 10);
+const members: DemoMember[] = (
+  [
+    ['demo', '운영', 'google', 120, 0, 'master'],
+    ['m-1', '해밀', 'kakao', 90, 0, 'admin'],
+    ['m-2', '서우', 'google', 64, 0, null],
+    ['m-3', '윤슬', 'kakao', 41, 1, null],
+    ['m-4', '오후네시', 'google', 22, 3, null],
+    ['m-5', '달무리', 'kakao', 9, 9, null],
+    ['m-6', '버들', 'google', 2, null, null],
+  ] as const
+).map(([id, name, provider, joined, visit, role]) => ({
+  id,
+  name,
+  provider,
+  joinedAt: minutesAgo(joined * 1440),
+  lastVisit: visit === null ? null : dayAgo(visit),
+  role,
+}));
+
 type Notice = {
   id: string;
   label: string;
@@ -133,7 +161,7 @@ function run(name: string, a: Record<string, unknown>): Promise<unknown> {
   const jitter = (n: number, s: number) => Math.max(0, Math.round(n + (Math.random() - 0.4) * s));
   switch (name) {
     case 'admin_whoami':
-      return wait({ userId: 'demo', admin: true });
+      return wait({ userId: 'demo', admin: true, role: 'master' });
     case 'admin_overview': {
       const ch = channels.map((c) => ({ ...c, count: jitter(c.count, 4) }));
       const visitors = [312, 280, 355, 401, 390, 512, 640, 420, 388, 451, 470, 530, 690, 812];
@@ -221,6 +249,23 @@ function run(name: string, a: Record<string, unknown>): Promise<unknown> {
       if (next !== 'reviewing')
         r.retentionUntil = new Date(Date.now() + 90 * 86400000).toISOString();
       return wait({ id: r.id, status: next });
+    }
+    case 'admin_members_list': {
+      const q = String(a.search ?? '').trim();
+      const rank = (r: string | null) => (r === 'master' ? 0 : r === 'admin' ? 1 : 2);
+      return wait(
+        members
+          .filter((m) => !q || m.name.includes(q))
+          .sort((x, y) => rank(x.role) - rank(y.role) || y.joinedAt.localeCompare(x.joinedAt)),
+      );
+    }
+    case 'admin_set_admin': {
+      const m = members.find((x) => x.id === a.target_user);
+      if (!m) return fail('MEMBER_NOT_FOUND');
+      if (m.id === 'demo') return fail('SELF_CHANGE');
+      if (m.role === 'master') return fail('MASTER_LOCKED');
+      m.role = a.make_admin ? 'admin' : null;
+      return wait({ id: m.id, role: m.role });
     }
     case 'admin_notices':
       return wait(notices);

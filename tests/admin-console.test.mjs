@@ -17,7 +17,7 @@ const admin = '11111111-1111-4111-8111-111111111111',
 
 async function fixture() {
   const db = new PGlite();
-  await db.exec(`create role anon; create role authenticated; create schema auth;
+  await db.exec(`create role anon; create role authenticated; create role service_role; create schema auth;
   create table auth.users(id uuid primary key, created_at timestamptz default now(), raw_app_meta_data jsonb default '{}');
   create function auth.uid() returns uuid language sql as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
   grant usage on schema auth to authenticated, anon;
@@ -50,8 +50,9 @@ test('only admins can read the console, everyone else is refused', async () => {
   const db = await fixture();
   try {
     await as(db, user);
-    assert.deepEqual(await call(db, 'admin_whoami'), { userId: user, admin: false });
+    assert.deepEqual(await call(db, 'admin_whoami'), { userId: user, admin: false, role: null });
     for (const fn of [
+      'admin_members_list',
       'admin_overview',
       'admin_live',
       'admin_shows',
@@ -67,6 +68,7 @@ test('only admins can read the console, everyone else is refused', async () => {
     await db.exec(`insert into public.admin_members(user_id) values('${admin}')`);
     await as(db, admin);
     assert.equal((await call(db, 'admin_whoami')).admin, true);
+    assert.equal((await call(db, 'admin_whoami')).role, 'admin');
   } finally {
     await db.close();
   }
@@ -237,6 +239,64 @@ test('notices: seeded once, only published ones reach the park board, one blank 
     await db.exec('reset role');
     await db.exec(sql); // Re-running does not seed again.
     assert.equal((await db.query('select count(*)::int n from public.town_notices')).rows[0].n, 2);
+  } finally {
+    await db.close();
+  }
+});
+
+test('masters come only from the server sync and alone can grant regular admins', async () => {
+  const db = await fixture();
+  try {
+    const sync = (uid, master) => call(db, 'admin_sync_role', ['$1', '$2'], [uid, master]);
+    const setAdmin = (uid, on) => call(db, 'admin_set_admin', ['$1', '$2'], [uid, on]);
+
+    // Browsers cannot call the sync themselves.
+    await as(db, user);
+    await assert.rejects(sync(user, true), /permission denied/);
+    await db.exec(`reset role; set role service_role;`);
+    assert.equal(await sync(admin, true), 'master');
+
+    await as(db, admin);
+    assert.equal((await call(db, 'admin_whoami')).role, 'master');
+    await assert.rejects(setAdmin(admin, false), /SELF_CHANGE/);
+    assert.deepEqual(await setAdmin(kakao, true), { id: kakao, role: 'admin' });
+    const list = await call(db, 'admin_members_list', ['$1'], [null]);
+    assert.deepEqual(
+      list.map((m) => [m.name, m.role]),
+      [
+        ['운영자', 'master'],
+        ['윤슬', 'admin'],
+        ['서우', null],
+      ],
+    );
+    assert.equal(list[1].provider, 'kakao');
+    assert.ok(!('email' in list[0]));
+    assert.deepEqual(
+      (await call(db, 'admin_members_list', ['$1'], ['서'])).map((m) => m.name),
+      ['서우'],
+    );
+
+    // A regular admin can use the console but cannot grant or touch a master.
+    await as(db, kakao);
+    assert.equal((await call(db, 'admin_whoami')).role, 'admin');
+    await assert.rejects(setAdmin(user, true), /MASTER_REQUIRED/);
+
+    await as(db, admin);
+    await db.exec('reset role');
+    await db.exec(`insert into public.admin_members(user_id, role, expires_at)
+      values ('${user}', 'master', now() + interval '1 hour')`);
+    await as(db, admin);
+    await assert.rejects(setAdmin(user, false), /MASTER_LOCKED/);
+    assert.deepEqual(await setAdmin(kakao, false), { id: kakao, role: null });
+
+    // Removing an email from ADMIN_EMAILS revokes at once; an unsynced master expires on its own.
+    await db.exec(`reset role; set role service_role;`);
+    assert.equal(await sync(user, false), null);
+    await db.exec(`reset role; update public.admin_members set expires_at = now() - interval '1 minute'
+      where user_id = '${admin}'`);
+    await as(db, admin);
+    assert.equal((await call(db, 'admin_whoami')).admin, false);
+    await assert.rejects(call(db, 'admin_members_list', ['$1'], [null]), /ADMIN_REQUIRED/);
   } finally {
     await db.close();
   }

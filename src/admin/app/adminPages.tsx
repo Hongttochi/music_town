@@ -1,5 +1,14 @@
 import type { ComponentType, ReactNode } from 'react';
-import { Filter, Flag, LayoutGrid, Megaphone, Mic, Radio, TriangleAlert } from 'lucide-react';
+import {
+  Filter,
+  Flag,
+  LayoutGrid,
+  Megaphone,
+  Mic,
+  Radio,
+  TriangleAlert,
+  Users,
+} from 'lucide-react';
 import { Overview } from '../pages/Overview';
 import { Live } from '../pages/Live';
 import { Shows } from '../pages/Shows';
@@ -7,6 +16,7 @@ import { Funnels } from '../pages/Funnels';
 import { Reports } from '../pages/Reports';
 import { Errors } from '../pages/Errors';
 import { Notices } from '../pages/Notices';
+import { Members } from '../pages/Members';
 
 export type PageDef = {
   key: string;
@@ -87,6 +97,17 @@ export const pageGroups: PageDef[][] = [
       title: '오류와 음성',
       sub: <>앱 오류 기록과 음성 연결 상태</>,
       Page: Errors,
+    },
+  ],
+  [
+    {
+      key: 'members',
+      label: '회원 관리',
+      group: '관리',
+      icon: Users,
+      title: '회원 관리',
+      sub: <>회원을 찾고 관리자 권한을 지정해요 · 지정은 마스터 관리자만</>,
+      Page: Members,
     },
   ],
 ];

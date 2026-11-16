@@ -5,30 +5,65 @@ begin;
 create schema if not exists private;
 
 -- Admin list. App users cannot read or write the table directly.
+-- 'master' rows mirror the server-only ADMIN_EMAILS list: /api/admin-role refreshes them with a short
+-- expiry, so removing an email revokes access on the next check or within two hours at most.
+-- 'admin' rows are granted by a master in the console and do not expire.
 create table if not exists public.admin_members (
   user_id uuid primary key references auth.users(id) on delete cascade,
   created_at timestamptz not null default now()
 );
+alter table public.admin_members
+  add column if not exists role text not null default 'admin',
+  add column if not exists expires_at timestamptz,
+  add column if not exists granted_by uuid;
+alter table public.admin_members drop constraint if exists admin_members_role_check;
+alter table public.admin_members add constraint admin_members_role_check check (
+  (role = 'admin' and expires_at is null) or (role = 'master' and expires_at is not null));
 alter table public.admin_members enable row level security;
 revoke all on public.admin_members from public, anon, authenticated;
 
+create or replace function private.admin_role(uid uuid) returns text
+language sql stable security definer set search_path='' as $$
+  select role from public.admin_members
+  where user_id = uid and (expires_at is null or expires_at > now());
+$$;
 create or replace function private.is_admin() returns boolean
 language sql stable security definer set search_path='' as $$
-  select auth.uid() is not null and exists(select 1 from public.admin_members where user_id = auth.uid());
+  select auth.uid() is not null and private.admin_role(auth.uid()) is not null;
 $$;
 create or replace function private.require_admin() returns void
 language plpgsql stable security definer set search_path='' as $$
 begin
   if not private.is_admin() then raise exception 'ADMIN_REQUIRED'; end if;
 end $$;
-revoke all on function private.is_admin(), private.require_admin() from public, anon, authenticated;
+revoke all on function private.admin_role(uuid), private.is_admin(), private.require_admin()
+  from public, anon, authenticated;
+
+-- Called only by /api/admin-role with the server secret key after it verified the caller's email.
+create or replace function public.admin_sync_role(target_user uuid, is_master boolean) returns text
+language plpgsql security definer set search_path='' as $$
+begin
+  if target_user is null or is_master is null then raise exception 'INVALID_REQUEST'; end if;
+  if is_master then
+    insert into public.admin_members(user_id, role, expires_at)
+    values (target_user, 'master', now() + interval '2 hours')
+    on conflict (user_id) do update set role = 'master', expires_at = excluded.expires_at, granted_by = null;
+  else
+    -- Removed from ADMIN_EMAILS: drop the mirrored master right immediately.
+    delete from public.admin_members where user_id = target_user and role = 'master';
+  end if;
+  return private.admin_role(target_user);
+end $$;
+revoke all on function public.admin_sync_role(uuid, boolean) from public, anon, authenticated;
+grant execute on function public.admin_sync_role(uuid, boolean) to service_role;
 
 -- Lets the console check the caller's own admin flag without exposing the list.
 create or replace function public.admin_whoami() returns jsonb
 language plpgsql stable security definer set search_path='' as $$
 begin
   if auth.uid() is null then raise exception 'AUTH_REQUIRED'; end if;
-  return jsonb_build_object('userId', auth.uid(), 'admin', private.is_admin());
+  return jsonb_build_object('userId', auth.uid(), 'admin', private.is_admin(),
+    'role', private.admin_role(auth.uid()));
 end $$;
 
 -- Performance history. town_performances rows are deleted when a show ends, so keep a log from now on.
@@ -299,6 +334,50 @@ begin
   if not found then raise exception 'NOTICE_NOT_FOUND'; end if;
 end $$;
 
+-- Members. Everyone with a profile, newest first; names only, never email or provider ids.
+create or replace function public.admin_members_list(search text default null) returns jsonb
+language plpgsql stable security definer set search_path='' as $$
+begin
+  perform private.require_admin();
+  return (select coalesce(jsonb_agg(jsonb_build_object(
+      'id', m.id, 'name', m.name, 'provider', m.provider, 'joinedAt', m.joined_at,
+      'lastVisit', m.last_visit, 'role', m.role
+    ) order by m.rank, m.joined_at desc), '[]'::jsonb)
+    from (
+      select p.id, coalesce(nullif(p.avatar->>'name', ''), '이름 없음') as name,
+        u.raw_app_meta_data->>'provider' as provider, u.created_at as joined_at,
+        (select max(a.day) from public.profile_daily_activity a where a.user_id = p.id) as last_visit,
+        private.admin_role(p.id) as role,
+        case private.admin_role(p.id) when 'master' then 0 when 'admin' then 1 else 2 end as rank
+      from public.member_profiles p join auth.users u on u.id = p.id
+      where coalesce(btrim(search), '') = '' or p.avatar->>'name' ilike '%' || btrim(search) || '%'
+      order by rank, u.created_at desc
+      limit 200
+    ) m);
+end $$;
+
+-- Only a master can grant or revoke the regular admin role. Masters come from ADMIN_EMAILS only.
+create or replace function public.admin_set_admin(target_user uuid, make_admin boolean) returns jsonb
+language plpgsql security definer set search_path='' as $$
+declare existing_role text;
+begin
+  perform private.require_admin();
+  if private.admin_role(auth.uid()) is distinct from 'master' then raise exception 'MASTER_REQUIRED'; end if;
+  if target_user is null or make_admin is null then raise exception 'INVALID_REQUEST'; end if;
+  if target_user = auth.uid() then raise exception 'SELF_CHANGE'; end if;
+  perform 1 from public.member_profiles where id = target_user;
+  if not found then raise exception 'MEMBER_NOT_FOUND'; end if;
+  select role into existing_role from public.admin_members where user_id = target_user for update;
+  if existing_role = 'master' then raise exception 'MASTER_LOCKED'; end if;
+  if make_admin then
+    insert into public.admin_members(user_id, role, granted_by) values (target_user, 'admin', auth.uid())
+    on conflict (user_id) do nothing;
+  else
+    delete from public.admin_members where user_id = target_user and role = 'admin';
+  end if;
+  return jsonb_build_object('id', target_user, 'role', private.admin_role(target_user));
+end $$;
+
 do $$
 declare f text;
 begin
@@ -306,7 +385,7 @@ begin
     'public.admin_whoami()', 'public.admin_overview()', 'public.admin_live()', 'public.admin_shows()',
     'public.admin_funnel(integer,text)', 'public.admin_reports()', 'public.admin_set_report_status(text,text,text)',
     'public.town_notice_board()', 'public.admin_notices()', 'public.admin_save_notice(uuid,text,text,text,text)',
-    'public.admin_delete_notice(uuid)'
+    'public.admin_delete_notice(uuid)', 'public.admin_members_list(text)', 'public.admin_set_admin(uuid,boolean)'
   ] loop
     execute format('revoke all on function %s from public, anon', f);
     execute format('grant execute on function %s to authenticated', f);
@@ -314,6 +393,5 @@ begin
 end $$;
 commit;
 
--- Grant admin access (run once by an operator):
---   insert into public.admin_members(user_id) values ('<your auth.users id>') on conflict do nothing;
--- The id is shown on the "no admin access" screen after signing in at /admin.
+-- Masters are the verified emails in the server-only ADMIN_EMAILS variable; signing in at /admin
+-- registers them through /api/admin-role. Masters grant regular admins in the console (회원 관리).

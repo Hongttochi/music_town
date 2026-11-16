@@ -1,7 +1,13 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Copy, LogIn, LogOut, Music } from 'lucide-react';
 import { signIn, supabase } from '../../../services/auth';
-import { AdminError, demoMode, rpc } from '../../services/adminRepository';
+import {
+  AdminError,
+  demoMode,
+  rpc,
+  syncAdminRole,
+  type Whoami,
+} from '../../services/adminRepository';
 import './admin-gate.css';
 
 type State =
@@ -21,7 +27,8 @@ export function AdminGate({ children }: { children: ReactNode }) {
     const check = async (signedIn: boolean) => {
       if (!signedIn) return setState({ kind: 'signedOut' });
       try {
-        const me = await rpc<{ userId: string; admin: boolean }>('admin_whoami');
+        await syncAdminRole();
+        const me = await rpc<Whoami>('admin_whoami');
         setState(me.admin ? { kind: 'ok' } : { kind: 'denied', userId: me.userId });
       } catch (e) {
         setState({
@@ -34,7 +41,12 @@ export function AdminGate({ children }: { children: ReactNode }) {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') void check(!!session);
     });
-    return () => data.subscription.unsubscribe();
+    // A master's database grant lasts two hours; refresh it while the console stays open.
+    const refresh = setInterval(() => void syncAdminRole(), 30 * 60 * 1000);
+    return () => {
+      data.subscription.unsubscribe();
+      clearInterval(refresh);
+    };
   }, []);
 
   if (state.kind === 'ok') return <>{children}</>;
@@ -77,7 +89,10 @@ export function AdminGate({ children }: { children: ReactNode }) {
         )}
         {state.kind === 'denied' && (
           <>
-            <p>이 계정에는 관리자 권한이 없어요. 운영자가 아래 ID를 관리자 명단에 추가해야 해요.</p>
+            <p>
+              이 계정에는 관리자 권한이 없어요. 마스터 관리자에게 회원 관리에서 관리자로 지정해
+              달라고 요청해 주세요.
+            </p>
             <code className="a-gate-id">{state.userId}</code>
             <div className="a-gate-actions">
               <button

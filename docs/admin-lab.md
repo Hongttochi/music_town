@@ -27,7 +27,9 @@ ADMIN_EMAILS=admin@example.com,owner@example.com
 GET /api/admin-role에 로그인 세션의 Authorization: Bearer 토큰을 보냅니다.
 서버가 Supabase auth.getUser(token)으로 사용자를 검증하고 반환된 계정 이메일을
 ADMIN_EMAILS와 비교합니다. 요청 본문·쿼리·메타데이터의 이메일이나 역할은 사용하지 않습니다.
-응답은 { "isAdmin": true | false }이며 이메일 목록은 반환하지 않습니다.
+응답은 { "isAdmin": true | false, "isMaster": true | false }이며 이메일 목록은 반환하지 않습니다.
+ADMIN_EMAILS의 계정은 마스터 관리자입니다. SUPABASE_SECRET_KEY가 있으면 서버가 마스터를 DB에 동기화하고,
+마스터가 운영실 회원 관리에서 지정한 일반 관리자도 isAdmin: true가 됩니다(자세한 내용은 admin-setup.md).
 Cache-Control: no-store를 적용합니다.
 
 토큰 누락·검증 실패는 401, 잘못된 메서드는 405, 서버 설정 누락은 503,

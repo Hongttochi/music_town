@@ -76,6 +76,17 @@ export type Notice = {
   updatedAt: string;
 };
 
+export type AdminRole = 'master' | 'admin';
+export type Whoami = { userId: string; admin: boolean; role: AdminRole | null };
+export type Member = {
+  id: string;
+  name: string;
+  provider: string | null;
+  joinedAt: string;
+  lastVisit: string | null;
+  role: AdminRole | null;
+};
+
 const messages: Record<string, string> = {
   ADMIN_REQUIRED: '관리자 권한이 없어요.',
   AUTH_REQUIRED: '로그인이 필요해요.',
@@ -85,6 +96,10 @@ const messages: Record<string, string> = {
   BLANK_DRAFT_EXISTS: '아직 비어 있는 공지가 있어요. 그 공지부터 써 주세요.',
   NOTICE_NOT_FOUND: '공지를 찾을 수 없어요. 이미 삭제됐을 수 있어요.',
   INVALID_RANGE: '기간이 올바르지 않아요.',
+  MASTER_REQUIRED: '관리자 지정은 마스터 관리자만 할 수 있어요.',
+  MASTER_LOCKED: '마스터 관리자는 서버 설정(ADMIN_EMAILS)에서만 바꿀 수 있어요.',
+  SELF_CHANGE: '내 권한은 직접 바꿀 수 없어요.',
+  MEMBER_NOT_FOUND: '회원을 찾을 수 없어요. 탈퇴했을 수 있어요.',
 };
 export class AdminError extends Error {
   constructor(
@@ -122,4 +137,17 @@ export async function rpc<T>(name: string, args?: Record<string, unknown>): Prom
     throw toError(error);
   }
   return data as T;
+}
+
+// Lets the server mirror a master admin (ADMIN_EMAILS) into the database before console calls.
+// Failures are ignored: the database role check stays the source of truth.
+export async function syncAdminRole() {
+  if (demoMode || !supabase) return;
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) return;
+  await fetch('/api/admin-role', {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: 'no-store',
+  }).catch(() => undefined);
 }
