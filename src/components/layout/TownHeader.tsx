@@ -1,5 +1,4 @@
 import './town-header.css';
-import { House } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { ProfileIcon } from '../profile/ProfileIcon';
 import { Flaticon } from '../ui/Flaticon';
@@ -11,7 +10,6 @@ export function TownHeader({
   onProfile,
   onSettings,
   onRankings,
-  onMyRoom,
 }: {
   channel: number;
   profileIcon?: string;
@@ -19,7 +17,6 @@ export function TownHeader({
   onProfile: () => void;
   onSettings: () => void;
   onRankings: () => void;
-  onMyRoom: () => void;
 }) {
   return (
     <header className="topbar">
@@ -35,14 +32,6 @@ export function TownHeader({
           title="뮤지션 랭킹"
         >
           <img src="/icons/achievement-award.png" width={22} height={22} alt="" />
-        </Button>
-        <Button
-          className="icon-button my-room-button"
-          onClick={onMyRoom}
-          aria-label="마이룸"
-          title="마이룸"
-        >
-          <House size={18} aria-hidden="true" />
         </Button>
         <Button className="avatar-button" onClick={onProfile} aria-label="마이페이지">
           <ProfileIcon id={profileIcon} avatar={avatar} size={12} />
