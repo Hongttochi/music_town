@@ -21,6 +21,7 @@ export function SettingsMenu({
       <SoundEffectsSetting />
       {onLab && (
         <Button variant="ghost" onClick={onLab}>
+          <Flaticon name="test-tubes" size={16} />
           실험실
         </Button>
       )}
