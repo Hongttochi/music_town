@@ -1,4 +1,4 @@
-import { useRef, type MouseEvent } from 'react';
+import { useRef } from 'react';
 import { LogOut, Music, PanelLeft, Settings } from 'lucide-react';
 import type { PageDef } from '../../app/adminPages';
 import { useSlidingPill } from '../../hooks/useSlidingPill';
@@ -11,7 +11,7 @@ type Props = {
   active: string;
   wide: boolean;
   openReports: number;
-  onNavigate: (key: string, e: MouseEvent) => void;
+  onNavigate: (key: string) => void;
   onToggleWide: () => void;
   onOpenSettings: () => void;
 };
@@ -60,7 +60,7 @@ export function AdminSidebar({
                 className="a-nav-btn"
                 aria-current={p.key === active ? 'page' : undefined}
                 aria-label={p.label}
-                onClick={(e) => onNavigate(p.key, e)}
+                onClick={() => onNavigate(p.key)}
               >
                 <span style={{ display: 'flex', flex: 'none' }}>
                   <p.icon size={18} />

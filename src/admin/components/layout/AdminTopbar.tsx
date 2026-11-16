@@ -1,4 +1,3 @@
-import type { MouseEvent } from 'react';
 import { Bell, ChevronRight, Search, Sun } from 'lucide-react';
 import type { PageDef } from '../../app/adminPages';
 import { demoMode } from '../../services/adminRepository';
@@ -8,7 +7,7 @@ type Props = {
   page: PageDef;
   openReports: number;
   onOpenSettings: () => void;
-  onOpenReports: (e: MouseEvent) => void;
+  onOpenReports: () => void;
 };
 
 export function AdminTopbar({ page, openReports, onOpenSettings, onOpenReports }: Props) {
