@@ -39,6 +39,7 @@ import { DialogPanel, PanelHeading } from '../components/ui/Panel';
 import { Button } from '../components/ui/Button';
 import { Flaticon } from '../components/ui/Flaticon';
 import { AvatarEditor } from '../components/avatar/AvatarEditor';
+import { MyRoom } from '../components/room/MyRoom';
 import { type Account } from './LoginPage';
 import { useEffect, useRef, useState } from 'react';
 import { Park, Position } from '../components/park/Park';
@@ -73,6 +74,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
   const [entrySceneReady, setEntrySceneReady] = useState(false);
   const [entryRevision, setEntryRevision] = useState(0);
   const [entered, setEntered] = useState(false);
+  const [roomOpen, setRoomOpen] = useState(false);
   const storagePrefix = `mt-${account.id}`;
   const [showStages, setShowStages] = useState(false);
   const [avatar, setAvatar] = useState<Avatar>(
@@ -95,7 +97,10 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
   const playSound = useSoundEffects();
   const timeTransition = useParkTimeTransition(entered);
   useEffect(() => {
-    if (timeTransition.active) setPanel(null);
+    if (timeTransition.active) {
+      setPanel(null);
+      setRoomOpen(false);
+    }
   }, [timeTransition.active]);
   const [toast, setToast] = useState('');
   const [toastKind, setToastKind] = useState<'notice' | 'performance' | 'arrival'>('notice');
@@ -259,6 +264,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
     setQueue(town.waiting?.stage_id ?? null);
     if (entered && town.state.channel === null) {
       setEntered(false);
+      setRoomOpen(false);
       setPanel('channels');
     }
   }, [town.state, account.demo]);
@@ -316,6 +322,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
       setEntered(true);
       setChannel(id);
       setNear(null);
+      setRoomOpen(false);
       position.current = { x: 650, y: 470 };
       setPanel(null);
       notify(`${String(id + 1).padStart(2, '0')}번 공원`, 'arrival');
@@ -380,7 +387,20 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
               }
               performerIds={town.state.performances.map((performance) => performance.user_id)}
               reaction={performing === null ? reaction : null}
+              paused={roomOpen}
             />
+            {roomOpen && (
+              <MyRoom
+                avatar={avatar}
+                storageKey={storagePrefix + '-room'}
+                onClose={() => setRoomOpen(false)}
+                onCustomize={() => {
+                  setRoomOpen(false);
+                  setAvatarReturn(null);
+                  setPanel('avatar');
+                }}
+              />
+            )}
             <TownHeader
               channel={channel}
               profileIcon={avatar.profileIcon}
@@ -389,8 +409,9 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
               onSettings={() => setPanel('settings')}
               onRankings={() => setPanel('rankings')}
               onMyRoom={() => {
+                setPanel(null);
                 setAvatarReturn(null);
-                setPanel('avatar');
+                setRoomOpen(true);
               }}
             />
             <ParkIntroduction hour={hour} night={night} />
