@@ -1,5 +1,6 @@
 import { BAR_SPOT } from '../../scene/park/nightBar';
 import { SCHOOL_SPOT } from '../../scene/park/school';
+import { OFFICE_SPOT } from '../../scene/park/townOffice';
 import { useEffect, useRef, type MutableRefObject } from 'react';
 import { CatmullRomCurve3, Vector3 } from 'three';
 import { PARK_PATHS } from '../../scene/park/parkPaths';
@@ -53,9 +54,26 @@ export function ParkMinimap({
       role="img"
       aria-label={`공원 지도 · 나와 다른 참가자 ${participants.length}명`}
     >
-      <svg viewBox="-30 -16 70 32" aria-hidden="true">
-        <rect x={-30} y={-16} width={70} height={32} rx={3} fill="#c4d6a5" />
-        <path d={`M${RIVER.left},-16V16H${RIVER.right}V-16Z`} fill="#91c6c4" />
+      <svg viewBox="-27 -28 74 52" aria-hidden="true">
+        <rect x={-27} y={-28} width={74} height={52} rx={3} fill="#c4d6a5" />
+        <path d={`M${RIVER.left},-28V24H${RIVER.right}V-28Z`} fill="#91c6c4" />
+        <rect
+          x={OFFICE_SPOT.x - 3.5}
+          y={OFFICE_SPOT.z - 2.5}
+          width={7}
+          height={5}
+          rx={0.4}
+          fill="#64866d"
+        />
+        <text
+          x={OFFICE_SPOT.x}
+          y={OFFICE_SPOT.z - 3.5}
+          textAnchor="middle"
+          fontSize={2}
+          fill="#3f553c"
+        >
+          동사무소
+        </text>
         <g fill="none" stroke="#eee3c8" strokeLinecap="round" strokeLinejoin="round">
           {paths.map((p, i) => (
             <polyline key={i} points={p.points} strokeWidth={p.width * 2} />
