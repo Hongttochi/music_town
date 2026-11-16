@@ -12,6 +12,7 @@ export function useParkTimeTransition(entered: boolean) {
   const [message, setMessage] = useState('');
   const [revision, setRevision] = useState(0);
   useEffect(() => {
+    if (!entered) setPhase('idle');
     let active = false;
     const timers: ReturnType<typeof setTimeout>[] = [];
     const stops: (() => void)[] = [];

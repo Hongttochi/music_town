@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { seasonalFoliage, treeSeason } from './treeSeason';
-export function createVillageProps(scene: THREE.Scene) {
+import { seasonalFoliage, treeSeason, type TreeSeason } from './treeSeason';
+export function createVillageProps(scene: THREE.Scene, season: TreeSeason = treeSeason()) {
   const materials: THREE.SpriteMaterial[] = [],
     textures: THREE.Texture[] = [];
   let disposed = false;
@@ -20,7 +20,7 @@ export function createVillageProps(scene: THREE.Scene) {
       const ctx = cell.getContext('2d', { willReadFrequently: true })!;
       ctx.drawImage(image, col * 512, top, 512, height, 0, 0, 512, height);
       const pixels = ctx.getImageData(0, 0, 512, height);
-      if (kind === 0 || kind === 2) seasonalFoliage(pixels.data, treeSeason());
+      if (kind === 0 || kind === 2) seasonalFoliage(pixels.data, season);
       let left = 512,
         right = 0,
         up = height,

@@ -1,0 +1,43 @@
+.admin-lab {
+  display: grid;
+  gap: 20px;
+}
+.admin-lab p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.admin-lab fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.admin-lab legend {
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.admin-lab-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.admin-lab .admin-lab-note {
+  font-size: 12px;
+  color: #68745d;
+}
+.admin-lab-preview {
+  position: fixed;
+  left: 50%;
+  top: 55px;
+  transform: translateX(-50%);
+  z-index: 30;
+  max-width: calc(100vw - 24px);
+  padding: 8px 14px;
+  border: 1px solid #bac9a6;
+  border-radius: 20px;
+  background: #f8fbeef2;
+  color: #35452e;
+  font-size: 12px;
+  cursor: pointer;
+}

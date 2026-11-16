@@ -199,7 +199,7 @@ export function createParkScene({
   ) {
     return mesh(new T.CylinderGeometry(r1, r2, height, 24), color, x, y, z, parent);
   }
-  const scenery = createVillageProps(scene);
+  const scenery = createVillageProps(scene, latest.current.season);
   const ground = box(0, -0.35, 0, 100, 0.6, 100, '#ffffff');
   ground.castShadow = false;
   ground.material.map = scenery.ground;
