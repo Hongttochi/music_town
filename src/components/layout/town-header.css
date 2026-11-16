@@ -41,12 +41,6 @@ header.topbar {
   object-fit: contain;
 }
 
-.topbar .header-right .my-room-button svg {
-  display: block;
-  width: 18px;
-  height: 18px;
-}
-
 .topbar .header-right .town-button.avatar-button {
   display: grid;
   place-items: center;

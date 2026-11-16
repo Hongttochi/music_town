@@ -1,9 +1,15 @@
+import { useEffect } from 'react';
+import { trackAppOpened } from '../services/analytics';
 import { SoundEffectsProvider } from '../providers/SoundEffectsProvider';
 import { DeviceGuide } from '../components/layout/DeviceGuide';
 import { LoginPage } from '../pages/LoginPage';
 import { ProfileLoader } from '../components/auth/ProfileLoader';
 import { TownPage } from '../pages/TownPage';
 export function App() {
+  useEffect(() => {
+    trackAppOpened();
+  }, []);
+
   return (
     <SoundEffectsProvider>
       <DeviceGuide>
