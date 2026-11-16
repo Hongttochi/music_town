@@ -30,7 +30,7 @@ dialog.town-panel[data-panel='account'] {
   height: 76px;
   padding: 4px;
   border: 0;
-  background: #f0f2e9;
+  background: #fff;
   border-radius: 6px;
   cursor: pointer;
   color: #767d6e;
@@ -70,7 +70,7 @@ dialog.town-panel[data-panel='account'] {
 }
 .account-badge:hover,
 .account-badge:focus-visible {
-  background: #e6ebdc;
+  background: #fff;
   outline: none;
 }
 .account-badge-picker[hidden] {

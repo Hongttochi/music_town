@@ -155,7 +155,7 @@ export function MusicianRankings({
             !error &&
             snapshot.entries.some((person) => person.rank === 1) && (
               <div className="ranking-winners" aria-live="polite">
-                <Trophy size={16} aria-hidden="true" />
+                <img src="/icons/trophy.png" width={16} height={16} alt="" />
                 <span>
                   {historical ? '주간' : '이번 주'}{' '}
                   {snapshot.entries.filter((person) => person.rank === 1).length > 1
@@ -174,7 +174,10 @@ export function MusicianRankings({
       )}
       <div className="ranking-results" hidden={period === 'weekly' && calendarOpen}>
         {demo ? (
-          <p role="status">로그인하면 뮤지션들의 랭킹을 볼 수 있어요.</p>
+          <div className="ranking-login" role="status">
+            <img src="/icons/trophy.png" width={32} height={32} alt="" />
+            <p>로그인하면 뮤지션 랭킹을 볼 수 있어요.</p>
+          </div>
         ) : error ? (
           <p role="status">
             {error}{' '}

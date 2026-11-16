@@ -23,8 +23,6 @@ export function ActivityChart({ stats }: { stats: FanStats | null }) {
   const peak = Math.max(0, ...days.map((day) => day[metric]));
   const step = peak <= 3600 ? 900 : 3600;
   const ceiling = Math.max(step, Math.ceil(peak / step) * step);
-  const shortDate = (date: string) => `${Number(date.slice(5, 7))}.${Number(date.slice(8))}`;
-  const range = days.length ? `${shortDate(days[0].date)} – ${shortDate(days.at(-1)!.date)}` : '';
   return (
     <section className="activity-stats" data-expanded={expanded} data-metric={metric}>
       <Button
@@ -45,9 +43,6 @@ export function ActivityChart({ stats }: { stats: FanStats | null }) {
         <div className="activity-reveal-inner">
           <div className="activity-expanded">
             <div className="activity-chart-heading">
-              <span>
-                최근 7일 <small className="activity-date-range">{range}</small>
-              </span>
               <div className="activity-metrics" role="group" aria-label="그래프 항목">
                 <Button
                   variant="plain"
