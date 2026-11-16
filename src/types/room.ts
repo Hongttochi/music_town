@@ -47,6 +47,8 @@ export type RoomSceneProps = {
   selectedId: string | null;
   movingId: string | null;
   mode: RoomMode;
+  topInset?: number;
+  bottomInset?: number;
   paused?: boolean;
   motion: MutableRefObject<Position>;
   avatarTile: MutableRefObject<RoomTile>;

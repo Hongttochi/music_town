@@ -3,8 +3,10 @@ import { findRoomFurniture } from '../../utils/roomLayout';
 import type { RoomFurnitureId } from '../../types/room';
 
 const MARGIN = 0.06;
-const GHOST_OK = new THREE.Color('#6fd18a');
-const GHOST_BLOCKED = new THREE.Color('#ef6b6b');
+export const GHOST_OK_COLOR = '#6fd18a';
+export const GHOST_BLOCKED_COLOR = '#ef6b6b';
+const GHOST_OK = new THREE.Color(GHOST_OK_COLOR);
+const GHOST_BLOCKED = new THREE.Color(GHOST_BLOCKED_COLOR);
 
 type Finish = {
   roughness?: number;
@@ -266,7 +268,7 @@ export function setGhostAppearance(group: THREE.Group, ok: boolean) {
     const tinted = (source: THREE.Material) => {
       const clone = source.clone() as THREE.MeshStandardMaterial;
       clone.transparent = true;
-      clone.opacity = 0.5;
+      clone.opacity = 0.55;
       clone.depthWrite = false;
       clone.color.copy(tint);
       clone.emissive.copy(tint).multiplyScalar(0.35);

@@ -12,11 +12,19 @@ import {
   tileToWorld,
   worldToTile,
 } from '../../utils/roomLayout';
-import { createFurniture, disposeFurniture, setGhostAppearance } from './furnitureMeshes';
+import {
+  createFurniture,
+  disposeFurniture,
+  GHOST_BLOCKED_COLOR,
+  GHOST_OK_COLOR,
+  setGhostAppearance,
+} from './furnitureMeshes';
 
 const AVATAR_RADIUS = 0.3;
 const ROOM_HALF = 4;
 const WALL_HEIGHT = 2.8;
+const ROOM_AVATAR_SCALE = 0.85;
+const TALL_FURNITURE = new Set(['bookshelf', 'tv', 'lamp', 'plant', 'guitar', 'bed', 'sofa']);
 
 type RoomSceneBindings = {
   el: HTMLCanvasElement;
@@ -44,7 +52,7 @@ export function createRoomScene({ el, latest, setError }: RoomSceneBindings) {
   const scene = new T.Scene();
   scene.background = new T.Color('#e5d3bd');
   const camera = new T.PerspectiveCamera(38, 1, 0.1, 100);
-  const cameraTarget = new T.Vector3(0, 0.75, 0);
+  const cameraTarget = new T.Vector3(0, 0.9, 0);
   const cameraDirection = new T.Vector3(0.62, 0.92, 1).normalize();
 
   const hemi = new T.HemisphereLight('#fff4df', '#9c7c61', 1.55);
@@ -229,6 +237,7 @@ export function createRoomScene({ el, latest, setError }: RoomSceneBindings) {
   let selection: T.LineSegments | null = null;
   let selectionSignature = '';
   let ghostGroup: T.Group | null = null;
+  let ghostOutline: T.LineSegments | null = null;
   let ghostItem = '';
   let ghostOk: boolean | null = null;
 
@@ -252,6 +261,7 @@ export function createRoomScene({ el, latest, setError }: RoomSceneBindings) {
     for (const placed of layout.items) {
       const group = createFurniture(placed.item);
       group.userData.furnitureId = placed.id;
+      group.userData.furnitureItem = placed.item;
       placeFurniture(group, placed);
       scene.add(group);
       furnitureGroups.set(placed.id, group);
@@ -289,12 +299,21 @@ export function createRoomScene({ el, latest, setError }: RoomSceneBindings) {
     selection = outline;
   }
 
+  function disposeGhostOutline() {
+    if (!ghostOutline) return;
+    scene.remove(ghostOutline);
+    ghostOutline.geometry.dispose();
+    (ghostOutline.material as T.Material).dispose();
+    ghostOutline = null;
+  }
+
   function syncGhost(ghost: RoomSceneProps['ghost']) {
     if (!ghost) {
       if (ghostGroup) {
         disposeFurniture(ghostGroup);
         ghostGroup = null;
       }
+      disposeGhostOutline();
       ghostItem = '';
       ghostOk = null;
       return;
@@ -307,29 +326,66 @@ export function createRoomScene({ el, latest, setError }: RoomSceneBindings) {
       scene.add(ghostGroup);
     }
     const furniture = findRoomFurniture(ghost.item);
-    if (furniture) {
-      const { width, depth } = rotatedFootprint(furniture, ghost.r);
-      ghostGroup.position.set(
-        ghost.x + width / 2 - ROOM_HALF,
-        0.015,
-        ghost.z + depth / 2 - ROOM_HALF,
+    if (!furniture) return;
+    const { width, depth } = rotatedFootprint(furniture, ghost.r);
+    const centerX = ghost.x + width / 2 - ROOM_HALF;
+    const centerZ = ghost.z + depth / 2 - ROOM_HALF;
+    ghostGroup.position.set(centerX, 0.015, centerZ);
+    ghostGroup.rotation.y = (ghost.r * Math.PI) / 2;
+    if (!ghostOutline) {
+      ghostOutline = new T.LineSegments(
+        new T.EdgesGeometry(new T.BoxGeometry(1, 0.05, 1)),
+        new T.LineBasicMaterial({
+          color: GHOST_OK_COLOR,
+          transparent: true,
+          opacity: 0.95,
+          depthTest: false,
+          depthWrite: false,
+        }),
       );
-      ghostGroup.rotation.y = (ghost.r * Math.PI) / 2;
+      ghostOutline.renderOrder = 6;
+      scene.add(ghostOutline);
     }
+    ghostOutline.scale.set(width, 1, depth);
+    ghostOutline.position.set(centerX, 0.07, centerZ);
+    ghostOutline.rotation.y = (ghost.r * Math.PI) / 2;
     if (ghostOk !== ghost.ok) {
       setGhostAppearance(ghostGroup, ghost.ok);
+      (ghostOutline.material as T.LineBasicMaterial).color.set(
+        ghost.ok ? GHOST_OK_COLOR : GHOST_BLOCKED_COLOR,
+      );
       ghostOk = ghost.ok;
     }
   }
 
   function startTile(layout: RoomLayout): RoomTile {
-    const spot = findFreePlacement(layout, 'chair', 0);
-    return spot ?? { x: 4, z: 6 };
+    const rects = blockingRects(layout);
+    let best = findFreePlacement(layout, 'chair', 0) ?? { x: 4, z: 6 };
+    let bestDistance = Infinity;
+    for (let z = 0; z < 8; z++) {
+      for (let x = 0; x < 8; x++) {
+        const world = tileToWorld(x, z);
+        if (collidesCircle(rects, world.x, world.z, AVATAR_RADIUS + 0.08)) continue;
+        const distance = world.x * world.x + (world.z - 3.15) * (world.z - 3.15);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          best = { x, z };
+        }
+      }
+    }
+    return best;
   }
+
+  function createPlayer(avatar: typeof latest.current.avatar) {
+    const next = imageCharacters.create(avatar);
+    next.scale.setScalar(ROOM_AVATAR_SCALE);
+    return next;
+  }
+
   const start = startTile(initialLayout);
   const startWorld = tileToWorld(start.x, start.z);
   const playerPosition = new T.Vector3(startWorld.x, 0, startWorld.z);
-  let player = imageCharacters.create(latest.current.avatar);
+  let player = createPlayer(latest.current.avatar);
   player.position.copy(playerPosition);
   scene.add(player);
   let avatarKey = JSON.stringify(latest.current.avatar);
@@ -405,42 +461,53 @@ export function createRoomScene({ el, latest, setError }: RoomSceneBindings) {
     new T.Vector3(ROOM_HALF, WALL_HEIGHT, ROOM_HALF),
   ];
   function updateCamera() {
-    const topLimit = 1 - (2 * Math.max(58, el.clientHeight * 0.07)) / el.clientHeight;
-    const bottomLimit = 1 - (2 * (el.clientHeight < 520 ? 108 : 122)) / el.clientHeight;
-    const limitX = el.clientWidth < 600 ? 0.94 : 0.84;
+    const width = el.clientWidth || 1;
+    const height = el.clientHeight || 1;
+    const topInset = Math.max(0, Math.min(height - 24, latest.current.topInset ?? 58));
+    const bottomInset = Math.max(
+      0,
+      Math.min(height - topInset - 24, latest.current.bottomInset ?? 12),
+    );
+    const sideInset = width < 600 ? 6 : 14;
+    const minX = sideInset;
+    const maxX = width - sideInset;
+    const minY = topInset + 4;
+    const maxY = height - bottomInset - 4;
     const fits = (distance: number) => {
       camera.position.copy(cameraTarget).addScaledVector(cameraDirection, distance);
       camera.lookAt(cameraTarget);
       camera.updateMatrixWorld();
-      let maxX = 0;
-      let maxY = -Infinity;
-      let minY = Infinity;
+      let minScreenX = Infinity;
+      let maxScreenX = -Infinity;
+      let minScreenY = Infinity;
+      let maxScreenY = -Infinity;
       for (const corner of roomCorners) {
         const projected = corner.clone().project(camera);
-        maxX = Math.max(maxX, Math.abs(projected.x));
-        maxY = Math.max(maxY, projected.y);
-        minY = Math.min(minY, projected.y);
+        const screenX = (projected.x * 0.5 + 0.5) * width;
+        const screenY = (-projected.y * 0.5 + 0.5) * height;
+        minScreenX = Math.min(minScreenX, screenX);
+        maxScreenX = Math.max(maxScreenX, screenX);
+        minScreenY = Math.min(minScreenY, screenY);
+        maxScreenY = Math.max(maxScreenY, screenY);
       }
-      return maxX <= limitX && maxY <= topLimit && -minY <= bottomLimit;
+      return minScreenX >= minX && maxScreenX <= maxX && minScreenY >= minY && maxScreenY <= maxY;
     };
-    let distance: number;
-    if (!fits(30)) distance = 30;
-    else if (fits(5)) distance = 5;
+    let near = 3.5;
+    let far = 40;
+    if (fits(near)) far = near;
+    else if (!fits(far)) near = far;
     else {
-      let near = 5;
-      let far = 30;
-      for (let step = 0; step < 16; step++) {
+      for (let step = 0; step < 18; step++) {
         const middle = (near + far) / 2;
         if (fits(middle)) far = middle;
         else near = middle;
       }
-      distance = far;
     }
-    camera.position.copy(cameraTarget).addScaledVector(cameraDirection, distance);
+    camera.position.copy(cameraTarget).addScaledVector(cameraDirection, far);
     camera.lookAt(cameraTarget);
     camera.updateMatrixWorld();
-    camera.updateProjectionMatrix();
   }
+  let cameraInsetKey = '';
   resize();
 
   function pointerCoordinate(event: PointerEvent) {
@@ -473,13 +540,15 @@ export function createRoomScene({ el, latest, setError }: RoomSceneBindings) {
       if (raycaster.intersectObject(player, true)[0]) props.onAvatarTap();
       return;
     }
-    const groups = [...furnitureGroups.values()].filter((group) => group.visible);
-    const furnitureHit = raycaster.intersectObjects(groups, true)[0];
-    if (furnitureHit) {
-      let object: T.Object3D | null = furnitureHit.object;
-      while (object && !object.userData.furnitureId) object = object.parent;
-      if (object?.userData.furnitureId) props.onSelectItem(object.userData.furnitureId);
-      return;
+    if (!props.ghost) {
+      const groups = [...furnitureGroups.values()].filter((group) => group.visible);
+      const furnitureHit = raycaster.intersectObjects(groups, true)[0];
+      if (furnitureHit) {
+        let object: T.Object3D | null = furnitureHit.object;
+        while (object && !object.userData.furnitureId) object = object.parent;
+        if (object?.userData.furnitureId) props.onSelectItem(object.userData.furnitureId);
+        return;
+      }
     }
     const tile = tileAtPointer(event);
     if (tile) props.onFloorTap(tile.x, tile.z);
@@ -502,6 +571,81 @@ export function createRoomScene({ el, latest, setError }: RoomSceneBindings) {
   el.addEventListener('pointermove', pointerMove);
   el.addEventListener('pointerleave', pointerLeave);
 
+  const fadeBox = new T.Box3();
+  const avatarBox = new T.Box3();
+  const fadePoint = new T.Vector3();
+  const fadeCenter = new T.Vector3();
+
+  type ScreenRect = { minX: number; maxX: number; minY: number; maxY: number };
+  function projectedBox(box: T.Box3, width: number, height: number): ScreenRect {
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+    for (const x of [box.min.x, box.max.x]) {
+      for (const y of [box.min.y, box.max.y]) {
+        for (const z of [box.min.z, box.max.z]) {
+          const projected = fadePoint.set(x, y, z).project(camera);
+          const screenX = (projected.x * 0.5 + 0.5) * width;
+          const screenY = (-projected.y * 0.5 + 0.5) * height;
+          minX = Math.min(minX, screenX);
+          maxX = Math.max(maxX, screenX);
+          minY = Math.min(minY, screenY);
+          maxY = Math.max(maxY, screenY);
+        }
+      }
+    }
+    return { minX, maxX, minY, maxY };
+  }
+
+  function setFurnitureOpacity(group: T.Group, opacity: number) {
+    if (group.userData.fadeOpacity === opacity) return;
+    group.userData.fadeOpacity = opacity;
+    const transparent = opacity < 1;
+    group.traverse((object) => {
+      if (!(object instanceof T.Mesh)) return;
+      const list = Array.isArray(object.material) ? object.material : [object.material];
+      for (const finish of list) {
+        if (finish.transparent !== transparent) {
+          finish.transparent = transparent;
+          finish.needsUpdate = true;
+        }
+        finish.opacity = opacity;
+        finish.depthWrite = !transparent;
+      }
+    });
+  }
+
+  function updateOcclusion() {
+    const width = el.clientWidth || 1;
+    const height = el.clientHeight || 1;
+    avatarBox.min.set(playerPosition.x - 0.5, 0, playerPosition.z - 0.5);
+    avatarBox.max.set(playerPosition.x + 0.5, 2.25, playerPosition.z + 0.5);
+    const avatarRect = projectedBox(avatarBox, width, height);
+    fadeCenter.set(playerPosition.x, 1.05, playerPosition.z);
+    const avatarDistance = camera.position.distanceTo(fadeCenter);
+    for (const [id, group] of furnitureGroups) {
+      const item = group.userData.furnitureItem as string | undefined;
+      if (!group.visible || id === latest.current.movingId || !item || !TALL_FURNITURE.has(item)) {
+        setFurnitureOpacity(group, 1);
+        continue;
+      }
+      fadeBox.setFromObject(group);
+      if (fadeBox.isEmpty() || fadeBox.distanceToPoint(camera.position) >= avatarDistance - 0.1) {
+        setFurnitureOpacity(group, 1);
+        continue;
+      }
+      const furnitureRect = projectedBox(fadeBox, width, height);
+      const overlapX =
+        Math.min(avatarRect.maxX, furnitureRect.maxX) -
+        Math.max(avatarRect.minX, furnitureRect.minX);
+      const overlapY =
+        Math.min(avatarRect.maxY, furnitureRect.maxY) -
+        Math.max(avatarRect.minY, furnitureRect.minY);
+      setFurnitureOpacity(group, overlapX > 2 && overlapY > 2 ? 0.35 : 1);
+    }
+  }
+
   function animate(time: number) {
     if (
       document.hidden ||
@@ -516,6 +660,11 @@ export function createRoomScene({ el, latest, setError }: RoomSceneBindings) {
     const dt = Math.min((time - last) / 1000, 0.04);
     last = time;
     const props = latest.current;
+    const nextCameraInsetKey = `${el.clientWidth}x${el.clientHeight}|${props.topInset ?? ''}|${props.bottomInset ?? ''}`;
+    if (nextCameraInsetKey !== cameraInsetKey) {
+      cameraInsetKey = nextCameraInsetKey;
+      updateCamera();
+    }
 
     const nextLayoutSignature = layoutSignatureOf(props.layout);
     if (nextLayoutSignature !== layoutSignature) {
@@ -523,14 +672,14 @@ export function createRoomScene({ el, latest, setError }: RoomSceneBindings) {
       rebuildFurniture(props.layout);
     }
     for (const [id, group] of furnitureGroups) group.visible = id !== props.movingId;
-    syncSelection(props.layout, props.selectedId, layoutSignature);
+    syncSelection(props.layout, props.movingId ? null : props.selectedId, layoutSignature);
     syncGhost(props.ghost);
 
     const nextAvatarKey = JSON.stringify(props.avatar);
     if (nextAvatarKey !== avatarKey) {
       const previousRotation = player.rotation.y;
       scene.remove(player);
-      player = imageCharacters.create(props.avatar);
+      player = createPlayer(props.avatar);
       player.position.copy(playerPosition);
       player.rotation.y = previousRotation;
       scene.add(player);
@@ -586,6 +735,7 @@ export function createRoomScene({ el, latest, setError }: RoomSceneBindings) {
     imageCharacters.update(player, walking, dt, reducedMotion);
     if (!reducedMotion) player.position.y += Number(player.userData.gaitBob) || 0;
     props.avatarTile.current = worldToTile(playerPosition.x, playerPosition.z);
+    updateOcclusion();
 
     renderer.render(scene, camera);
     if (!readyReported) {
@@ -615,6 +765,7 @@ export function createRoomScene({ el, latest, setError }: RoomSceneBindings) {
     furnitureGroups.forEach((group) => disposeFurniture(group));
     furnitureGroups.clear();
     if (ghostGroup) disposeFurniture(ghostGroup);
+    disposeGhostOutline();
     if (selection) {
       scene.remove(selection);
       selection.geometry.dispose();

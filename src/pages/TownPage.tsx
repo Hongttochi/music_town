@@ -395,7 +395,6 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
                 storageKey={storagePrefix + '-room'}
                 onClose={() => setRoomOpen(false)}
                 onCustomize={() => {
-                  setRoomOpen(false);
                   setAvatarReturn(null);
                   setPanel('avatar');
                 }}
