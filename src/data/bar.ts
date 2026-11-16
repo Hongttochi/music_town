@@ -13,15 +13,15 @@ export const barStage: Stage = {
   color: '#b78a66',
 };
 export const barDrinks = [
-  { id: 'beer', name: '생맥주', detail: '시원한 한 잔', icon: '🍺', color: '#e5b750' },
-  { id: 'wine', name: '레드 와인', detail: '깊고 부드러운 향', icon: '🍷', color: '#963e53' },
-  { id: 'whisky', name: '위스키', detail: '은은한 오크 향', icon: '🥃', color: '#b97935' },
+  { id: 'grape', name: '포도주스', detail: '달콤한 포도 향', icon: '🍇', color: '#824c99' },
+  { id: 'cola', name: '콜라', detail: '시원하고 톡 쏘는 맛', icon: '🥤', color: '#603b29' },
+  { id: 'soda', name: '사이다', detail: '맑고 청량한 탄산', icon: '🥤', color: '#d5eee5' },
   {
-    id: 'mocktail',
-    name: '달빛 에이드',
-    detail: '알코올 없는 산뜻한 한 잔',
-    icon: '🍹',
-    color: '#83bba1',
+    id: 'orange',
+    name: '오렌지 주스',
+    detail: '상큼한 오렌지 향',
+    icon: '🍊',
+    color: '#f3a633',
   },
 ] as const;
 export type BarDrinkId = (typeof barDrinks)[number]['id'];

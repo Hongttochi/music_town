@@ -96,7 +96,7 @@ dialog.town-panel {
   padding: 22px;
   border: 2px solid #a6b780;
   border-radius: var(--town-panel-radius);
-  background: var(--town-paper);
+  background: #fff;
   color: var(--town-ink);
   box-shadow: 0 16px 55px #26351b30;
 }
@@ -926,6 +926,7 @@ body:has(#app.before-entry) .town-panel::backdrop {
   }
 }
 dialog.town-panel[data-panel='settings'] {
+  background: #fff;
   border: 2px solid #a6b780;
   width: 340px;
   max-width: calc(100vw - 32px);
@@ -1049,7 +1050,7 @@ dialog.town-panel.profile-dialog[open] {
   padding: 22px;
   border: 2px solid #a6b780;
   border-radius: var(--town-panel-radius);
-  background: var(--town-paper);
+  background: #fff;
   box-shadow: 0 16px 55px #26351b30;
   overflow: visible;
 }
@@ -1060,7 +1061,7 @@ dialog.town-panel.profile-dialog[open] {
   width: min(560px, 100%);
 }
 .profile-dialog[data-panel='account'] > .profile-sheet {
-  background: #fcfcf8;
+  background: #fff;
   border-color: #a6b780;
 }
 @media (max-height: 500px) {

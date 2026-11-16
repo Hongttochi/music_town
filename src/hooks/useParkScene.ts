@@ -26,6 +26,9 @@ export function useParkScene(props: ParkProps) {
   const npcBubble = useRef<HTMLButtonElement>(null);
   const [nearNpc, setNearNpc] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
+  const officeBubble = useRef<HTMLButtonElement>(null);
+  const [nearOffice, setNearOffice] = useState(false);
+  const [officeOpen, setOfficeOpen] = useState(false);
   const noticeBubble = useRef<HTMLButtonElement>(null);
   const [nearNoticeBoard, setNearNoticeBoard] = useState(false);
   const [noticeBoardOpen, setNoticeBoardOpen] = useState(false);
@@ -44,6 +47,7 @@ export function useParkScene(props: ParkProps) {
       setBarMenuOpen(false);
       setBarNotice(false);
       setGuideOpen(false);
+      setOfficeOpen(false);
       setNoticeBoardOpen(false);
       setCoffeeMenuOpen(false);
     }
@@ -65,6 +69,8 @@ export function useParkScene(props: ParkProps) {
         benchBubble,
         noticeBubble,
         npcBubble,
+        officeBubble,
+        setNearOffice,
         setNearNpc,
         coffeeBubble,
         useBench,
@@ -79,6 +85,10 @@ export function useParkScene(props: ParkProps) {
     [],
   );
   return {
+    officeBubble,
+    nearOffice,
+    officeOpen,
+    setOfficeOpen,
     residentTalk,
     setResidentTalk,
     barNotice,

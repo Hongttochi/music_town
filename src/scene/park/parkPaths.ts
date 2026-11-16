@@ -59,4 +59,22 @@ export const PARK_PATHS: { points: [number, number][]; width: number }[] = [
     ],
     width: 0.75,
   },
+  {
+    points: [
+      [0, -10.5],
+      [1, -14],
+      [5, -14.5],
+      [5, -16.3],
+    ],
+    width: 1.1,
+  },
+  {
+    points: [
+      [-14, -8],
+      [-17, -17],
+      [-12, -22],
+      [-1, -23],
+    ],
+    width: 0.9,
+  },
 ];

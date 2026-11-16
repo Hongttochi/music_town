@@ -1,0 +1,122 @@
+.admin-lab {
+  display: grid;
+  gap: 20px;
+  color: #39462f;
+}
+.admin-lab fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.admin-lab legend {
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.admin-lab-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.admin-lab-seasons {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.admin-lab .town-button.admin-lab-choice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  min-height: 66px;
+  padding: 10px 6px;
+  border: 1px solid #e0e3d6;
+  border-radius: 12px;
+  background: #fafbf5;
+  color: #5e6b50;
+  box-shadow: none;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.admin-lab .town-button.admin-lab-choice--spring {
+  background: #fff2f4;
+  color: #a75d75;
+}
+.admin-lab .town-button.admin-lab-choice--summer {
+  background: #edf5e8;
+  color: #597444;
+}
+.admin-lab .town-button.admin-lab-choice--autumn {
+  background: #faf0e2;
+  color: #9a693b;
+}
+.admin-lab .town-button.admin-lab-choice--winter {
+  background: #eef5f8;
+  color: #597c95;
+}
+.admin-lab .town-button.admin-lab-choice--day {
+  background: #fff8e5;
+  color: #977523;
+}
+.admin-lab .town-button.admin-lab-choice--night {
+  background: #eff0f8;
+  color: #666c94;
+}
+.admin-lab .town-button.admin-lab-choice[aria-pressed='true'] {
+  border-color: #687e4c;
+  box-shadow: inset 0 0 0 1px #687e4c;
+  font-weight: 700;
+}
+.admin-lab .town-button.admin-lab-choice[aria-pressed='true']::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #687e4c;
+}
+.admin-lab .town-button.admin-lab-choice:hover {
+  filter: brightness(0.97);
+}
+.admin-lab .admin-lab-seasons .admin-lab-choice--auto {
+  background: #ffffff;
+  grid-column: 1 / -1;
+  flex-direction: row;
+  min-height: 38px;
+  padding: 8px;
+}
+.admin-lab .admin-lab-seasons .admin-lab-choice--auto img {
+  width: 18px;
+  height: 18px;
+}
+.admin-lab .admin-lab-reset {
+  background: #ffffff;
+  width: 100%;
+  min-height: 40px;
+  border-radius: 10px;
+}
+@media (max-width: 420px) {
+  .admin-lab-options {
+    gap: 6px;
+  }
+  .admin-lab .town-button.admin-lab-choice {
+    font-size: 12px;
+  }
+}
+.admin-lab-preview {
+  position: fixed;
+  left: 50%;
+  top: 55px;
+  transform: translateX(-50%);
+  z-index: 30;
+  max-width: calc(100vw - 24px);
+  padding: 8px 14px;
+  border: 1px solid #bac9a6;
+  border-radius: 20px;
+  background: #f8fbeef2;
+  color: #35452e;
+  font-size: 12px;
+  cursor: pointer;
+}

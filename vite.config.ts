@@ -25,6 +25,9 @@ export default defineConfig(({ mode }) => ({
       name: 'dev-voice-api',
       configureServer(server) {
         server.middlewares.use(
+          createAdminMiddleware({ ...loadEnv(mode, process.cwd(), ''), ...process.env }),
+        );
+        server.middlewares.use(
           createVoiceMiddleware({ ...loadEnv(mode, process.cwd(), ''), ...process.env }),
         );
       },

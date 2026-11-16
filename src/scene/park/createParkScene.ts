@@ -24,8 +24,23 @@ import {
 } from './nightBar';
 import { clampParkPosition } from '../../utils/parkBounds';
 import { createSchool, SCHOOL_SPOT, overlapsSchool } from './school';
+import {
+  createTownOffice,
+  OFFICE_CLERK,
+  OFFICE_SPOT,
+  overlapsOffice,
+  isInsideOffice,
+  isOfficeGround,
+  OFFICE_FLOOR_HEIGHT,
+  OFFICE_SEAT_HEIGHT,
+  OFFICE_TALK_REACH,
+  OFFICE_SEATS,
+  blocksOfficeStep,
+  recoverOfficeDeskPosition,
+} from './townOffice';
 import { PARK_PATHS } from './parkPaths';
 import { remoteMovementStep } from '../../utils/remoteMovement';
+import { smoothVelocity, smoothVelocityDelta, WALK_SPEED } from '../avatar/gait';
 import type { useSoundEffects } from '../../hooks/useSoundEffects';
 import { createCampfire, CAMPFIRE_SPOT, CAMPFIRE_RADIUS } from './campfire';
 import { createNoticeBoard, NOTICE_BOARD_SPOT, NOTICE_BOARD_REACH } from './noticeBoard';
@@ -44,6 +59,7 @@ import { createImageCharacters } from '../avatar/imageCharacter';
 import { loadAvatarLayers } from '../avatar/modularAvatar';
 import { npcAppearance } from '../../data/avatarParts';
 import { createVillageProps } from './villageProps';
+import { treeSeason } from './treeSeason';
 import { createGardens } from './gardens';
 import {
   CHARACTER_ASSET,
@@ -68,6 +84,8 @@ type ParkSceneBindings = {
   sound: React.MutableRefObject<ReturnType<typeof useSoundEffects>>;
   benchBubble: React.RefObject<HTMLButtonElement | null>;
   npcBubble: React.RefObject<HTMLButtonElement | null>;
+  officeBubble: React.RefObject<HTMLButtonElement | null>;
+  setNearOffice: (value: boolean) => void;
   setNearNpc: (value: boolean) => void;
   noticeBubble: React.RefObject<HTMLButtonElement | null>;
   coffeeBubble: React.RefObject<HTMLButtonElement | null>;
@@ -87,6 +105,8 @@ export function createParkScene({
   benchBubble,
   noticeBubble,
   npcBubble,
+  officeBubble,
+  setNearOffice,
   setNearNpc,
   coffeeBubble,
   useBench,
@@ -198,7 +218,9 @@ export function createParkScene({
   ) {
     return mesh(new T.CylinderGeometry(r1, r2, height, 24), color, x, y, z, parent);
   }
-  const scenery = createVillageProps(scene);
+  const season = latest.current.season ?? treeSeason();
+  const frozenWater = season === 'winter';
+  const scenery = createVillageProps(scene, season);
   const ground = box(0, -0.35, 0, 100, 0.6, 100, '#ffffff');
   ground.castShadow = false;
   ground.material.map = scenery.ground;
@@ -238,7 +260,7 @@ export function createParkScene({
     m.receiveShadow = true;
     scene.add(m);
   }
-  PARK_PATHS.slice(0, 2).forEach(({ points, width }) =>
+  [...PARK_PATHS.slice(0, 2), ...PARK_PATHS.slice(6)].forEach(({ points, width }) =>
     path(
       points.map(([x, z]) => new T.Vector3(x, 0, z)),
       width,
@@ -246,6 +268,10 @@ export function createParkScene({
   );
   const obstacles: { x: number; z: number; r: number }[] = [];
   function tree(x: number, z: number, s = 1) {
+    // The former north border is now an open route into the expanded park.
+    if (z < -17) z -= 6;
+    if (Math.hypot(x - NOTICE_BOARD_SPOT.x, z - NOTICE_BOARD_SPOT.z) < 2.8 * s) return;
+    if (isOfficeGround({ x, z }, 2.5 * s)) return;
     if (Math.abs(x - BAR_SPOT.x) < 9 && Math.abs(z - BAR_SPOT.z) < 9) return;
     if (Math.abs(x - SCHOOL_SPOT.x) < 4.5 && Math.abs(z - SCHOOL_SPOT.z) < 5) return;
     if (walkways.some((p) => Math.hypot(x - p.x, z - p.z) < p.width + s)) return;
@@ -282,22 +308,32 @@ export function createParkScene({
   waterCanvas.height = 1024;
   const waterCtx = waterCanvas.getContext('2d')!;
   const depth = waterCtx.createLinearGradient(0, 0, 512, 0);
-  depth.addColorStop(0, '#92cfc5');
-  depth.addColorStop(0.16, '#60b9bd');
-  depth.addColorStop(0.48, '#368fa8');
-  depth.addColorStop(0.8, '#59b4bb');
-  depth.addColorStop(1, '#a2d5c9');
+  depth.addColorStop(0, frozenWater ? '#eff8fa' : '#92cfc5');
+  depth.addColorStop(0.16, frozenWater ? '#d4eaf0' : '#60b9bd');
+  depth.addColorStop(0.48, frozenWater ? '#b6d6e3' : '#368fa8');
+  depth.addColorStop(0.8, frozenWater ? '#d8edf3' : '#59b4bb');
+  depth.addColorStop(1, frozenWater ? '#f2fafb' : '#a2d5c9');
   waterCtx.fillStyle = depth;
   waterCtx.fillRect(0, 0, 512, 1024);
   for (let i = 0; i < 240; i++) {
     const x = random() * 512,
       y = random() * 1024;
     const width = 14 + random() * 75;
-    waterCtx.strokeStyle = i % 3 === 0 ? 'rgba(224,251,230,0.28)' : 'rgba(24,105,137,0.13)';
+    waterCtx.strokeStyle = frozenWater
+      ? 'rgba(255,255,255,0.55)'
+      : i % 3 === 0
+        ? 'rgba(224,251,230,0.28)'
+        : 'rgba(24,105,137,0.13)';
     waterCtx.lineWidth = 1 + random() * 3;
     waterCtx.beginPath();
     waterCtx.moveTo(x, y);
-    waterCtx.quadraticCurveTo(x + width / 2, y - 5, x + width, y);
+    if (frozenWater) {
+      waterCtx.lineTo(x + width * 0.4, y + width * 0.3);
+      waterCtx.lineTo(x + width * 0.7, y + width * 0.15);
+      waterCtx.lineTo(x + width, y + width * 0.5);
+    } else {
+      waterCtx.quadraticCurveTo(x + width / 2, y - 5, x + width, y);
+    }
     waterCtx.stroke();
   }
   const waterTexture = new T.CanvasTexture(waterCanvas);
@@ -306,7 +342,7 @@ export function createParkScene({
   waterTexture.repeat.set(1, 8);
   water.material.color.set('#ffffff');
   water.material.map = waterTexture;
-  water.material.roughness = 0.38;
+  water.material.roughness = frozenWater ? 0.18 : 0.38;
   water.castShadow = false;
   // Raised irregular boulders catch light on top and cast shadows onto the shallows.
   function riverStone(x: number, z: number) {
@@ -350,7 +386,7 @@ export function createParkScene({
   let barApproachHandled = false;
   let barNoticeShown = false;
   let barSipStarted: number | null = null;
-  let orderedBarDrink: BarDrinkId = 'beer';
+  let orderedBarDrink: BarDrinkId = 'grape';
   dismissBarNotice.current = () => {
     barTalkUntil = 0;
     barNoticeShown = false;
@@ -391,6 +427,13 @@ export function createParkScene({
     p.onMove({ ...p.position.current });
   };
   const school = createSchool(scene);
+  const office = createTownOffice(scene);
+  const officeClerk = createBarNpc('/art/office-sol.png', 'office-clerk-sol');
+  officeClerk.group.position.copy(OFFICE_CLERK);
+  scene.add(officeClerk.group);
+  const officeSprite = officeClerk.group.children[0] as T.Sprite;
+  obstacles.push({ x: OFFICE_CLERK.x, z: OFFICE_CLERK.z, r: 0.45 });
+  let officeShown = false;
   obstacles.push({ x: SCHOOL_SPOT.x, z: SCHOOL_SPOT.z, r: 3.2 });
   const npcObstacle = { x: school.npcPosition.x, z: school.npcPosition.z, r: 0.45 };
   obstacles.push(npcObstacle);
@@ -461,7 +504,15 @@ export function createParkScene({
     [-8, 12],
   ].forEach(([x, z]) => flowerBed(x, z));
 
-  for (let x = -20; x < 14; x += 3.4) scenery.prop(5, x, -17, 1.2);
+  // Move the old dividing fence to the expanded north boundary.
+  for (let x = -20; x < 14; x += 3.4) {
+    const z = -25.5;
+    if (
+      !isOfficeGround({ x, z }, 1.6) &&
+      !walkways.some((p) => Math.hypot(x - p.x, z - p.z) < p.width + 1.8)
+    )
+      scenery.prop(5, x, z, 1.2);
+  }
   // A small wooden footbridge makes the river part of the walk.
   for (let x = BRIDGE.left; x < BRIDGE.right; x += 0.45)
     box(x, BRIDGE.surfaceHeight - 0.1, BRIDGE.centerZ, 0.42, 0.2, BRIDGE.width, '#bd9767');
@@ -478,7 +529,7 @@ export function createParkScene({
     box(20, 1.12, z, 10.5, 0.09, 0.09, '#c6a476').material = bridgeRailMaterial;
   }
 
-  PARK_PATHS.slice(3).forEach(({ points, width }) =>
+  PARK_PATHS.slice(3, 6).forEach(({ points, width }) =>
     path(
       points.map(([x, z]) => new T.Vector3(x, 0, z)),
       width,
@@ -515,6 +566,7 @@ export function createParkScene({
       !overlapsBar({ x, z }, radius + 1, false) &&
       !overlapsSchool({ x, z }, radius + 0.5) &&
       Math.hypot(x - COFFEE_BUILDING.x, z - COFFEE_BUILDING.z) > radius + 4,
+    frozenWater,
   );
   if (latest.current.fountainPosition)
     latest.current.fountainPosition.current = gardens.fountain ?? null;
@@ -591,13 +643,14 @@ export function createParkScene({
     }
   }
   benches.push(...BAR_SEATS);
+  benches.push(...OFFICE_SEATS);
   let nearbyBench: T.Vector3 | null = null;
   let seatedBench: T.Vector3 | null = null;
   let seatZoom = 0;
   let standingPosition: Position | null = null;
   let shownBenchAction: 'sit' | null = null;
   const seatPosition = (bench: T.Vector3) =>
-    BAR_SEATS.includes(bench) || riversideSeats.has(bench)
+    OFFICE_SEATS.includes(bench) || BAR_SEATS.includes(bench) || riversideSeats.has(bench)
       ? bench.clone()
       : new T.Vector3(bench.x - 0.2, 0, bench.z + 0.65);
   const standUp = (restorePosition: boolean) => {
@@ -645,17 +698,19 @@ export function createParkScene({
     }
   };
   const surfaceHeight = (position: T.Vector3, footprint = 0) =>
-    isOnBridge(position)
-      ? BRIDGE.surfaceHeight
-      : latest.current.liveStages.some((stage) => {
-            const center = world(stage);
-            return (
-              Math.hypot(position.x - center.x, position.z - center.z) <=
-              (stage.id === BAR_STAGE_ID ? 1.7 : STAGE_RADIUS) + footprint
-            );
-          })
-        ? STAGE_SURFACE_HEIGHT
-        : 0;
+    isInsideOffice(position)
+      ? OFFICE_FLOOR_HEIGHT
+      : isOnBridge(position)
+        ? BRIDGE.surfaceHeight
+        : latest.current.liveStages.some((stage) => {
+              const center = world(stage);
+              return (
+                Math.hypot(position.x - center.x, position.z - center.z) <=
+                (stage.id === BAR_STAGE_ID ? 1.7 : STAGE_RADIUS) + footprint
+              );
+            })
+          ? STAGE_SURFACE_HEIGHT
+          : 0;
   // Shared soft glow for lantern halos and the pools of light beneath them.
   const glowCanvas = document.createElement('canvas');
   glowCanvas.width = glowCanvas.height = 128;
@@ -870,35 +925,38 @@ export function createParkScene({
       !benchFootprints.some((bench) => overlapsBench(point, bench)) &&
       !overlapsCoffeeMachine(point, PLAYER_RADIUS) &&
       !overlapsSchool(point, PLAYER_RADIUS) &&
+      !overlapsOffice(point, PLAYER_RADIUS) &&
       !overlapsBar(point, PLAYER_RADIUS, night) &&
       !obstacles.some((o) => Math.hypot(point.x - o.x, point.z - o.z) < o.r + PLAYER_RADIUS) &&
       !stageCenters.some((s) => Math.hypot(point.x - s.x, point.z - s.z) < STAGE_RADIUS + 1),
-    seats: benches.map((bench) => {
-      const barSeat = BAR_SEATS.includes(bench);
-      // Billboard residents anchor their hips directly on the seat, not the player foot marker.
-      const point = barSeat
-        ? bench.clone()
-        : riversideSeats.has(bench)
-          ? bench.clone().add(new T.Vector3(0, 0, riversideSeats.get(bench) === 0 ? -0.36 : 0.36))
-          : new T.Vector3(bench.x, 0, bench.z + 0.12);
-      const facing =
-        riversideSeats.get(bench) ??
-        (BAR_COUNTER_SEATS.includes(bench)
-          ? Math.PI
-          : BAR_LOUNGE_SEATS.includes(bench)
-            ? bench.x < BAR_SPOT.x
-              ? -Math.PI / 2
-              : Math.PI / 2
-            : 0);
-      return {
-        point,
-        facing,
-        bar: barSeat,
-        approach: barSeat
-          ? barWalkablePosition(point, PLAYER_RADIUS)
-          : point.clone().add(new T.Vector3(Math.sin(facing) * 1.15, 0, Math.cos(facing) * 1.15)),
-      };
-    }),
+    seats: benches
+      .filter((bench) => !OFFICE_SEATS.includes(bench))
+      .map((bench) => {
+        const barSeat = BAR_SEATS.includes(bench);
+        // Billboard residents anchor their hips directly on the seat, not the player foot marker.
+        const point = barSeat
+          ? bench.clone()
+          : riversideSeats.has(bench)
+            ? bench.clone().add(new T.Vector3(0, 0, riversideSeats.get(bench) === 0 ? -0.36 : 0.36))
+            : new T.Vector3(bench.x, 0, bench.z + 0.12);
+        const facing =
+          riversideSeats.get(bench) ??
+          (BAR_COUNTER_SEATS.includes(bench)
+            ? Math.PI
+            : BAR_LOUNGE_SEATS.includes(bench)
+              ? bench.x < BAR_SPOT.x
+                ? -Math.PI / 2
+                : Math.PI / 2
+              : 0);
+        return {
+          point,
+          facing,
+          bar: barSeat,
+          approach: barSeat
+            ? barWalkablePosition(point, PLAYER_RADIUS)
+            : point.clone().add(new T.Vector3(Math.sin(facing) * 1.15, 0, Math.cos(facing) * 1.15)),
+        };
+      }),
   });
   const click = (e: MouseEvent) => {
     if (document.querySelector('dialog[open]')) return;
@@ -941,6 +999,7 @@ export function createParkScene({
   let frame = 0,
     last = 0,
     lastMove = 0;
+  let playerVelocity = { x: 0, z: 0 };
   const focus = world(latest.current.position.current),
     target = new T.Vector3(),
     cameraFocusGoal = new T.Vector3();
@@ -969,7 +1028,11 @@ export function createParkScene({
   entranceRing.position.y = 0.04;
   scene.add(entranceRing);
   function animate(time: number) {
-    if (document.hidden || document.documentElement.dataset.deviceBlocked === 'true') {
+    if (
+      document.hidden ||
+      document.documentElement.dataset.deviceBlocked === 'true' ||
+      latest.current.paused
+    ) {
       clear();
       last = time;
       frame = requestAnimationFrame(animate);
@@ -977,7 +1040,7 @@ export function createParkScene({
     }
     const dt = Math.min((time - last) / 1000, 0.04);
     last = time;
-    waterTexture.offset.y = (time * 0.000008) % 1;
+    if (!frozenWater) waterTexture.offset.y = (time * 0.000008) % 1;
     gardens.update(time);
     const p = latest.current,
       key = JSON.stringify(p.avatar);
@@ -1033,32 +1096,36 @@ export function createParkScene({
         y: visitor.group.position.z * 25 + 450,
       });
       visitor.group.userData.walking = movement.walking && !performing;
+      visitor.group.userData.walkDistance =
+        movement.walking && !performing ? distance * movement.fraction : 0;
       const arrived = distance * (1 - movement.fraction) < 0.02;
       visitor.group.userData.seated =
         arrived &&
         !performing &&
         benches.some((bench) => destination.distanceTo(seatPosition(bench)) < 0.1);
       if (visitor.group.userData.seated) {
+        const officeSeat = OFFICE_SEATS.some(
+          (seat) => destination.distanceTo(seatPosition(seat)) < 0.1,
+        );
         const lounge = BAR_LOUNGE_SEATS.find((seat) => destination.distanceTo(seat) < 0.1);
         const riverside = [...riversideSeats.keys()].find(
           (seat) => destination.distanceTo(seat) < 0.1,
         );
-        visitor.group.userData.seatHeight = BAR_SEATS.some(
-          (seat) => destination.distanceTo(seat) < 0.1,
-        )
-          ? 1.03
-          : 0.68;
-        visitor.group.rotation.y = BAR_COUNTER_SEATS.some(
-          (seat) => destination.distanceTo(seat) < 0.1,
-        )
-          ? Math.PI
-          : riverside
-            ? riversideSeats.get(riverside)!
-            : lounge
-              ? lounge.x < BAR_SPOT.x
-                ? -Math.PI / 2
-                : Math.PI / 2
-              : 0;
+        visitor.group.userData.seatHeight = officeSeat
+          ? OFFICE_SEAT_HEIGHT
+          : BAR_SEATS.some((seat) => destination.distanceTo(seat) < 0.1)
+            ? 1.03
+            : 0.68;
+        visitor.group.rotation.y =
+          officeSeat || BAR_COUNTER_SEATS.some((seat) => destination.distanceTo(seat) < 0.1)
+            ? Math.PI
+            : riverside
+              ? riversideSeats.get(riverside)!
+              : lounge
+                ? lounge.x < BAR_SPOT.x
+                  ? -Math.PI / 2
+                  : Math.PI / 2
+                : 0;
       }
     }
     if (key !== avatarKey) {
@@ -1087,6 +1154,7 @@ export function createParkScene({
     ) {
       dx = 0;
       dz = 0;
+      playerVelocity = { x: 0, z: 0 };
       keys.clear();
     }
     if (
@@ -1231,6 +1299,20 @@ export function createParkScene({
       !seatedBench &&
       coffeePhase === 'idle' &&
       world(p.position.current).distanceTo(school.npcPosition) < 3;
+    const insideOffice = isInsideOffice(world(p.position.current));
+    office.update(time, p.night ?? isParkNight(), reducedMotion, insideOffice);
+    officeClerk.group.visible = insideOffice;
+    const nearOffice =
+      p.performing === null &&
+      !seatedBench &&
+      coffeePhase === 'idle' &&
+      !p.timeTransition &&
+      insideOffice &&
+      world(p.position.current).distanceTo(OFFICE_CLERK) < OFFICE_TALK_REACH;
+    if (nearOffice !== officeShown) {
+      officeShown = nearOffice;
+      setNearOffice(nearOffice);
+    }
     if (nearNpc !== npcShown) {
       npcShown = nearNpc;
       setNearNpc(nearNpc);
@@ -1271,6 +1353,14 @@ export function createParkScene({
     // Recover older saved positions and teleports into furniture, but never move a sitter
     // or performer off their intentional seat/stage position.
     const currentPoint = world(p.position.current);
+    if (!seatedBench && p.performing === null) {
+      const safe = recoverOfficeDeskPosition(currentPoint, PLAYER_RADIUS);
+      if (safe !== currentPoint) {
+        p.position.current = { x: safe.x * 25 + 700, y: safe.z * 25 + 450 };
+        currentPoint.set(safe.x, 0, safe.z);
+        p.onMove({ ...p.position.current });
+      }
+    }
     if (
       barNight &&
       !seatedBench &&
@@ -1287,16 +1377,20 @@ export function createParkScene({
       dx /= len;
       dz /= len;
     }
+    const targetVelocity = { x: dx * WALK_SPEED, z: dz * WALK_SPEED };
+    const movementDelta = smoothVelocityDelta(playerVelocity, targetVelocity, dt);
+    playerVelocity = smoothVelocity(playerVelocity, targetVelocity, dt);
     const movementOrigin = { ...p.position.current };
     const next = clampParkPosition({
-        x: p.position.current.x + dx * 105 * dt,
-        y: p.position.current.y + dz * 105 * dt,
+        x: p.position.current.x + movementDelta.x * 25,
+        y: p.position.current.y + movementDelta.z * 25,
       }),
       point = world(next);
     if (
       canCrossRiver(world(p.position.current), point) &&
       !overlapsCoffeeMachine(point, PLAYER_RADIUS) &&
       !overlapsSchool(point, PLAYER_RADIUS) &&
+      !blocksOfficeStep(currentPoint, point, PLAYER_RADIUS) &&
       !overlapsBar(point, PLAYER_RADIUS, barNight) &&
       !benchFootprints.some((bench) =>
         blocksBenchStep(world(p.position.current), point, bench, PLAYER_RADIUS),
@@ -1309,7 +1403,11 @@ export function createParkScene({
       })
     )
       p.position.current = next;
-    if ((dx || dz) && time - lastMove > 70) {
+    const movedMap = Math.hypot(
+      p.position.current.x - movementOrigin.x,
+      p.position.current.y - movementOrigin.y,
+    );
+    if (movedMap > 0.001 && time - lastMove > 70) {
       p.onMove({ ...p.position.current });
       lastMove = time;
     }
@@ -1320,6 +1418,7 @@ export function createParkScene({
               (bench) =>
                 world(p.position.current).distanceTo(bench) < 2.5 &&
                 (!BAR_SEATS.includes(bench) || (barNight && insideBar)) &&
+                (!OFFICE_SEATS.includes(bench) || insideOffice) &&
                 !p.participants.some(
                   (person) => world(person).distanceTo(seatPosition(bench)) < 0.5,
                 ),
@@ -1341,7 +1440,12 @@ export function createParkScene({
       setBenchAction(action);
     }
     player.userData.seated = seatedBench !== null;
-    player.userData.seatHeight = seatedBench && BAR_SEATS.includes(seatedBench) ? 1.03 : 0.68;
+    player.userData.seatHeight =
+      seatedBench && OFFICE_SEATS.includes(seatedBench)
+        ? OFFICE_SEAT_HEIGHT
+        : seatedBench && BAR_SEATS.includes(seatedBench)
+          ? 1.03
+          : 0.68;
     player.position.copy(world(p.position.current));
     player.position.y = surfaceHeight(player.position);
     player.userData.inFrontOfBarCounter =
@@ -1353,7 +1457,11 @@ export function createParkScene({
     bridgeRailMaterial.opacity +=
       ((crossingBridge ? 0.25 : 1) - bridgeRailMaterial.opacity) * (1 - Math.exp(-dt * 10));
     // Stage performers face the audience, regardless of their approach direction.
-    if (seatedBench && BAR_COUNTER_SEATS.includes(seatedBench)) player.rotation.y = Math.PI;
+    if (
+      seatedBench &&
+      (BAR_COUNTER_SEATS.includes(seatedBench) || OFFICE_SEATS.includes(seatedBench))
+    )
+      player.rotation.y = Math.PI;
     else if (seatedBench && riversideSeats.has(seatedBench))
       player.rotation.y = riversideSeats.get(seatedBench)!;
     else if (seatedBench && BAR_LOUNGE_SEATS.includes(seatedBench))
@@ -1361,20 +1469,13 @@ export function createParkScene({
     else if (p.performing !== null || seatedBench || coffeePhase === 'drinking')
       player.rotation.y = 0;
     else if (dx || dz) player.rotation.y = Math.atan2(dx, dz);
-    const walking =
-      !!(dx || dz) &&
-      !seatedBench &&
-      Math.hypot(p.position.current.x - movementOrigin.x, p.position.current.y - movementOrigin.y) >
-        0.001;
+    const movedWorld = movedMap / 25;
+    player.userData.walkDistance = movedWorld;
+    const walking = !seatedBench && movedWorld > 0.0001;
     footsteps.update(walking, isInsideBar(world(p.position.current)));
     (player.userData.limbs as T.Object3D[]).forEach((l, i) => {
       l.rotation.x = walking ? Math.sin(time / 130 + (i < 2 ? 0 : Math.PI)) * 0.42 : 0;
     });
-    player.position.y += seatedBench
-      ? 0
-      : walking
-        ? Math.abs(Math.sin(time / 130)) * 0.055
-        : Math.sin(time / 700) * 0.012;
     if (entranceReady && entranceStart === null) entranceStart = time;
     const arrival = reducedMotion
       ? 1
@@ -1418,6 +1519,10 @@ export function createParkScene({
     if (coffeePhase !== 'idle') {
       cameraFocusGoal.copy(COFFEE_SPOT).lerp(player.position, 0.4);
       stageZoom = 2.1;
+    }
+    if (insideOffice) {
+      cameraFocusGoal.copy(OFFICE_SPOT);
+      stageZoom = 1.6;
     }
     if (insideBar) {
       cameraFocusGoal.copy(BAR_SPOT);
@@ -1501,6 +1606,21 @@ export function createParkScene({
         Math.abs(anchor.y) < 0.9 &&
         Math.abs(anchor.z) < 1 &&
         !barTalkUntil &&
+        !document.querySelector('dialog[open]')
+          ? 'visible'
+          : 'hidden';
+    }
+    if (officeBubble.current) {
+      const anchor = spriteHeadAnchor(officeSprite, camera);
+      anchor.project(camera);
+      officeBubble.current.style.left = `${(anchor.x * 0.5 + 0.5) * el.clientWidth}px`;
+      officeBubble.current.style.top = `${(-anchor.y * 0.5 + 0.5) * el.clientHeight}px`;
+      officeBubble.current.style.visibility =
+        nearOffice &&
+        officeSprite.visible &&
+        Math.abs(anchor.x) < 0.95 &&
+        Math.abs(anchor.y) < 0.9 &&
+        Math.abs(anchor.z) < 1 &&
         !document.querySelector('dialog[open]')
           ? 'visible'
           : 'hidden';
@@ -1629,7 +1749,18 @@ export function createParkScene({
       asset.object.rotation.y = player.rotation.y + CHARACTER_ASSET.facingRadians;
       asset.update(dt, walking);
     }
-    imageCharacters.update(player, walking, time);
+    imageCharacters.update(player, walking, dt, reducedMotion);
+    if (!seatedBench && !reducedMotion) {
+      const weight = Number(player.userData.gaitBobWeight) || 0;
+      player.position.y +=
+        (Number(player.userData.gaitBob) || 0) + Math.sin(time / 700) * 0.012 * (1 - weight);
+    }
+    if (!reducedMotion) {
+      for (const visitor of visitors.values()) {
+        if (visitor.group.userData.seated) continue;
+        visitor.group.position.y += Number(visitor.group.userData.gaitBob) || 0;
+      }
+    }
     residents.update(time, dt, {
       talkingResidentId: p.focusResident,
       interactionResidentId,
@@ -1676,6 +1807,8 @@ export function createParkScene({
     useBarDrink.current = () => {};
     dismissBarNotice.current = () => {};
     school.dispose();
+    officeClerk.dispose();
+    office.dispose();
     coffeeShop.dispose();
     noticeBoard.dispose();
     campfire.dispose();

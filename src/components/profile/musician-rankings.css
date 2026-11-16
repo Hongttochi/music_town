@@ -126,7 +126,7 @@ dialog.town-panel[data-panel='rankings'] .ranking-periods > .town-button[aria-pr
   margin-top: 8px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: #f2ebd8;
+  background: #ffffff;
   color: #99784b;
   font-size: 10px;
   max-height: 90px;
@@ -265,7 +265,7 @@ dialog.town-panel[data-panel='rankings'] .ranking-periods > .town-button[aria-pr
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-  scrollbar-color: #b5bea1 transparent;
+  scrollbar-color: #a3a3a3 transparent;
 }
 .musician-rankings .ranking-list {
   flex: none;

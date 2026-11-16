@@ -1,4 +1,3 @@
-import { UserRound } from 'lucide-react';
 import type { Avatar } from '../../data/model';
 import { ModularPortrait } from '../avatar/ModularPortrait';
 import './profile-icon.css';
@@ -45,7 +44,7 @@ export function ProfileIcon({
         style={{ width: size + 10, height: size + 10 }}
         aria-hidden="true"
       >
-        <UserRound size={size + 6} strokeWidth={1.7} />
+        <img src="/icons/profile.png" width={size + 6} height={size + 6} alt="" />
       </span>
     );
   }
