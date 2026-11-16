@@ -235,6 +235,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
       (item) => item.stage_id === BAR_STAGE_ID && Date.parse(item.ends_at) > now.getTime(),
     ),
     fountainPosition,
+    season === 'winter',
   );
   const stages = account.demo ? demoStages : town.stages;
   const populations = account.demo ? demoPopulations : town.state.channels.map((c) => c.count);
@@ -668,6 +669,7 @@ export function TownPage({ account, initial }: { account: Account; initial: Save
               selectedMusician={selectedMusician}
               performerAvatar={selectedOwnPerformance ? avatar : selectedMusician?.avatar}
               own={selectedOwnPerformance}
+              isAdmin={selectedOwnPerformance && account.isAdmin}
               muted={muted.includes(selected.id)}
               onProfile={() => {
                 if (selectedMusician) {

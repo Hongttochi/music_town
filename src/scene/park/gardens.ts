@@ -7,6 +7,7 @@ export function createGardens(
   scene: T.Scene,
   _walkways: (Spot & { width: number })[],
   clear: (x: number, z: number, radius: number) => boolean,
+  frozenWater = false,
 ) {
   const group = new T.Group();
   group.name = 'park-gardens';
@@ -25,7 +26,10 @@ export function createGardens(
   };
   const stone = material('#d8cbb8');
   const rim = material('#eee2cf');
-  const water = material('#80becb', { roughness: 0.28, metalness: 0.12 });
+  const water = material(frozenWater ? '#dceff5' : '#80becb', {
+    roughness: frozenWater ? 0.18 : 0.28,
+    metalness: 0.12,
+  });
   const stream = material('#b8e2e8', {
     transparent: true,
     opacity: 0.7,
@@ -62,7 +66,7 @@ export function createGardens(
     part(new T.CylinderGeometry(0.53, 0.53, 0.025, 24), water, x, 1.47, z);
     part(new T.SphereGeometry(0.12, 12, 8), rim, x, 1.6, z);
     const dropShape = geometry(new T.SphereGeometry(0.045, 6, 4));
-    for (let jet = 0; jet < 6; jet++) {
+    for (let jet = 0; jet < (frozenWater ? 0 : 6); jet++) {
       const angle = (jet * Math.PI) / 3;
       const curve = new T.QuadraticBezierCurve3(
         new T.Vector3(x, 1.65, z),
@@ -78,7 +82,7 @@ export function createGardens(
         drops.push(drop);
       }
     }
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < (frozenWater ? 0 : 3); i++) {
       const ring = part(new T.TorusGeometry(1, 0.012, 4, 32), stream, x, 0.568 + i * 0.002, z);
       ring.rotation.x = Math.PI / 2;
       ripples.push(ring);

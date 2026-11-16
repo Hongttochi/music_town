@@ -1,5 +1,22 @@
 export type TreeSeason = 'spring' | 'summer' | 'autumn' | 'winter';
 
+/** Keep the painted lawn texture while replacing its green palette. */
+export function seasonalGround(pixels: Uint8ClampedArray, season: TreeSeason) {
+  if (season === 'summer') return;
+  for (let i = 0; i < pixels.length; i += 4) {
+    const light = (pixels[i] * 0.3 + pixels[i + 1] * 0.6 + pixels[i + 2] * 0.1) / 255;
+    const color =
+      season === 'spring'
+        ? [211 + light * 44, 169 + light * 67, 182 + light * 63]
+        : season === 'autumn'
+          ? [117 + light * 91, 83 + light * 79, 51 + light * 70]
+          : [217 + light * 38, 225 + light * 30, 231 + light * 24];
+    pixels[i] = color[0];
+    pixels[i + 1] = color[1];
+    pixels[i + 2] = color[2];
+  }
+}
+
 export function treeSeason(date = new Date()): TreeSeason {
   const month = new Date(date.getTime() + 9 * 60 * 60 * 1000).getUTCMonth() + 1;
   if (month >= 3 && month <= 5) return 'spring';

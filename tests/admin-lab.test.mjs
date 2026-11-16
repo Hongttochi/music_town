@@ -31,8 +31,8 @@ const { lab } = mod.exports;
 
 test('lab identifies selected options and allows returning from a preview', () => {
   const preview = lab('night', 'winter');
-  assert.match(preview, /aria-pressed="true"[^>]*>밤</);
-  assert.match(preview, /aria-pressed="true"[^>]*>겨울</);
+  assert.match(preview, /aria-label="밤" aria-pressed="true"/);
+  assert.match(preview, /aria-label="겨울" aria-pressed="true"/);
   assert.doesNotMatch(preview, /disabled/);
   const automatic = lab('auto', 'auto');
   assert.match(automatic, /disabled=""/);
