@@ -3,17 +3,27 @@ import * as T from 'three';
 export const OFFICE_SPOT = new T.Vector3(5, 0, -20);
 export const OFFICE_CLERK = new T.Vector3(5, 0, -22.3);
 export const OFFICE_FLOOR_HEIGHT = 0.065;
+// Lift the billboard hip anchor slightly above the stool so the seat does not hide the pelvis.
+export const OFFICE_SEAT_HEIGHT = 0.76 - OFFICE_FLOOR_HEIGHT;
+export const OFFICE_TALK_REACH = 4.4;
+export const OFFICE_SEATS = [-2.5, 2.5].map(
+  (x) => new T.Vector3(OFFICE_SPOT.x + x, 0, OFFICE_SPOT.z + 0.5),
+);
+// Billboards lean toward the counter in world space: reserve room for the head, too.
+const OFFICE_DESK_FRONT = 0.9;
 type Point = { x: number; z: number };
 function overlapsOfficeDesk(point: Point, radius: number) {
   const z = point.z - OFFICE_SPOT.z;
   // Include the countertop overhang and the camera-facing sprite's front clearance.
   return (
-    Math.abs(point.x - OFFICE_SPOT.x) < 3.7 + radius && z > -1.75 - radius && z < -0.2 + radius
+    Math.abs(point.x - OFFICE_SPOT.x) < 3.7 + radius &&
+    z > -1.75 - radius &&
+    z < OFFICE_DESK_FRONT + radius
   );
 }
 export function recoverOfficeDeskPosition(point: Point, radius: number): Point {
   return overlapsOfficeDesk(point, radius)
-    ? { x: point.x, z: OFFICE_SPOT.z - 0.2 + radius + 0.02 }
+    ? { x: point.x, z: OFFICE_SPOT.z + OFFICE_DESK_FRONT + radius + 0.02 }
     : point;
 }
 export function blocksOfficeStep(from: Point, to: Point, radius: number) {
@@ -62,8 +72,6 @@ export function createTownOffice(scene: T.Scene) {
   scene.add(group);
   const materials = new Map<string, T.MeshStandardMaterial>();
   const geometries: T.BufferGeometry[] = [];
-  const textures: T.Texture[] = [];
-  const extraMaterials: T.Material[] = [];
   const facade = new T.Group();
   facade.name = 'office-facade';
   group.add(facade);
@@ -153,27 +161,6 @@ export function createTownOffice(scene: T.Scene) {
   clock.rotation.x = Math.PI / 2;
   box(0, 3.1, -3.72, 0.025, 0.2, 0.03, '#614f42', interior);
   box(0.09, 3, -3.71, 0.18, 0.025, 0.03, '#614f42', interior);
-  const sign = document.createElement('canvas');
-  sign.width = 512;
-  sign.height = 128;
-  const ctx = sign.getContext('2d')!;
-  ctx.fillStyle = '#fff1d1';
-  ctx.fillRect(0, 0, 512, 128);
-  ctx.fillStyle = '#435b48';
-  ctx.font = 'bold 58px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('동사무소', 256, 64);
-  const texture = new T.CanvasTexture(sign);
-  texture.colorSpace = T.SRGBColorSpace;
-  textures.push(texture);
-  const signMaterial = new T.MeshBasicMaterial({ map: texture });
-  extraMaterials.push(signMaterial);
-  const signGeometry = new T.PlaneGeometry(3.2, 0.8);
-  geometries.push(signGeometry);
-  const signMesh = new T.Mesh(signGeometry, signMaterial);
-  signMesh.position.set(0, 3.1, 4.2);
-  facade.add(signMesh);
   const light = new T.PointLight('#ffe7bd', 0, 12, 2);
   light.position.set(0, 3, 0);
   group.add(light);
@@ -187,8 +174,6 @@ export function createTownOffice(scene: T.Scene) {
       group.removeFromParent();
       geometries.forEach((g) => g.dispose());
       materials.forEach((m) => m.dispose());
-      extraMaterials.forEach((m) => m.dispose());
-      textures.forEach((t) => t.dispose());
     },
   };
 }

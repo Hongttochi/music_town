@@ -39,7 +39,7 @@ export function AdminLab({
               aria-pressed={time === value}
               onClick={() => onTime(value)}
             >
-              <img src={`/icons/${icon}.png`} width={28} height={28} alt="" />
+              <img src={`/icons/${icon}.png`} width={18} height={18} alt="" />
               <span>{label}</span>
             </Button>
           ))}
@@ -65,7 +65,7 @@ export function AdminLab({
               aria-pressed={season === value}
               onClick={() => onSeason(value)}
             >
-              <img src={`/icons/${icon}.png`} width={28} height={28} alt="" />
+              <img src={`/icons/${icon}.png`} width={18} height={18} alt="" />
               <span>{label}</span>
             </Button>
           ))}
