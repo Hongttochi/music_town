@@ -1,6 +1,8 @@
 .a-side {
   position: sticky;
   top: 12px;
+  /* Above the page content so hover labels are not covered; below the panel (41) and dialogs (60). */
+  z-index: 30;
   display: flex;
   flex-direction: column;
   align-items: center;

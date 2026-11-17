@@ -378,6 +378,27 @@ begin
   return jsonb_build_object('id', target_user, 'role', private.admin_role(target_user));
 end $$;
 
+-- Amplitude dashboard embeds shown on the console's Amplitude page. Embed links open without an
+-- Amplitude login, so they live here (admins only) and never in the public repo or shipped JavaScript.
+-- Add one in the SQL Editor:
+--   insert into public.admin_embeds(title, url) values ('대시보드', 'https://app.amplitude.com/analytics/share/embed/...');
+create table if not exists public.admin_embeds (
+  id uuid primary key default gen_random_uuid(),
+  title text not null check (char_length(btrim(title)) between 1 and 40),
+  url text not null check (char_length(url) <= 500 and url ~ '^https://([a-z0-9-]+\.)*amplitude\.com/[^\s"<>]*$'),
+  created_at timestamptz not null default now()
+);
+alter table public.admin_embeds enable row level security;
+revoke all on public.admin_embeds from public, anon, authenticated;
+
+create or replace function public.admin_embeds() returns jsonb
+language plpgsql stable security definer set search_path='' as $$
+begin
+  perform private.require_admin();
+  return (select coalesce(jsonb_agg(jsonb_build_object('id', e.id, 'title', e.title, 'url', e.url)
+      order by e.created_at), '[]'::jsonb) from public.admin_embeds e);
+end $$;
+
 do $$
 declare f text;
 begin
@@ -385,7 +406,8 @@ begin
     'public.admin_whoami()', 'public.admin_overview()', 'public.admin_live()', 'public.admin_shows()',
     'public.admin_funnel(integer,text)', 'public.admin_reports()', 'public.admin_set_report_status(text,text,text)',
     'public.town_notice_board()', 'public.admin_notices()', 'public.admin_save_notice(uuid,text,text,text,text)',
-    'public.admin_delete_notice(uuid)', 'public.admin_members_list(text)', 'public.admin_set_admin(uuid,boolean)'
+    'public.admin_delete_notice(uuid)', 'public.admin_members_list(text)', 'public.admin_set_admin(uuid,boolean)',
+    'public.admin_embeds()'
   ] loop
     execute format('revoke all on function %s from public, anon', f);
     execute format('grant execute on function %s to authenticated', f);

@@ -76,6 +76,7 @@ export type Notice = {
   updatedAt: string;
 };
 
+export type Embed = { id: string; title: string; url: string };
 export type AdminRole = 'master' | 'admin';
 export type Whoami = { userId: string; admin: boolean; role: AdminRole | null };
 export type Member = {

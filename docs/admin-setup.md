@@ -18,6 +18,14 @@
    목록에서 이메일을 빼면 다음 확인 때 바로, 늦어도 2시간 뒤에는 권한이 사라진다.
 4. 일반 관리자: 마스터가 운영실 **회원 관리**에서 지정·해제한다. 이메일이 없는 카카오 계정도 지정할 수 있고,
    만료되지 않는다. 일반 관리자는 운영실 전체를 쓰고 앱의 관리자 실험실·GM 표시도 받지만, 관리자 지정은 못 한다.
+5. 이용 통계: Amplitude 대시보드의 Share → Embed를 켜고 복사한 링크를 SQL Editor에서 넣는다.
+   임베드 링크는 로그인 없이 열리므로 공개 저장소나 앱 코드에 넣지 않는다.
+   ```sql
+   insert into public.admin_embeds(title, url)
+   values ('활성 사용자 & 머문 시간', 'https://app.amplitude.com/analytics/share/embed/<ID>');
+   ```
+   로컬 데모에서 보려면 `.env.local`에 `VITE_DEMO_AMPLITUDE_EMBED=<링크>`를 넣는다. Vercel에는 넣지 않는다.
+   링크가 새면 Amplitude에서 Embed 스위치를 끄면 바로 막힌다.
 
 ## 마이그레이션이 만드는 것
 
@@ -33,6 +41,7 @@
 | `admin_funnel(days, provider)`                                                       | 최근 N일 가입자의 가입 → 프로필 완성 → 공원 방문 → 첫 무대 → 팔로워 생김. 바로 전 N일 가입자와 비교. Google/Kakao로 나눠 볼 수 있다.                                                                                                                                            |
 | `admin_reports()` / `admin_set_report_status()`                                      | `private.town_reports`의 신고 목록과 상태 변경. 접수 → 검토 중 → 조치 완료/반려만 허용하고, 처리한 신고는 되돌릴 수 없다. 처리는 `private.close_town_report()`로 일반 보관(90일)을 적용하고 처리자는 `admin:<운영자 ID>`로 남긴다. 다른 운영자가 먼저 바꿨으면 덮어쓰지 않는다. |
 | `town_notices` + `admin_notices()` / `admin_save_notice()` / `admin_delete_notice()` | 공지 작성·게시·내리기·삭제. 내용이 빈 임시 공지는 한 번에 하나만. 게시하려면 제목과 본문이 있어야 한다.                                                                                                                                                                         |
+| `admin_embeds` + `admin_embeds()`                                                    | 이용 통계 화면에 띄울 Amplitude 임베드 링크. `https://*.amplitude.com/` 주소만 저장되고 관리자만 읽는다.                                                                                                                                                                         |
 | `town_notice_board()`                                                                | 공원 게시판용. 게시 중인 공지만 최신 순. 기존 공지 2개를 처음 한 번 옮겨 둔다.                                                                                                                                                                                                  |
 | `private.performance_log` + 트리거                                                   | 공연이 끝나면 지워지는 `town_performances` 대신 공연 기록을 남긴다.                                                                                                                                                                                                             |
 

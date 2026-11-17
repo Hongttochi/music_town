@@ -267,6 +267,11 @@ function run(name: string, a: Record<string, unknown>): Promise<unknown> {
       m.role = a.make_admin ? 'admin' : null;
       return wait({ id: m.id, role: m.role });
     }
+    // The real dashboard link stays out of the public repo; set it in .env.local to see it locally.
+    case 'admin_embeds': {
+      const url = import.meta.env.VITE_DEMO_AMPLITUDE_EMBED as string | undefined;
+      return wait(url ? [{ id: 'demo-embed', title: '활성 사용자 & 머문 시간', url }] : []);
+    }
     case 'admin_notices':
       return wait(notices);
     case 'admin_save_notice': {
