@@ -1,0 +1,15 @@
+.a-kpi p {
+  margin: 0;
+  color: var(--a-sub);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.a-kpi strong {
+  display: block;
+  margin: 8px 0 4px;
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}

@@ -10,6 +10,8 @@
     { "source": "/privacy", "destination": "/privacy/index.html" },
     { "source": "/privacy/", "destination": "/privacy/index.html" },
     { "source": "/safety", "destination": "/safety/index.html" },
-    { "source": "/safety/", "destination": "/safety/index.html" }
+    { "source": "/safety/", "destination": "/safety/index.html" },
+    { "source": "/admin", "destination": "/admin/index.html" },
+    { "source": "/admin/", "destination": "/admin/index.html" }
   ]
 }

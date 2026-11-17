@@ -1,0 +1,229 @@
+.a-side {
+  position: sticky;
+  top: 12px;
+  /* Above the page content so hover labels are not covered; below the panel (41) and dialogs (60). */
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: calc(100vh - 60px);
+  padding: 10px 0;
+  border: 1px solid var(--a-line);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--t-surface) 55%, transparent);
+}
+.a-logo {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  background: var(--t-acc2);
+}
+.a-nav {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  flex: 1;
+}
+.a-pill {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  z-index: 0;
+  border-radius: 12px;
+  background: var(--t-acc2);
+  pointer-events: none;
+}
+.a-sep {
+  width: 28px;
+  height: 1px;
+  margin: 8px 0;
+  background: var(--a-line);
+}
+.a-nav-btn {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0;
+  width: 44px;
+  height: 40px;
+  padding: 0 13px;
+  border-radius: 12px;
+  color: var(--a-sub);
+  transition:
+    color 0.25s,
+    width 0.5s var(--a-ease),
+    gap 0.5s var(--a-ease),
+    transform 0.25s var(--a-ease);
+}
+.a-nav-btn:hover {
+  color: var(--a-strong);
+}
+.a-nav-btn:active {
+  transform: scale(0.92);
+}
+.a-nav-btn[aria-current='page'] {
+  color: #fff;
+}
+.a-nav-btn .a-dot {
+  position: absolute;
+  top: 8px;
+  right: 9px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--a-blue-hi);
+  box-shadow: 0 0 0 2px var(--t-surface);
+}
+.a-tip {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: rgba(220, 228, 255, 0.92);
+  color: #1b2470;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-6px, -50%);
+  transition:
+    opacity 0.18s,
+    transform 0.25s var(--a-ease);
+  pointer-events: none;
+}
+.a-nav-btn:hover .a-tip {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+.a-me {
+  display: grid;
+  place-items: center;
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #d4dcff;
+  color: #2a3488;
+  font-size: 12px;
+  font-weight: 700;
+}
+.a-me::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--a-green);
+  box-shadow: 0 0 0 2px var(--t-surface);
+}
+@media (max-width: 640px) {
+  .a-nav-btn {
+    width: 38px;
+  }
+}
+.a-label {
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    max-width 0.5s var(--a-ease),
+    opacity 0.3s;
+}
+.a-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: 44px;
+  margin-bottom: 12px;
+  transition:
+    width 0.5s var(--a-ease),
+    gap 0.5s var(--a-ease);
+}
+.a-brand-row .a-logo {
+  flex: none;
+  margin: 0 2px;
+}
+.a-brand {
+  display: grid;
+  line-height: 1.2;
+}
+.a-brand b {
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+.a-brand small {
+  color: var(--a-muted);
+  font-size: 11px;
+}
+.a-frame.wide {
+  grid-template-columns: 196px 1fr;
+}
+.wide .a-nav-btn,
+.wide .a-brand-row {
+  width: calc(100% - 20px);
+  gap: 12px;
+}
+.wide .a-label {
+  max-width: 140px;
+  opacity: 1;
+}
+.wide .a-tip {
+  display: none;
+}
+.wide .a-sep {
+  width: calc(100% - 28px);
+}
+.wide .a-nav-btn .a-dot {
+  left: 27px;
+  right: auto;
+}
+.a-me-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: 34px;
+  margin-top: 10px;
+  font-size: 12.5px;
+  transition:
+    width 0.5s var(--a-ease),
+    gap 0.5s var(--a-ease);
+}
+.wide .a-me-row {
+  width: calc(100% - 28px);
+  gap: 10px;
+}
+.a-me {
+  flex: none;
+}
+.a-me-row .a-label small {
+  display: block;
+  color: var(--a-muted);
+  font-size: 11px;
+}
+:root[data-mode='light'] .a-card,
+:root[data-mode='light'] .a-side,
+:root[data-mode='light'] .a-top {
+  box-shadow:
+    0 1px 2px rgba(30, 40, 80, 0.05),
+    0 6px 18px rgba(30, 40, 80, 0.05);
+}
+:root[data-mode='light'] .a-nav-btn[aria-current='page'] {
+  color: #fff;
+}
+.a-gate-card .a-logo {
+  margin: 0 auto 16px;
+}

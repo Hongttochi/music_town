@@ -15,10 +15,12 @@ export function createAdminRoleHandler(env = process.env, makeClient = createCli
     const url = clean(env.SUPABASE_URL) || clean(env.VITE_SUPABASE_URL);
     const key = clean(env.SUPABASE_PUBLISHABLE_KEY) || clean(env.VITE_SUPABASE_PUBLISHABLE_KEY);
     if (!url || !key) return fail(503, '권한 확인 서비스가 아직 준비되지 않았어요.');
+    const secret = clean(env.SUPABASE_SECRET_KEY) || clean(env.SUPABASE_SERVICE_ROLE_KEY);
     try {
-      const client = makeClient(url, key, {
+      const options = {
         auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
-      });
+      };
+      const client = makeClient(url, key, options);
       const { data, error } = await client.auth.getUser(authorization.slice(7));
       if (error || !data?.user?.id) return fail(401, '다시 로그인해 주세요.');
       const admins = new Set(
@@ -29,8 +31,19 @@ export function createAdminRoleHandler(env = process.env, makeClient = createCli
       );
       // Only Supabase's verified account email is authoritative, never request fields or metadata.
       const email = clean(data.user.email).toLowerCase();
-      const isAdmin = Boolean(data.user.email_confirmed_at && email && admins.has(email));
-      return res.status(200).json({ isAdmin });
+      const isMaster = Boolean(data.user.email_confirmed_at && email && admins.has(email));
+      // ADMIN_EMAILS holds the master admins. Mirror them into the database so console functions can
+      // check them, and read back any regular admin role a master granted. Without the secret key
+      // (or before the console migration) only masters are recognised.
+      let role = isMaster ? 'master' : null;
+      if (secret) {
+        const synced = await makeClient(url, secret, options).rpc('admin_sync_role', {
+          target_user: data.user.id,
+          is_master: isMaster,
+        });
+        if (!synced.error) role = isMaster ? 'master' : synced.data === 'admin' ? 'admin' : null;
+      }
+      return res.status(200).json({ isAdmin: role !== null, isMaster });
     } catch {
       return fail(502, '권한을 확인하지 못했어요. 잠시 후 다시 시도해 주세요.');
     }

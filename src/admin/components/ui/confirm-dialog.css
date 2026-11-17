@@ -1,0 +1,75 @@
+.a-modal-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.a-modal-wrap.open {
+  pointer-events: auto;
+  opacity: 1;
+}
+.a-modal-wrap .a-scrim {
+  position: absolute;
+  z-index: 0;
+  backdrop-filter: blur(4px);
+}
+.a-modal {
+  position: relative;
+  z-index: 1;
+  width: min(400px, 100%);
+  padding: 22px;
+  border: 1px solid var(--a-line-strong);
+  border-radius: 20px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--t-surface) 96%, transparent),
+    color-mix(in srgb, var(--t-deep) 98%, transparent)
+  );
+  box-shadow: 0 30px 80px var(--t-shadow);
+  transform: translateY(12px) scale(0.96);
+  transition: transform 0.4s var(--a-ease);
+}
+.a-modal-wrap.open .a-modal {
+  transform: none;
+}
+.a-modal h2 {
+  margin: 0 0 10px;
+  font-size: 17px;
+}
+.a-modal-body {
+  color: var(--a-sub);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.a-modal-body p {
+  margin: 0 0 14px;
+}
+.a-modal-body dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 7px 14px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--a-line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--t-deep) 60%, transparent);
+  font-size: 12.5px;
+}
+.a-modal-body dt {
+  color: var(--a-muted);
+}
+.a-modal-body dd {
+  margin: 0;
+  color: var(--a-text);
+}
+.a-modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
