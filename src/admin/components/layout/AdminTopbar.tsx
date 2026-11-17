@@ -1,4 +1,4 @@
-import { Bell, ChevronRight, Search, Sun } from 'lucide-react';
+import { Bell, ChevronRight, Sun } from 'lucide-react';
 import type { PageDef } from '../../app/adminPages';
 import { demoMode } from '../../services/adminRepository';
 import './admin-topbar.css';
@@ -17,11 +17,6 @@ export function AdminTopbar({ page, openReports, onOpenSettings, onOpenReports }
         {page.group}
         <ChevronRight size={13} />
         <b>{page.label}</b>
-      </div>
-      <div className="a-search">
-        <Search size={14} />
-        이용자, 무대, 신고 번호 검색
-        <kbd>⌘K</kbd>
       </div>
       <div className="a-top-right">
         <span className={`a-live ${demoMode ? 'demo' : ''}`}>

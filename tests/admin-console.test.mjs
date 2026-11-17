@@ -53,6 +53,7 @@ test('only admins can read the console, everyone else is refused', async () => {
     assert.deepEqual(await call(db, 'admin_whoami'), { userId: user, admin: false, role: null });
     for (const fn of [
       'admin_members_list',
+      'admin_embeds',
       'admin_overview',
       'admin_live',
       'admin_shows',
@@ -297,6 +298,35 @@ test('masters come only from the server sync and alone can grant regular admins'
     await as(db, admin);
     assert.equal((await call(db, 'admin_whoami')).admin, false);
     await assert.rejects(call(db, 'admin_members_list', ['$1'], [null]), /ADMIN_REQUIRED/);
+  } finally {
+    await db.close();
+  }
+});
+
+test('amplitude embeds: admins read them, links must be amplitude https', async () => {
+  const db = await fixture();
+  try {
+    await db.exec(`insert into public.admin_members values('${admin}');`);
+    const add = (url) =>
+      db.query('insert into public.admin_embeds(title, url) values ($1, $2)', ['대시보드', url]);
+    for (const bad of [
+      'http://app.amplitude.com/x',
+      'https://evil.com/amplitude.com/x',
+      'https://app.amplitude.com.evil.com/x',
+      'javascript:alert(1)',
+      'https://app.amplitude.com/x" onload="y',
+    ])
+      await assert.rejects(add(bad), /check constraint/, bad);
+    await add('https://app.amplitude.com/analytics/share/embed/abc-123');
+
+    await as(db, user);
+    await assert.rejects(call(db, 'admin_embeds'), /ADMIN_REQUIRED/);
+    await assert.rejects(db.query('select * from public.admin_embeds'), /permission denied/);
+
+    await as(db, admin);
+    const [embed] = await call(db, 'admin_embeds');
+    assert.equal(embed.title, '대시보드');
+    assert.equal(embed.url, 'https://app.amplitude.com/analytics/share/embed/abc-123');
   } finally {
     await db.close();
   }

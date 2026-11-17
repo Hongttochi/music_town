@@ -1,5 +1,6 @@
 import type { ComponentType, ReactNode } from 'react';
 import {
+  ChartLine,
   Filter,
   Flag,
   LayoutGrid,
@@ -17,6 +18,7 @@ import { Reports } from '../pages/Reports';
 import { Errors } from '../pages/Errors';
 import { Notices } from '../pages/Notices';
 import { Members } from '../pages/Members';
+import { Amplitude } from '../pages/Amplitude';
 
 export type PageDef = {
   key: string;
@@ -77,6 +79,15 @@ export const pageGroups: PageDef[][] = [
       title: '퍼널',
       sub: <>가입한 사람이 공원 방문, 첫 무대, 팔로워까지 가는 흐름</>,
       Page: Funnels,
+    },
+    {
+      key: 'amplitude',
+      label: '이용 통계',
+      group: '분석',
+      icon: ChartLine,
+      title: '이용 통계 분석',
+      sub: <>활성 사용자, 머문 시간 같은 이용 흐름을 한눈에 봐요</>,
+      Page: Amplitude,
     },
   ],
   [
