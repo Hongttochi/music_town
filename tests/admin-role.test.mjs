@@ -15,11 +15,23 @@ async function invoke({
   authError = false,
   throws = false,
   request = {},
+  dbRole = null,
+  dbError = false,
 } = {}) {
   const tokens = [];
+  const syncs = [];
   const handler = createAdminRoleHandler(config, (_url, key, options) => {
-    assert.equal(key, 'public-key');
     assert.equal(options.auth.persistSession, false);
+    if (key === 'secret-key')
+      return {
+        rpc: async (name, args) => {
+          syncs.push([name, args]);
+          return dbError
+            ? { data: null, error: new Error('missing') }
+            : { data: args.is_master ? 'master' : dbRole, error: null };
+        },
+      };
+    assert.equal(key, 'public-key');
     return {
       auth: {
         getUser: async (token) => {
@@ -48,13 +60,13 @@ async function invoke({
     { method: 'GET', headers: { authorization: 'Bearer verified-token' }, ...request },
     res,
   );
-  return { ...res, tokens };
+  return { ...res, tokens, syncs };
 }
 
 test('verified allowlisted email grants access without exposing the list', async () => {
   const result = await invoke();
   assert.equal(result.code, 200);
-  assert.deepEqual(result.body, { isAdmin: true });
+  assert.deepEqual(result.body, { isAdmin: true, isMaster: true });
   assert.equal(result.headers['Cache-Control'], 'no-store');
   assert.deepEqual(result.tokens, ['verified-token']);
 });
@@ -70,16 +82,18 @@ test('email matching is exact and ignores forged request or metadata roles', asy
       },
       request: { query: { email: verified.email }, body: { email: verified.email, isAdmin: true } },
     });
-    assert.deepEqual(result.body, { isAdmin: false });
+    assert.deepEqual(result.body, { isAdmin: false, isMaster: false });
   }
 });
 
 test('empty configuration and unverified emails never grant access', async () => {
   assert.deepEqual((await invoke({ config: { ...env, ADMIN_EMAILS: '' } })).body, {
     isAdmin: false,
+    isMaster: false,
   });
   assert.deepEqual((await invoke({ user: { ...verified, email_confirmed_at: null } })).body, {
     isAdmin: false,
+    isMaster: false,
   });
 });
 
@@ -99,4 +113,34 @@ test('invalid tokens and requests fail closed', async () => {
   const failure = await invoke({ throws: true });
   assert.equal(failure.code, 502);
   assert.doesNotMatch(JSON.stringify(failure.body), /private upstream/);
+});
+
+test('masters are mirrored to the database and granted admins are recognised', async () => {
+  const config = { ...env, SUPABASE_SECRET_KEY: 'secret-key' };
+  const master = await invoke({ config });
+  assert.deepEqual(master.body, { isAdmin: true, isMaster: true });
+  assert.deepEqual(master.syncs, [
+    ['admin_sync_role', { target_user: 'account', is_master: true }],
+  ]);
+
+  const kakao = { id: 'kakao-account', email: '', email_confirmed_at: null };
+  const granted = await invoke({ config, user: kakao, dbRole: 'admin' });
+  assert.deepEqual(granted.body, { isAdmin: true, isMaster: false });
+  assert.deepEqual(granted.syncs, [
+    ['admin_sync_role', { target_user: 'kakao-account', is_master: false }],
+  ]);
+  assert.deepEqual((await invoke({ config, user: kakao })).body, {
+    isAdmin: false,
+    isMaster: false,
+  });
+
+  // A database failure never removes a master or grants anyone else.
+  assert.deepEqual((await invoke({ config, dbError: true })).body, {
+    isAdmin: true,
+    isMaster: true,
+  });
+  assert.deepEqual((await invoke({ config, user: kakao, dbError: true, dbRole: 'admin' })).body, {
+    isAdmin: false,
+    isMaster: false,
+  });
 });

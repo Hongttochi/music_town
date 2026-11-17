@@ -1,9 +1,10 @@
 import { ModularPortrait } from '../avatar/ModularPortrait';
 import { defaultAvatar } from '../../data/model';
 import { X } from 'lucide-react';
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Logo } from '../ui/Flaticon';
-import { notices } from '../../data/notices';
+import { notices as fallback, type Notice } from '../../data/notices';
+import { supabase } from '../../services/auth';
 import { Button } from '../ui/Button';
 import { DialogPanel } from '../ui/Panel';
 import './notice-board.css';
@@ -11,6 +12,31 @@ import './notice-board.css';
 export function NoticeBoardDialog({ onClose }: { onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const title = useId();
+  // Read notices published from the admin console; fall back to the bundled notices if the RPC is missing or fails.
+  const [notices, setNotices] = useState<Notice[]>(fallback);
+  useEffect(() => {
+    let alive = true;
+    supabase
+      ?.rpc('town_notice_board')
+      .then(({ data, error }) => {
+        if (!alive || error || !Array.isArray(data)) return;
+        setNotices(
+          data.map((n: { id: string; label: string; title: string; body: string }) => ({
+            id: n.id,
+            label: n.label,
+            title: n.title,
+            paragraphs: n.body
+              .split(/\n\s*\n/)
+              .map((p) => p.trim())
+              .filter(Boolean),
+          })),
+        );
+      })
+      .then(undefined, () => undefined);
+    return () => {
+      alive = false;
+    };
+  }, []);
   useEffect(() => {
     const element = dialog.current!;
     element.showModal();
@@ -53,6 +79,7 @@ export function NoticeBoardDialog({ onClose }: { onClose: () => void }) {
         </Button>
       </header>
       <div className="notice-board-papers" aria-label="공지사항">
+        {!notices.length && <p className="notice-board-footnote">아직 올라온 소식이 없어요.</p>}
         {notices.map((notice) => (
           <article className="notice-paper" key={notice.id}>
             <span className="notice-pin" aria-hidden="true" />

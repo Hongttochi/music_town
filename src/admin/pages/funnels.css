@@ -1,0 +1,30 @@
+.a-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  align-items: center;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--a-line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--t-deep) 40%, transparent);
+  color: var(--a-sub);
+  font-size: 12px;
+}
+.a-foot b {
+  color: var(--a-text);
+}
+.a-foot span:last-child {
+  margin-left: auto;
+  color: var(--a-muted);
+}
+.a-leak {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  background: rgba(255, 107, 136, 0.15);
+  color: var(--a-red);
+}

@@ -1,0 +1,42 @@
+.a-gate {
+  display: grid;
+  place-items: center;
+}
+.a-gate-card {
+  width: min(420px, 100%);
+  padding: 30px 26px;
+  border: 1px solid var(--a-line-strong);
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--t-surface) 92%, transparent);
+  box-shadow: 0 30px 80px var(--t-shadow);
+  text-align: center;
+}
+.a-gate-card h1 {
+  margin: 0 0 10px;
+  font-size: 20px;
+}
+.a-gate-card p {
+  margin: 0 0 18px;
+  color: var(--a-sub);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.a-gate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.a-gate-id {
+  display: block;
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--a-line);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--t-deep) 60%, transparent);
+  font:
+    12px ui-monospace,
+    Menlo,
+    monospace;
+  word-break: break-all;
+}
