@@ -72,6 +72,7 @@ export function createTownOffice(scene: T.Scene) {
   scene.add(group);
   const materials = new Map<string, T.MeshStandardMaterial>();
   const geometries: T.BufferGeometry[] = [];
+  const stools: T.MeshStandardMaterial[][] = [];
   const facade = new T.Group();
   facade.name = 'office-facade';
   group.add(facade);
@@ -117,8 +118,59 @@ export function createTownOffice(scene: T.Scene) {
     box(side * 3.2, 1.65, 3.95, 3.6, 3.3, 0.2, '#f0dfba', facade);
     box(side * 3.1, 1.8, 4.08, 1.7, 1.4, 0.12, '#6e8d79', facade);
     box(side * 3.1, 1.8, 4.16, 1.4, 1.1, 0.04, '#bedbcf', facade);
-    const slope = box(0, 3.85, side * 2.1, 10.8, 0.22, 4.5, '#64866d', roof);
-    slope.rotation.x = side * 0.2;
+    // Steeper roof with raised seams and a warm timber fascia.
+    const slope = box(0, 4.18, side * 2.1, 10.8, 0.18, 4.65, '#466c60', roof);
+    slope.rotation.x = side * 0.36;
+    for (let x = -5; x <= 5; x += 0.65) {
+      const seam = box(x, 4.29, side * 2.1, 0.035, 0.045, 4.65, '#638575', roof);
+      seam.rotation.x = side * 0.36;
+    }
+    box(0, 3.43, side * 4.3, 10.9, 0.18, 0.16, '#b29468', roof);
+    box(side * 4.77, 1.65, 4.1, 0.22, 3.3, 0.16, '#d5bb90', facade);
+    box(side * 3.2, 0.24, 4.1, 3.6, 0.42, 0.22, '#b6ab91', facade);
+    box(side * 3.1, 1.8, 4.2, 0.07, 1.15, 0.07, '#fff0d0', facade);
+    box(side * 3.1, 1.8, 4.2, 1.45, 0.07, 0.07, '#fff0d0', facade);
+    box(side * 3.1, 1.14, 4.2, 1.95, 0.13, 0.35, '#b29468', facade);
+  }
+  box(0, 4.98, 0, 10.95, 0.16, 0.22, '#36574e', roof);
+  // Fill the gable ends beneath the pitched roof.
+  const gable = new T.Shape();
+  gable.moveTo(-4.25, 3.32);
+  gable.lineTo(0, 4.98);
+  gable.lineTo(4.25, 3.32);
+  gable.closePath();
+  for (const side of [-1, 1]) {
+    const end = part(
+      new T.ExtrudeGeometry(gable, { depth: 0.12, bevelEnabled: false }),
+      '#e4cba7',
+      side * 4.95,
+      0,
+      0,
+      roof,
+    );
+    end.rotation.y = Math.PI / 2;
+  }
+  // A small civic clock and sheltered entry make the public entrance recognizable.
+  // Mount the whole clock assembly ahead of the roof edge so the eave cannot occlude it.
+  const clockMount = new T.Group();
+  clockMount.position.set(0, 0.45, 0.65);
+  facade.add(clockMount);
+  box(0, 3.45, 4.02, 2.1, 1.1, 0.3, '#f0dfba', clockMount);
+  const entryClock = part(
+    new T.CylinderGeometry(0.38, 0.38, 0.09, 32),
+    '#fff3d6',
+    0,
+    3.52,
+    4.24,
+    clockMount,
+  );
+  entryClock.rotation.x = Math.PI / 2;
+  box(0, 3.63, 4.3, 0.035, 0.23, 0.03, '#466c60', clockMount);
+  box(0.1, 3.52, 4.3, 0.2, 0.035, 0.03, '#466c60', clockMount);
+  const canopy = box(0, 2.95, 4.43, 3.3, 0.15, 1.05, '#466c60', facade);
+  canopy.rotation.x = 0.12;
+  for (const side of [-1, 1]) {
+    box(side * 1.49, 1.42, 4.05, 0.16, 2.84, 0.23, '#b29468', facade);
   }
   // Open doorway, lintel and floor mat; no solid box across the entrance.
   box(0, 2.9, 3.95, 2.8, 0.8, 0.22, '#6e8d79', facade);
@@ -144,8 +196,30 @@ export function createTownOffice(scene: T.Scene) {
     box(side * 4.4, 1, -2.7, 0.8, 2, 1.6, '#9a7757', interior);
     for (let y = 0.5; y < 2; y += 0.6)
       box(side * 4.4, y, -1.86, 0.65, 0.04, 0.03, '#e9d4b4', interior);
-    part(new T.CylinderGeometry(0.42, 0.42, 0.16, 24), '#6c8978', side * 2.5, 0.55, 0.5, interior);
-    part(new T.CylinderGeometry(0.07, 0.1, 0.5, 12), '#795c47', side * 2.5, 0.25, 0.5, interior);
+    const top = part(
+      new T.CylinderGeometry(0.42, 0.42, 0.16, 24),
+      '#6c8978',
+      side * 2.5,
+      0.55,
+      0.5,
+      interior,
+    );
+    const post = part(
+      new T.CylinderGeometry(0.07, 0.1, 0.5, 12),
+      '#795c47',
+      side * 2.5,
+      0.25,
+      0.5,
+      interior,
+    );
+    stools.push(
+      [top, post].map((mesh, index) => {
+        const material = mesh.material.clone();
+        mesh.material = material;
+        materials.set(`stool-${side}-${index}`, material);
+        return material;
+      }),
+    );
   }
   box(0, 2.1, -3.8, 2.3, 1.2, 0.12, '#8f775b', interior);
   box(0, 2.1, -3.71, 2.1, 1, 0.04, '#e9dfc2', interior);
@@ -165,6 +239,18 @@ export function createTownOffice(scene: T.Scene) {
   light.position.set(0, 3, 0);
   group.add(light);
   return {
+    setOccupied(points: readonly Point[]) {
+      stools.forEach((parts, index) => {
+        const seat = OFFICE_SEATS[index];
+        const occupied = points.some(
+          (point) => Math.hypot(point.x - seat.x, point.z - seat.z) < 0.35,
+        );
+        // The stool must not slice through the camera-facing seated sprite.
+        parts.forEach((material) => {
+          material.depthWrite = !occupied;
+        });
+      });
+    },
     update(_time: number, night: boolean, _reduced: boolean, inside = false) {
       roof.visible = facade.visible = !inside;
       interior.visible = inside;

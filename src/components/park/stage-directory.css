@@ -1,0 +1,36 @@
+aside.stage-list {
+  background: #ffffff;
+  border: 1px solid #d6d6d6;
+  color: #000000;
+  box-shadow: 0 3px 12px #00000014;
+}
+.stage-list .section-title h2,
+.stage-list .section-title span,
+.stage-list .stage-item,
+.stage-list .stage-info strong,
+.stage-list .stage-info small,
+.stage-list .stage-info em,
+.stage-list .stage-item:hover .stage-info strong,
+.stage-list .list-foot {
+  color: #000000;
+}
+.stage-list .section-title h2 span,
+.stage-list .stage-info em,
+.stage-list .stage-avatar {
+  background: #ffffff;
+}
+.stage-list .town-button.stage-item {
+  background: #ffffff;
+  border-bottom: 1px solid #d6d6d6;
+}
+.stage-list .town-button.stage-item:hover {
+  background: #f5f5f5;
+}
+.stage-list .town-button.stage-item:focus-visible {
+  outline: 2px solid #777777;
+  outline-offset: -2px;
+}
+.stage-list .equalizer i,
+.stage-list .live-dot {
+  background: #777777;
+}

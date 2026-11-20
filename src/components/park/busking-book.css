@@ -2,8 +2,8 @@ dialog.town-panel[data-panel='queue'] {
   width: 620px;
   max-width: 94vw;
   padding: 16px 18px 18px;
-  background: #f9f5e7;
-  border: 1px solid #d9d0b3;
+  background: #ffffff;
+  border: 1px solid #d6d6d6;
   border-radius: 10px;
   max-height: 92dvh;
 }
@@ -16,7 +16,7 @@ dialog.town-panel[data-panel='queue'] {
 .busking-book {
   display: grid;
   grid-template-columns: 0.9fr 1.1fr;
-  border: 1px solid #e2dac2;
+  border: 1px solid #d6d6d6;
   border-radius: 14px;
   box-shadow: 0 3px 10px #6e70400a;
   overflow: hidden;
@@ -25,22 +25,22 @@ dialog.town-panel[data-panel='queue'] {
   position: relative;
   padding: 22px;
   min-width: 0;
-  background: #fffdf3;
+  background: #ffffff;
 }
 .book-stage {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  background: #eef0df;
-  border-right: 1px dashed #cdd4b9;
+  background: #ffffff;
+  border-right: 1px dashed #d6d6d6;
   justify-content: center;
 }
 .book-guide {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background: #fffdf3;
+  background: #ffffff;
 }
 .book-logo {
   display: block;
@@ -50,7 +50,7 @@ dialog.town-panel[data-panel='queue'] {
 }
 .book-stage-label {
   margin-top: 7px;
-  color: #8e977f;
+  color: #000000;
   font-size: 10px;
 }
 dialog.town-panel[open] .busking-book .book-guide h3 {
@@ -58,7 +58,7 @@ dialog.town-panel[open] .busking-book .book-guide h3 {
   line-height: 1.5;
   letter-spacing: -0.04em;
   font-weight: 600;
-  color: #4b5d43;
+  color: #000000;
   margin: 0 0 12px;
 }
 .book-details {
@@ -66,7 +66,7 @@ dialog.town-panel[open] .busking-book .book-guide h3 {
   flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 15px;
-  color: #859174;
+  color: #000000;
   font-size: 9px;
 }
 .book-details > span {
@@ -85,12 +85,12 @@ dialog.town-panel[open] .busking-book .book-guide h3 {
   font-size: 15px;
   font-weight: 600;
   margin: 0 0 10px;
-  color: #566248;
+  color: #000000;
 }
 .book-stage > p {
   font-size: 10px;
   line-height: 1.7;
-  color: #646d58;
+  color: #000000;
   margin: 0;
 }
 .book-stage-status {
@@ -100,7 +100,7 @@ dialog.town-panel[open] .busking-book .book-guide h3 {
   gap: 6px;
   padding: 5px 9px;
   border-radius: 999px;
-  background: #ffffff70;
+  background: #ffffff;
 }
 .book-stage-status > span {
   flex: none;
@@ -115,15 +115,15 @@ dialog.town-panel[open] .busking-book .book-guide h3 {
 .book-summary {
   font-size: 12px;
   line-height: 1.7;
-  color: #505c44;
+  color: #000000;
   margin: 0 0 8px;
 }
 .book-instructions {
   padding: 12px 14px;
   margin-bottom: 14px;
   border-radius: 9px;
-  background: #f2ecde;
-  border: 1px solid #e8dfcc;
+  background: #ffffff;
+  border: 1px solid #d6d6d6;
 }
 .book-instructions .book-demo-note {
   margin-bottom: 0;
@@ -131,7 +131,7 @@ dialog.town-panel[open] .busking-book .book-guide h3 {
 .book-demo-note {
   font-size: 11px;
   line-height: 1.6;
-  color: #717568;
+  color: #000000;
   margin: 0 0 16px;
 }
 .busking-book .book-guide .town-button.book-join {
@@ -143,8 +143,8 @@ dialog.town-panel[open] .busking-book .book-guide h3 {
   font-size: 12px;
   line-height: 1.4;
   box-shadow: none;
-  background: #657d55;
-  border-color: #657d55;
+  background: #ffffff;
+  border-color: #d6d6d6;
   justify-content: center;
   gap: 6px;
 }
@@ -157,10 +157,10 @@ dialog.town-panel[open] .busking-book .book-guide h3 {
   }
   .book-stage {
     border-right: 0;
-    border-bottom: 1px dashed #cdd4b9;
+    border-bottom: 1px dashed #d6d6d6;
   }
   .book-guide {
-    background: #fffdf3;
+    background: #ffffff;
   }
   .book-illustration {
     height: 135px;
@@ -174,4 +174,24 @@ dialog.town-panel[open] .busking-book .book-guide h3 {
   .book-illustration {
     height: 125px;
   }
+}
+
+dialog.town-panel[open][data-panel='queue'] {
+  background: #ffffff;
+  border-color: #b8b8b8;
+  color: #000000;
+}
+dialog.town-panel[open][data-panel='queue'] .panel-heading {
+  border-color: #d6d6d6;
+}
+dialog.town-panel[open][data-panel='queue'] .panel-heading h2.modal-title,
+dialog.town-panel[open][data-panel='queue'] .town-button {
+  color: #000000;
+}
+.busking-book .book-guide .town-button.book-join:hover:not(:disabled) {
+  background: #f2f2f2;
+}
+.busking-book .book-guide .town-button.book-join:focus-visible {
+  outline: 2px solid #777777;
+  outline-offset: 2px;
 }
