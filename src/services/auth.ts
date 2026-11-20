@@ -16,7 +16,7 @@ export const supabase = authConfigured
     })
   : null;
 
-// redirectPath: where to return after sign-in. The admin console uses '/admin/' (must be listed in Supabase Redirect URLs).
+// Town login only. The admin console owns a separate auth client and callback.
 export async function signIn(provider: 'google' | 'kakao', redirectPath = '/') {
   if (!supabase) throw new Error('로그인 서비스가 아직 연결되지 않았어요.');
   const { error } = await supabase.auth.signInWithOAuth({

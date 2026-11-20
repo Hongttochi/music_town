@@ -4,16 +4,103 @@
 }
 .a-gate-card {
   width: min(420px, 100%);
-  padding: 30px 26px;
-  border: 1px solid var(--a-line-strong);
-  border-radius: 22px;
-  background: color-mix(in srgb, var(--t-surface) 92%, transparent);
-  box-shadow: 0 30px 80px var(--t-shadow);
-  text-align: center;
+  padding: 36px;
+  border: 1px solid var(--a-line);
+  border-radius: 18px;
+  background: var(--t-surface);
+  text-align: left;
 }
 .a-gate-card h1 {
   margin: 0 0 10px;
-  font-size: 20px;
+  font-size: 26px;
+  letter-spacing: -0.04em;
+}
+.a-gate-brand {
+  width: 156px;
+  margin: 0 auto 32px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: transparent;
+}
+.a-gate-brand img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.a-gate-actions.a-gate-social {
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 28px;
+}
+.a-gate-social .a-btn {
+  position: relative;
+  width: 100%;
+  min-height: 50px;
+  padding: 12px 44px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  justify-content: center;
+}
+.a-gate-social .a-btn:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+}
+.a-gate-card .a-gate-demo {
+  margin: 26px 0 0;
+  padding-top: 22px;
+  border-top: 1px solid var(--a-line);
+  text-align: center;
+}
+.a-gate-card .a-gate-demo p {
+  color: var(--a-muted);
+  font-size: 12px;
+  margin: 0 0 8px;
+}
+.a-gate-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.a-gate-preview:hover {
+  color: var(--a-strong);
+}
+.a-gate-preview:focus-visible {
+  outline: 2px solid var(--a-blue-hi);
+  outline-offset: 4px;
+}
+.a-gate-social svg {
+  position: absolute;
+  left: 18px;
+  flex: none;
+}
+.a-gate-social .a-gate-google {
+  background: #fff;
+  color: #1f1f1f;
+  border: 1px solid #dadce0;
+}
+.a-gate-social .a-gate-google:hover {
+  background: #f1f3f4;
+}
+.a-gate-social .a-gate-kakao {
+  background: #fee500;
+  color: #191919;
+  border: 1px solid #fee500;
+}
+.a-gate-social .a-gate-kakao:hover {
+  background: #f5dc00;
+}
+.a-gate-social .a-btn:focus-visible {
+  outline: 3px solid var(--a-blue-hi);
+  outline-offset: 4px;
+}
+@media (max-width: 480px) {
+  .a-gate-card {
+    padding: 30px 22px;
+  }
 }
 .a-gate-card p {
   margin: 0 0 18px;

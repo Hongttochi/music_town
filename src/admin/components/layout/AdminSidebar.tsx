@@ -3,7 +3,7 @@ import { LogOut, PanelLeft, Settings } from 'lucide-react';
 import type { PageDef } from '../../app/adminPages';
 import { useSlidingPill } from '../../hooks/useSlidingPill';
 import { demoMode } from '../../services/adminRepository';
-import { supabase } from '../../../services/auth';
+import { supabase } from '../../services/adminAuth';
 import './admin-sidebar.css';
 
 type Props = {
@@ -84,7 +84,7 @@ export function AdminSidebar({
           <button
             className="a-nav-btn"
             aria-label="로그아웃"
-            onClick={() => void supabase?.auth.signOut()}
+            onClick={() => void supabase?.auth.signOut({ scope: 'local' })}
           >
             <LogOut size={18} style={{ flex: 'none' }} />
             <span className="a-label">로그아웃</span>

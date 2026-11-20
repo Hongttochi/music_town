@@ -1,4 +1,4 @@
-import { authConfigured, supabase } from '../../services/auth';
+import { authConfigured, supabase } from './adminAuth';
 import { errorCode, logEvent } from '../../services/telemetry';
 import { demoResponse } from '../data/demoResponses';
 
