@@ -1,137 +1,214 @@
-import { useEffect, useState } from 'react';
-import { reveal } from '../utils/reveal';
-import { CountUp } from '../components/ui/CountUp';
+﻿import { useCallback, useEffect, useRef, useState } from 'react';
 import { Meter } from '../components/charts/Meter';
-import { errorCodes, loginByProvider, randomLog, voice } from '../data/demoErrors';
+import { demoMode } from '../services/adminRepository';
+import { loadMonitoring, type Monitoring } from '../services/monitoring';
+import { formatClock } from '../utils/format';
 import './errors.css';
 
 export function Errors() {
-  const [logs, setLogs] = useState(() => Array.from({ length: 6 }, (_, i) => randomLog(i)));
+  const [data, setData] = useState<Monitoring | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [paused, setPaused] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const request = useRef<AbortController | null>(null);
+  const reload = useCallback(async () => {
+    if (demoMode || request.current) return;
+    const controller = new AbortController();
+    request.current = controller;
+    setLoading(true);
+    try {
+      const next = await loadMonitoring(
+        AbortSignal.any([controller.signal, AbortSignal.timeout(20000)]),
+      );
+      if (!controller.signal.aborted) {
+        setData(next);
+        setError(null);
+      }
+    } catch (e) {
+      if (!controller.signal.aborted)
+        setError(e instanceof Error ? e.message : '모니터링 조회에 실패했어요.');
+    } finally {
+      if (request.current === controller) {
+        request.current = null;
+        setLoading(false);
+      }
+    }
+  }, []);
   useEffect(() => {
-    if (paused) return;
-    let seq = 100;
-    const id = setInterval(() => setLogs((l) => [randomLog(seq++), ...l].slice(0, 8)), 2200);
-    return () => clearInterval(id);
-  }, [paused]);
-  const total = errorCodes.reduce((a, c) => a + c.count, 0);
-
+    if (paused) setLoading(false);
+    if (!paused) void reload();
+    const id = paused
+      ? undefined
+      : setInterval(() => {
+          if (document.visibilityState === 'visible') void reload();
+        }, 30000);
+    return () => {
+      clearInterval(id);
+      request.current?.abort();
+      request.current = null;
+    };
+  }, [paused, reload]);
+  const logs = data?.logs.status === 'ok' ? data.logs : null;
+  const voice = data?.voice.status === 'ok' ? data.voice : null;
+  const logMessage =
+    error && !data
+      ? 'ERROR_LOAD'
+      : demoMode
+        ? 'DEMO_LOGS'
+        : data?.logs.status === 'not_configured'
+          ? 'SETUP_LOGS'
+          : data?.logs.status === 'error'
+            ? 'ERROR_LOGS'
+            : 'LOADING';
+  const voiceMessage =
+    error && !data
+      ? 'ERROR_LOAD'
+      : demoMode
+        ? 'DEMO_VOICE'
+        : data?.voice.status === 'not_configured'
+          ? 'SETUP_VOICE'
+          : data?.voice.status === 'error'
+            ? 'ERROR_VOICE'
+            : 'LOADING';
+  const total = logs?.errorCodes.reduce((n, c) => n + c.count, 0) ?? 0;
   return (
     <>
-      <p className="a-banner">
-        아직 실제 데이터와 연결되지 않은 화면이에요. 오류 기록(Logflare)과 음성(LiveKit) 연결은 다음
-        단계에서 붙일 예정이라 지금은 예시 값이에요.
-      </p>
+      <div className="a-monitor-toolbar">
+        <p className="a-cap">
+          {data ? `마지막 확인 ${formatClock(data.checkedAt)} · 30초마다 갱신` : '30초마다 갱신'}
+        </p>
+        <div className="a-actions">
+          <button
+            className="a-btn a-btn-ghost"
+            disabled={demoMode}
+            onClick={() => setPaused(!paused)}
+          >
+            {paused ? '다시 받기' : '일시 정지'}
+          </button>
+          <button
+            className="a-btn a-btn-ghost"
+            disabled={demoMode || loading}
+            onClick={() => void reload()}
+          >
+            {loading ? '불러오는 중…' : '새로고침'}
+          </button>
+        </div>
+      </div>
+      {demoMode && (
+        <p className="a-banner">
+          데모에서는 외부 모니터링을 조회하지 않아요. 실제 운영실에 로그인하면 연결 상태를 확인할 수
+          있어요.
+        </p>
+      )}
+      {error && (
+        <p className="a-banner" role="alert">
+          {error} {data ? '마지막으로 불러온 값을 표시하고 있어요.' : ''}
+        </p>
+      )}
       <div className="a-grid g-2-1 a-errors-layout">
         <div className="a-errors-column">
-          <div {...reveal(0)}>
+          <div>
             <div className="a-card">
               <div className="a-card-head">
                 <div>
-                  <h3>실시간 이벤트</h3>
+                  <h3>최근 오류 이벤트</h3>
                   <p className="a-cap">
-                    Logflare로 들어오는 오류 이벤트 · 원본 메시지 없이 분류 코드만 저장
+                    Logflare · 최근 24시간 중 최대 50건 · 원본 메시지는 표시하지 않아요
                   </p>
                 </div>
-                <button className="a-btn a-btn-ghost" onClick={() => setPaused((p) => !p)}>
-                  {paused ? '다시 받기' : '일시 정지'}
-                </button>
               </div>
-              <div className="a-log">
-                {logs.map((l) => (
-                  <div className="a-log-row" key={l.id}>
-                    <span>{l.time}</span>
-                    <code>{l.event}</code>
-                    <span>
-                      {l.op} · {l.channel}채널
-                    </span>
-                    <span
-                      className={`a-badge ${l.code === 'invalid_token' ? 'b-red' : l.code === 'permission_denied' ? 'b-amber' : 'b-blue'}`}
-                    >
-                      {l.code}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              {!logs ? (
+                <p className="a-empty">{messages[logMessage]}</p>
+              ) : (
+                <div className="a-log">
+                  {!logs.logs.length && <p className="a-empty">수집된 오류가 없어요.</p>}
+                  {logs.logs.map((l, i) => (
+                    <div className="a-log-row" key={`${l.at}-${i}`}>
+                      <span>{formatClock(l.at)}</span>
+                      <code>{l.event}</code>
+                      <span>
+                        {l.operation ?? '-'}
+                        {l.channel !== null ? ` / ${l.channel}` : ''}
+                      </span>
+                      <span className="a-badge b-blue">{l.code}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-          <div {...reveal(1)}>
+          <div>
             <div className="a-card">
-              <h3>오류 코드 (24시간)</h3>
-              <p className="a-cap">총 {total}건</p>
-              <div style={{ marginTop: 10 }}>
-                {errorCodes.map((c, i) => (
-                  <div
-                    className="a-chan"
-                    key={c.code}
-                    style={{ gridTemplateColumns: '130px 1fr 44px' }}
-                  >
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                      <i style={{ width: 7, height: 7, borderRadius: 4, background: c.color }} />
-                      {c.code}
-                    </span>
-                    <Meter ratio={c.count / errorCodes[0].count} i={i} />
-                    <span>{c.count}</span>
-                  </div>
-                ))}
-              </div>
+              <h3>오류 코드</h3>
+              {!logs ? (
+                <p className="a-empty">{messages[logMessage]}</p>
+              ) : (
+                <>
+                  <p className="a-cap">
+                    최근 24시간 수집 이벤트 {logs.sampleSize}건 중 오류 {total}건
+                    {logs.sampled ? ' · 최근 1,000건 표본으로 전체 수치와 다를 수 있어요' : ''}
+                  </p>
+                  {!logs.errorCodes.length && <p className="a-empty">수집된 오류가 없어요.</p>}
+                  {logs.errorCodes.map((c, i) => (
+                    <div className="a-chan a-error-meter" key={c.code}>
+                      <span>{c.code}</span>
+                      <Meter ratio={c.count / Math.max(1, logs.errorCodes[0].count)} i={i} />
+                      <span>{c.count}</span>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
           </div>
         </div>
-
         <div className="a-errors-column">
-          <div {...reveal(2)}>
+          <div>
             <div className="a-card">
-              <h3>로그인 실패율</h3>
-              <p className="a-cap">OAuth 설정이 깨지면 여기서 먼저 튀어요</p>
-              {loginByProvider.map((p, i) => {
-                const rate = (p.fail / (p.ok + p.fail)) * 100;
-                return (
-                  <div key={p.provider} style={{ marginTop: 14 }}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        fontSize: 12.5,
-                        marginBottom: 7,
-                      }}
-                    >
-                      <span>{p.provider}</span>
-                      <b>
-                        <CountUp value={rate} format={(n) => n.toFixed(2) + '%'} />
-                      </b>
-                    </div>
-                    <Meter ratio={rate / 5} i={i} hot={rate > 2.5} />
+              <h3>로그인·마이크 이벤트</h3>
+              <p className="a-cap">조회된 브라우저 이벤트 기준 · 전송 누락이 있을 수 있어요</p>
+              {!logs ? (
+                <p className="a-empty">{messages[logMessage]}</p>
+              ) : (
+                <div className="a-stat-rows">
+                  <div>
+                    로그인 성공 <b>{logs.loginOk}</b>
                   </div>
-                );
-              })}
+                  <div>
+                    로그인 실패 <b>{logs.loginFail}</b>
+                  </div>
+                  <div>
+                    음성 권한 거부 <b>{logs.micDenied}</b>
+                  </div>
+                </div>
+              )}
+              <p className="a-cap a-monitor-note">제공자별 로그인 실패율은 아직 집계하지 않아요.</p>
             </div>
           </div>
-          <div {...reveal(3)}>
+          <div>
             <div className="a-card">
               <h3>음성 (LiveKit)</h3>
-              <p className="a-cap">토큰 발급과 열린 방</p>
-              <div className="a-big" style={{ marginTop: 10 }}>
-                <CountUp
-                  value={(voice.tokenOk / (voice.tokenOk + voice.tokenFail)) * 100}
-                  format={(n) => n.toFixed(1) + '%'}
-                />
-              </div>
-              <p className="a-cap">토큰 발급 성공률</p>
-              <div className="a-stat-rows">
-                <div>
-                  열린 방 <b>{voice.rooms}</b>
-                </div>
-                <div>
-                  송출 중 공연자 <b>{voice.publishers}</b>
-                </div>
-                <div>
-                  토큰 발급 실패 <b>{voice.tokenFail}</b>
-                </div>
-                <div>
-                  마이크 권한 거부 <b style={{ color: 'var(--a-amber)' }}>{voice.micDenied}</b>
-                </div>
-              </div>
+              <p className="a-cap">마을 공연 방의 현재 연결 현황</p>
+              {!voice ? (
+                <p className="a-empty">{messages[voiceMessage]}</p>
+              ) : (
+                <>
+                  <span className="a-badge b-green">조회 연결 정상</span>
+                  <div className="a-stat-rows">
+                    <div>
+                      열린 방 <b>{voice.rooms}</b>
+                    </div>
+                    <div>
+                      연결된 참여자 <b>{voice.participants}</b>
+                    </div>
+                    <div>
+                      미디어 발행 참여자 <b>{voice.publishers}</b>
+                    </div>
+                  </div>
+                </>
+              )}
+              <p className="a-cap a-monitor-note">
+                토큰 발급 성공률은 아직 집계하지 않아요. 방 조회 성공은 실제 음질을 보장하지 않아요.
+              </p>
             </div>
           </div>
         </div>
@@ -139,3 +216,13 @@ export function Errors() {
     </>
   );
 }
+const messages: Record<string, string> = {
+  ERROR_LOAD: '데이터를 확인하지 못했어요. 새로고침으로 다시 시도해 주세요.',
+  LOADING: '모니터링 데이터를 기다리고 있어요.',
+  DEMO_LOGS: '실제 로그인 후 오류 기록을 확인할 수 있어요.',
+  DEMO_VOICE: '실제 로그인 후 음성 연결을 확인할 수 있어요.',
+  SETUP_LOGS: 'Logflare 조회 연결이 아직 설정되지 않았어요.',
+  SETUP_VOICE: 'LiveKit 연결이 아직 설정되지 않았어요.',
+  ERROR_LOGS: 'Logflare 조회에 실패했어요. 조회 권한과 연결 설정을 확인해 주세요.',
+  ERROR_VOICE: 'LiveKit 조회에 실패했어요. 잠시 후 다시 확인해 주세요.',
+};

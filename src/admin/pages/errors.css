@@ -2,7 +2,7 @@
   display: grid;
   gap: 6px;
   max-height: 330px;
-  overflow: hidden;
+  overflow: auto;
 }
 .a-log-row {
   display: grid;
@@ -16,6 +16,23 @@
   font-size: 12px;
   color: var(--a-sub);
   animation: a-slide 0.55s var(--a-ease);
+}
+.a-monitor-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.a-monitor-note {
+  margin-top: 18px;
+}
+.a-error-meter {
+  grid-template-columns: minmax(0, 130px) minmax(40px, 1fr) 44px;
+}
+.a-error-meter > span:first-child {
+  overflow-wrap: anywhere;
 }
 .a-log-row code {
   color: var(--a-text);
