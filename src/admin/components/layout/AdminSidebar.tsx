@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { LogOut, Music, PanelLeft, Settings } from 'lucide-react';
+import { LogOut, PanelLeft, Settings } from 'lucide-react';
 import type { PageDef } from '../../app/adminPages';
 import { useSlidingPill } from '../../hooks/useSlidingPill';
 import { demoMode } from '../../services/adminRepository';
@@ -30,13 +30,9 @@ export function AdminSidebar({
   return (
     <aside className="a-side">
       <div className="a-brand-row">
-        <div className="a-logo">
-          <Music size={20} color="#fff" />
+        <div className="a-brand-logo">
+          <img src={wide ? '/art/busking-town-logo.png' : '/favicon-v3.png'} alt="MusicTown" />
         </div>
-        <span className="a-label a-brand">
-          <b>MUSIC TOWN</b>
-          <small>운영실</small>
-        </span>
       </div>
       <button
         className="a-nav-btn"

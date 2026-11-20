@@ -17,3 +17,64 @@
 .a-detail dd {
   margin: 0;
 }
+
+.a-reports-list {
+  display: grid;
+  gap: 16px;
+}
+.a-reports-list tr[tabindex] {
+  cursor: pointer;
+}
+.a-reports-list tr[tabindex]:focus-visible {
+  outline: 2px solid var(--a-blue);
+  outline-offset: -2px;
+}
+.a-report-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+}
+.a-report-stats > div {
+  gap: 24px;
+  border-bottom: 0;
+}
+.a-report-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: #0009;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.a-report-dialog {
+  position: relative;
+  width: min(540px, 100%);
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  background: var(--t-surface);
+  color: var(--a-text);
+  border: 1px solid var(--a-line-strong);
+  border-radius: 16px;
+}
+.a-report-dialog .a-detail {
+  border: 0;
+  margin: 0;
+  padding: 28px;
+}
+.a-report-dialog .a-card-head {
+  padding-right: 38px;
+}
+.a-report-dialog .a-detail p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.a-report-dialog dd {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.a-report-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}

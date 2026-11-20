@@ -25,11 +25,7 @@
   padding: 22px;
   border: 1px solid var(--a-line-strong);
   border-radius: 20px;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--t-surface) 96%, transparent),
-    color-mix(in srgb, var(--t-deep) 98%, transparent)
-  );
+  background: var(--t-surface);
   box-shadow: 0 30px 80px var(--t-shadow);
   transform: translateY(12px) scale(0.96);
   transition: transform 0.4s var(--a-ease);

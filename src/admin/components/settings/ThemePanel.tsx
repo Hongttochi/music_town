@@ -71,7 +71,7 @@ export function ThemePanel({
                 >
                   <i
                     style={{
-                      background: `linear-gradient(${p.theme.angle}deg, ${p.theme.frame1}, ${p.theme.frame2})`,
+                      background: p.theme.frame1,
                     }}
                   />
                   {p.name}
