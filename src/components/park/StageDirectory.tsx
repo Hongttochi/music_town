@@ -1,3 +1,4 @@
+import './stage-directory.css';
 import { Button } from '../ui/Button';
 import { Flaticon } from '../ui/Flaticon';
 import { ArrowUpRight } from 'lucide-react';
@@ -25,7 +26,7 @@ export function StageDirectory({
       </div>
       {stages.map((s) => (
         <Button className="stage-item" key={s.id} onClick={() => openStage(s)}>
-          <span className="stage-avatar" style={{ background: s.color + '55' }}>
+          <span className="stage-avatar">
             {s.artist ? <Flaticon name="musical" size={22} /> : <Flaticon name="mic" size={20} />}
           </span>
           <span className="stage-info">
@@ -42,7 +43,7 @@ export function StageDirectory({
               <i />
             </span>
           ) : (
-            <ArrowUpRight size={13} className="text-[#9aa789]" />
+            <ArrowUpRight size={13} />
           )}
         </Button>
       ))}

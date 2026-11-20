@@ -8,7 +8,7 @@
   border: 1px solid #d6d6d6;
   border-radius: 18px;
   background: #ffffff;
-  color: #536447;
+  color: #000000;
   text-align: center;
   box-shadow: 0 18px 60px #25371e30;
 }
@@ -21,7 +21,7 @@
   width: 80px;
   height: 80px;
   margin: 0 auto 9px;
-  background: #eff3df;
+  background: #ffffff;
   border-radius: 50%;
 }
 .channel-entry-art .modular-portrait {
@@ -44,6 +44,7 @@
   top: 8px;
   color: #b7a075;
   font-size: 18px;
+  animation: entry-note-float 1.4s ease-in-out infinite;
 }
 .channel-entry-ground {
   position: absolute;
@@ -60,7 +61,7 @@
 }
 .channel-entry p {
   font-size: 10px;
-  color: #859075;
+  color: #000000;
   margin: 0;
 }
 .channel-entry-mori {
@@ -87,6 +88,17 @@
     transform: rotate(360deg);
   }
 }
+@keyframes entry-note-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-8deg);
+    opacity: 0.65;
+  }
+  50% {
+    transform: translateY(-6px) rotate(8deg);
+    opacity: 1;
+  }
+}
 @keyframes entry-walk {
   to {
     transform: translateY(-4px);
@@ -95,6 +107,7 @@
 @media (prefers-reduced-motion: reduce) {
   .channel-entry-art .modular-portrait,
   .channel-entry-mori,
+  .channel-entry-note,
   .channel-entry-spinner {
     animation: none;
   }
