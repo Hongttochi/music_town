@@ -12,11 +12,7 @@
 }
 .a-stage-card.live {
   border-color: color-mix(in srgb, var(--t-line) 40%, transparent);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--t-card) 32%, transparent),
-    color-mix(in srgb, var(--t-card) 20%, transparent)
-  );
+  background: var(--t-surface);
 }
 .a-perf {
   display: flex;

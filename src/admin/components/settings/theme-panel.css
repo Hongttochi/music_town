@@ -9,11 +9,7 @@
   width: min(360px, calc(100vw - 36px));
   border: 1px solid var(--a-line-strong);
   border-radius: 22px;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--t-surface) 92%, transparent),
-    color-mix(in srgb, var(--t-deep) 96%, transparent)
-  );
+  background: var(--t-surface);
   box-shadow: 0 30px 80px var(--t-shadow);
   backdrop-filter: blur(24px);
   transform: translateX(calc(100% + 30px));

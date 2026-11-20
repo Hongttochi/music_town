@@ -22,8 +22,8 @@ export function Errors() {
         아직 실제 데이터와 연결되지 않은 화면이에요. 오류 기록(Logflare)과 음성(LiveKit) 연결은 다음
         단계에서 붙일 예정이라 지금은 예시 값이에요.
       </p>
-      <div className="a-grid g-2-1">
-        <div style={{ display: 'grid', gap: 16, minWidth: 0 }}>
+      <div className="a-grid g-2-1 a-errors-layout">
+        <div className="a-errors-column">
           <div {...reveal(0)}>
             <div className="a-card">
               <div className="a-card-head">
@@ -79,7 +79,7 @@ export function Errors() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gap: 16, alignContent: 'start' }}>
+        <div className="a-errors-column">
           <div {...reveal(2)}>
             <div className="a-card">
               <h3>로그인 실패율</h3>

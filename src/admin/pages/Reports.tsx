@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Check, X } from 'lucide-react';
 import { reveal } from '../utils/reveal';
 import { Tabs } from '../components/ui/Tabs';
@@ -67,6 +68,22 @@ export function Reports() {
     const id = setTimeout(() => setToast(null), 2800);
     return () => clearTimeout(id);
   }, [toast]);
+  const detailRef = useRef<HTMLDivElement>(null);
+  const detailOpen = list.some((r) => r.id === selId);
+  useEffect(() => {
+    if (!detailOpen) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    detailRef.current?.focus();
+    return () => {
+      document.body.style.overflow = overflow;
+      previous?.focus();
+    };
+  }, [detailOpen]);
+  const closeDetail = () => {
+    if (!ask && !busy) setSelId(null);
+  };
   const cancel = useCallback(() => setAsk(null), []);
 
   if (!data) return <ErrorCard error={error} reload={reload} />;
@@ -74,9 +91,10 @@ export function Reports() {
   const open = list.filter(isOpen);
   const closed = list.filter((r) => !isOpen(r));
   const rows = tab === 'open' ? open : closed;
-  const sel = list.find((r) => r.id === selId) ?? rows[0];
+  const sel = list.find((r) => r.id === selId);
 
   const setStatus = (status: ReportStatus) => {
+    if (!sel || busy) return;
     setLastAsk(status);
     setFrom(sel.status);
     setAsk(status);
@@ -109,7 +127,7 @@ export function Reports() {
   return (
     <>
       {error && <p className="a-banner">{error.message}</p>}
-      <div {...reveal(0)}>
+      <div {...reveal(0)} inert={detailOpen}>
         <Tabs
           items={[
             { id: 'open', label: '처리할 신고', count: open.length },
@@ -119,7 +137,7 @@ export function Reports() {
           onChange={setTab}
         />
       </div>
-      <div className="a-grid g-2-1">
+      <div className="a-reports-list" inert={detailOpen}>
         <div {...reveal(1)}>
           <div className="a-card" style={{ overflowX: 'auto' }}>
             <table className="a-table">
@@ -139,6 +157,15 @@ export function Reports() {
                     key={r.id}
                     className={r.id === sel?.id ? 'sel' : ''}
                     onClick={() => setSelId(r.id)}
+                    tabIndex={0}
+                    aria-label={`신고 ${r.id} 상세 보기`}
+                    aria-haspopup="dialog"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelId(r.id);
+                      }
+                    }}
                   >
                     <td>{r.id.length > 10 ? r.id.slice(0, 8) : r.id}</td>
                     <td>
@@ -172,57 +199,8 @@ export function Reports() {
           </div>
         </div>
         <div {...reveal(2)}>
-          {sel && (
-            <div className="a-card a-detail" key={sel.id}>
-              <div className="a-card-head">
-                <div>
-                  <h3>신고 {sel.id.length > 10 ? sel.id.slice(0, 8) : sel.id}</h3>
-                  <p className="a-cap">{formatClock(sel.createdAt)} 접수</p>
-                </div>
-                <span className={`a-badge ${statusLabel[sel.status][1]}`}>
-                  {statusLabel[sel.status][0]}
-                </span>
-              </div>
-              <p>{sel.details}</p>
-              <dl>
-                <dt>사유</dt>
-                <dd>{reasons[sel.reason] ?? sel.reason}</dd>
-                <dt>대상</dt>
-                <dd>
-                  {sel.target}{' '}
-                  {sel.targetTotal > 1 && (
-                    <span className="a-badge b-red">누적 {sel.targetTotal}건</span>
-                  )}
-                </dd>
-                <dt>신고자</dt>
-                <dd>{sel.reporter}</dd>
-                <dt>채널</dt>
-                <dd>{sel.channel != null ? `${sel.channel}채널` : '-'}</dd>
-              </dl>
-              <div className="a-actions" style={{ flexWrap: 'wrap' }}>
-                {sel.status === 'pending' && (
-                  <button className="a-btn a-btn-primary" onClick={() => setStatus('reviewing')}>
-                    검토 시작
-                  </button>
-                )}
-                {sel.status === 'reviewing' && (
-                  <>
-                    <button className="a-btn a-btn-solid" onClick={() => setStatus('resolved')}>
-                      <Check size={15} /> 조치 완료
-                    </button>
-                    <button className="a-btn a-btn-ghost" onClick={() => setStatus('dismissed')}>
-                      <X size={15} /> 반려
-                    </button>
-                  </>
-                )}
-                {(sel.status === 'resolved' || sel.status === 'dismissed') && (
-                  <p className="a-cap">처리가 끝난 신고는 바꿀 수 없어요.</p>
-                )}
-              </div>
-            </div>
-          )}
-          <div className="a-card" style={{ marginTop: sel ? 16 : 0 }}>
-            <div className="a-stat-rows" style={{ marginTop: 0 }}>
+          <div className="a-card" style={{ marginTop: 0 }}>
+            <div className="a-stat-rows a-report-stats" style={{ marginTop: 0 }}>
               <div>
                 처리할 신고 <b>{open.length}건</b>
               </div>
@@ -249,6 +227,99 @@ export function Reports() {
           </div>
         </div>
       </div>
+
+      {sel &&
+        createPortal(
+          <div className="a-report-overlay" onClick={closeDetail}>
+            <div
+              ref={detailRef}
+              className="a-report-dialog"
+              role="dialog"
+              aria-modal="true"
+              aria-label="신고 상세"
+              tabIndex={-1}
+              inert={ask !== null}
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') closeDetail();
+                if (e.key === 'Tab') {
+                  const buttons = Array.from(
+                    e.currentTarget.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'),
+                  );
+                  const first = buttons[0];
+                  const last = buttons[buttons.length - 1];
+                  if (
+                    e.shiftKey &&
+                    (document.activeElement === first || document.activeElement === e.currentTarget)
+                  ) {
+                    e.preventDefault();
+                    last?.focus();
+                  } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first?.focus();
+                  }
+                }
+              }}
+            >
+              <button
+                className="a-btn a-btn-ghost a-report-close"
+                aria-label="닫기"
+                disabled={busy}
+                onClick={closeDetail}
+              >
+                <X size={18} />
+              </button>
+              <div className="a-card a-detail" key={sel.id}>
+                <div className="a-card-head">
+                  <div>
+                    <h3>신고 {sel.id.length > 10 ? sel.id.slice(0, 8) : sel.id}</h3>
+                    <p className="a-cap">{formatClock(sel.createdAt)} 접수</p>
+                  </div>
+                  <span className={`a-badge ${statusLabel[sel.status][1]}`}>
+                    {statusLabel[sel.status][0]}
+                  </span>
+                </div>
+                <p>{sel.details}</p>
+                <dl>
+                  <dt>사유</dt>
+                  <dd>{reasons[sel.reason] ?? sel.reason}</dd>
+                  <dt>대상</dt>
+                  <dd>
+                    {sel.target}{' '}
+                    {sel.targetTotal > 1 && (
+                      <span className="a-badge b-red">누적 {sel.targetTotal}건</span>
+                    )}
+                  </dd>
+                  <dt>신고자</dt>
+                  <dd>{sel.reporter}</dd>
+                  <dt>채널</dt>
+                  <dd>{sel.channel != null ? `${sel.channel}채널` : '-'}</dd>
+                </dl>
+                <div className="a-actions" style={{ flexWrap: 'wrap' }}>
+                  {sel.status === 'pending' && (
+                    <button className="a-btn a-btn-primary" onClick={() => setStatus('reviewing')}>
+                      검토 시작
+                    </button>
+                  )}
+                  {sel.status === 'reviewing' && (
+                    <>
+                      <button className="a-btn a-btn-solid" onClick={() => setStatus('resolved')}>
+                        <Check size={15} /> 조치 완료
+                      </button>
+                      <button className="a-btn a-btn-ghost" onClick={() => setStatus('dismissed')}>
+                        <X size={15} /> 반려
+                      </button>
+                    </>
+                  )}
+                  {(sel.status === 'resolved' || sel.status === 'dismissed') && (
+                    <p className="a-cap">처리가 끝난 신고는 바꿀 수 없어요.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
 
       {toast && <Toast text={toast.text} stamp={toast.stamp} />}
       <ConfirmDialog

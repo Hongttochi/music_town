@@ -24,11 +24,7 @@
   --a-frame: color-mix(in srgb, var(--t-deep) 72%, transparent);
   --a-line: color-mix(in srgb, var(--t-line) 14%, transparent);
   --a-line-strong: color-mix(in srgb, var(--t-line) 28%, transparent);
-  --a-card: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--t-card) var(--t-card-a), transparent),
-    color-mix(in srgb, var(--t-card) var(--t-card-b), transparent)
-  );
+  --a-card: var(--t-surface);
   --a-card-solid: var(--t-surface);
   --a-text: #e9edff;
   --a-strong: #fff;
@@ -85,11 +81,7 @@ button {
   height: 70vw;
   left: 20vw;
   top: -10vw;
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--t-glow1) 42%, transparent),
-    transparent 62%
-  );
+  background: var(--t-surface);
   opacity: var(--t-glow-o);
   transition: opacity 0.4s;
   animation: a-drift 18s ease-in-out infinite alternate;
@@ -99,11 +91,7 @@ button {
   height: 55vw;
   left: -15vw;
   bottom: -25vw;
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--t-glow2) 25%, transparent),
-    transparent 60%
-  );
+  background: var(--t-surface);
   opacity: var(--t-glow-o);
   transition: opacity 0.4s;
   animation: a-drift 22s ease-in-out infinite alternate-reverse;
@@ -123,11 +111,7 @@ button {
   padding: 12px;
   border: 1px solid var(--a-line);
   border-radius: 26px;
-  background: linear-gradient(
-    var(--t-frame-angle),
-    color-mix(in srgb, var(--t-frame1) 55%, transparent),
-    color-mix(in srgb, var(--t-frame2) 75%, transparent)
-  );
+  background: var(--t-surface);
   box-shadow:
     0 30px 80px var(--t-shadow),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -269,7 +253,7 @@ button {
 }
 .a-grid {
   display: grid;
-  gap: 16px;
+  gap: 24px;
 }
 .g-2-1 {
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
@@ -437,7 +421,7 @@ button {
 .a-mini i {
   flex: 1;
   border-radius: 3px;
-  background: linear-gradient(180deg, var(--t-acc1), var(--t-acc2));
+  background: var(--t-surface);
   transition: height 0.8s var(--a-ease);
 }
 .a-delta {
@@ -661,4 +645,159 @@ button {
   color: var(--a-muted);
   font-size: 13px;
   text-align: center;
+}
+
+/* Quiet, flat surfaces throughout the operations console. */
+.a-stage::before,
+.a-stage::after {
+  display: none;
+}
+.a-stage *,
+.a-stage *::before,
+.a-stage *::after {
+  transition-duration: 120ms !important;
+  transition-delay: 0ms !important;
+  transition-property: color, background-color, border-color, opacity !important;
+}
+.a-stage .rv,
+.a-stage .a-title,
+.a-stage .a-page {
+  animation: none;
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+.a-stage .a-spark .ln {
+  animation: none;
+  stroke-dashoffset: 0;
+}
+.a-stage .a-live i::after {
+  animation: none;
+  display: none;
+}
+.a-stage .a-eq i {
+  animation: none;
+  height: 8px;
+}
+.a-stage .a-stage-card:hover {
+  transform: none;
+}
+.a-stage .a-col:hover,
+.a-stage .a-btn:active,
+.a-stage .a-nav-btn:active {
+  transform: none;
+}
+.a-frame {
+  background: var(--t-deep);
+  box-shadow: none;
+  border-radius: 16px;
+}
+.a-card {
+  box-shadow: none;
+  border-radius: 12px;
+  padding: 22px;
+}
+.a-page {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 28px 12px 40px;
+}
+.a-title {
+  font-size: 28px;
+}
+.a-head {
+  margin-bottom: 24px;
+}
+.a-stage .a-fill {
+  box-shadow: none;
+  border-radius: 4px;
+}
+.a-stage .a-fill.teal {
+  background: var(--a-teal);
+}
+.a-stage .a-col.sel {
+  box-shadow: none;
+  border-color: var(--t-acc1);
+}
+.a-stage .a-mini i {
+  background: var(--t-acc2);
+}
+@media (max-width: 640px) {
+  .a-page {
+    padding: 20px 0;
+  }
+  .a-card {
+    padding: 16px;
+  }
+}
+
+/* Keep the dashboard readable at both wide and narrow sizes. */
+.a-page .a-card {
+  padding: 26px;
+}
+.a-page .a-card-head {
+  margin-bottom: 22px;
+}
+.a-subtitle,
+.a-cap {
+  line-height: 1.65;
+}
+@media (max-width: 640px) {
+  .a-grid {
+    gap: 16px;
+  }
+  .a-page .a-card {
+    padding: 18px;
+  }
+}
+
+.a-reports-layout > div:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.a-reports-layout .a-detail {
+  flex: 1;
+}
+.a-errors-column {
+  display: grid;
+  min-width: 0;
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+  gap: 24px;
+}
+.a-errors-column > div > .a-card {
+  height: 100%;
+}
+@media (max-width: 980px) {
+  .a-errors-column {
+    grid-row: auto;
+    grid-template-rows: auto;
+  }
+}
+/* Only sidebar expansion moves; page and chart changes remain still. */
+.a-stage .a-frame {
+  transition: grid-template-columns 180ms ease-out !important;
+}
+.a-stage .a-side .a-nav-btn,
+.a-stage .a-side .a-brand-row,
+.a-stage .a-side .a-me-row {
+  transition:
+    width 180ms ease-out,
+    gap 180ms ease-out,
+    color 120ms !important;
+}
+.a-stage .a-side .a-label {
+  transition:
+    max-width 180ms ease-out,
+    opacity 140ms ease-out !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .a-stage .a-frame,
+  .a-stage .a-side .a-nav-btn,
+  .a-stage .a-side .a-brand-row,
+  .a-stage .a-side .a-me-row,
+  .a-stage .a-side .a-label {
+    transition: none !important;
+  }
 }

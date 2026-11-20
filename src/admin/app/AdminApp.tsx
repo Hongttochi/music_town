@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { allPages, pageGroups } from './adminPages';
 import { AdminSidebar } from '../components/layout/AdminSidebar';
 import { AdminTopbar } from '../components/layout/AdminTopbar';
@@ -15,8 +15,6 @@ const fromHash = () => allPages.find((p) => p.key === location.hash.slice(2))?.k
 export function AdminApp() {
   const [active, setActive] = useState(fromHash);
   const [shown, setShown] = useState(active);
-  const [leaving, setLeaving] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [wide, setWide] = useState(() => readSaved(WIDE_KEY, false));
   const [settings, setSettings] = useState(false);
   const [theme, setTheme] = useTheme();
@@ -34,18 +32,13 @@ export function AdminApp() {
       return !w;
     });
 
-  // Blur the current page out, then swap in the next page.
+  // Navigate immediately without a staged animation.
   const go = (key: string) => {
     if (key === active) return;
     setActive(key);
     history.replaceState(null, '', `#/${key}`);
-    setLeaving(true);
-    clearTimeout(timer.current);
-    timer.current = setTimeout(() => {
-      setShown(key);
-      setLeaving(false);
-      window.scrollTo({ top: 0 });
-    }, 260);
+    setShown(key);
+    window.scrollTo({ top: 0 });
   };
   useEffect(() => {
     const onHash = () => go(fromHash());
@@ -75,7 +68,7 @@ export function AdminApp() {
             onOpenSettings={() => setSettings(true)}
             onOpenReports={() => go('reports')}
           />
-          <section className={`a-page ${leaving ? 'is-out' : ''}`} key={shown}>
+          <section className="a-page" key={shown}>
             <div className="a-head">
               <div>
                 <h1 className="a-title">{page.title}</h1>

@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Eye, EyeOff, Plus, Send, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { X, Eye, EyeOff, Plus, Send, Trash2 } from 'lucide-react';
 import { reveal } from '../utils/reveal';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { ErrorCard } from '../components/ui/ErrorCard';
@@ -40,6 +41,26 @@ export function Notices() {
   const [shownAsk, setShownAsk] = useState<Ask>('publish');
   const [pendingSel, setPendingSel] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const editorRef = useRef<HTMLDivElement>(null);
+  const closeEditor = () => {
+    if (busy || ask) return;
+    if (dirty) {
+      setPendingSel('__close__');
+      open('discard');
+    } else setEditorOpen(false);
+  };
+  useEffect(() => {
+    if (!editorOpen) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    editorRef.current?.focus();
+    return () => {
+      document.body.style.overflow = overflow;
+      previous?.focus();
+    };
+  }, [editorOpen]);
 
   // Sync with the server list; select the first notice when nothing valid is selected.
   useEffect(() => {
@@ -110,6 +131,7 @@ export function Notices() {
   };
 
   const select = (id: string) => {
+    setEditorOpen(true);
     if (id === selId) return;
     if (dirty) {
       setPendingSel(id);
@@ -128,6 +150,7 @@ export function Notices() {
     (n.id !== selId || (!form.title.trim() && !form.body.trim()));
 
   const create = () => {
+    setEditorOpen(true);
     // Send the user to an existing blank draft instead of creating another. The server enforces the same rule.
     const blank = list.find(isBlank);
     if (blank) {
@@ -162,10 +185,14 @@ export function Notices() {
         setList(rest);
         setSelId(rest[0]?.id ?? '');
         setForm(pick(rest[0]));
+        setEditorOpen(false);
       }
       if (kind === 'discard' && target === NEW) {
         setForm(pick(sel));
         await makeNew();
+      } else if (kind === 'discard' && target === '__close__') {
+        setForm(pick(sel));
+        setEditorOpen(false);
       } else if (kind === 'discard' && target) {
         setSelId(target);
         setForm(pick(list.find((n) => n.id === target)));
@@ -208,7 +235,7 @@ export function Notices() {
 
   return (
     <>
-      <div className="a-grid g-notice">
+      <div className="a-grid g-notice" inert={editorOpen}>
         <div {...reveal(0)}>
           <div className="a-card">
             <div className="a-card-head" style={{ alignItems: 'center' }}>
@@ -243,154 +270,218 @@ export function Notices() {
           </div>
         </div>
 
-        {sel ? (
-          <div className="a-grid g-2-1" style={{ minWidth: 0, alignItems: 'start' }} key={sel.id}>
-            <div {...reveal(1)}>
-              <div className="a-card a-editor">
-                <div className="a-card-head">
-                  <div>
-                    <h3>{sel.status === 'draft' && !sel.title ? '새 공지 쓰기' : '공지 수정'}</h3>
-                    <p className="a-cap">
-                      빈 줄로 문단을 나눠요 ·{' '}
-                      {sel.status === 'published'
-                        ? '고친 내용은 다시 게시해야 반영돼요'
-                        : '게시 전까지 이용자에게 보이지 않아요'}
-                    </p>
-                  </div>
-                  <span className={`a-badge ${statusText[sel.status][1]}`}>
-                    {statusText[sel.status][0]}
-                  </span>
-                </div>
-
-                <label className="a-input">
-                  <span>
-                    분류{' '}
-                    <em>
-                      {form.label.length}/{LIMIT.label}
-                    </em>
-                  </span>
-                  <input
-                    value={form.label}
-                    onChange={(e) => setForm({ ...form, label: e.target.value })}
-                  />
-                </label>
-                <div className="a-chips" style={{ marginTop: -6 }}>
-                  {labelIdeas.map((l) => (
-                    <button
-                      key={l}
-                      className="a-chip"
-                      aria-pressed={form.label === l}
-                      onClick={() => setForm({ ...form, label: l })}
-                    >
-                      {l}
-                    </button>
-                  ))}
-                </div>
-                <label className="a-input">
-                  <span>
-                    제목{' '}
-                    <em>
-                      {form.title.length}/{LIMIT.title}
-                    </em>
-                  </span>
-                  <input
-                    value={form.title}
-                    placeholder="예: 이번 주말 밤 공연이 늘어나요"
-                    onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  />
-                </label>
-                <label className="a-input">
-                  <span>
-                    본문{' '}
-                    <em>
-                      {form.body.length}/{LIMIT.body}
-                    </em>
-                  </span>
-                  <textarea
-                    rows={9}
-                    value={form.body}
-                    placeholder={'첫 문단\n\n두 번째 문단'}
-                    onChange={(e) => setForm({ ...form, body: e.target.value })}
-                  />
-                </label>
-
-                {problems.length > 0 && (dirty || sel.status !== 'published') && (
-                  <p className="a-warn">{problems[0]}</p>
-                )}
-                <div className="a-actions" style={{ flexWrap: 'wrap', marginTop: 4 }}>
+        {editorOpen &&
+          sel &&
+          createPortal(
+            <div
+              className="a-notice-overlay"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) closeEditor();
+              }}
+            >
+              <div
+                className="a-notice-dialog"
+                inert={ask !== null}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="notice-editor-title"
+                ref={editorRef}
+                tabIndex={-1}
+                onKeyDown={(e) => {
+                  if (ask) return;
+                  if (e.key === 'Escape') {
+                    e.stopPropagation();
+                    closeEditor();
+                  }
+                  if (e.key === 'Tab') {
+                    const nodes = editorRef.current?.querySelectorAll<HTMLElement>(
+                      'button:not(:disabled), input, textarea, [tabindex="0"]',
+                    );
+                    if (!nodes?.length) return;
+                    const first = nodes[0],
+                      last = nodes[nodes.length - 1];
+                    if (
+                      e.shiftKey &&
+                      (document.activeElement === first ||
+                        document.activeElement === editorRef.current)
+                    ) {
+                      e.preventDefault();
+                      last.focus();
+                    } else if (
+                      !e.shiftKey &&
+                      (document.activeElement === last ||
+                        document.activeElement === editorRef.current)
+                    ) {
+                      e.preventDefault();
+                      first.focus();
+                    }
+                  }
+                }}
+              >
+                <header className="a-notice-dialog-head">
+                  <h2 id="notice-editor-title">공지 작성 및 수정</h2>
                   <button
-                    className="a-btn a-btn-primary"
-                    disabled={busy || problems.length > 0 || (sel.status === 'published' && !dirty)}
-                    onClick={() => open('publish')}
-                  >
-                    <Send size={14} /> {sel.status === 'published' ? '수정 내용 게시' : '게시하기'}
-                  </button>
-                  {sel.status !== 'published' && (
-                    <button
-                      className="a-btn a-btn-ghost"
-                      disabled={busy || !dirty}
-                      onClick={saveDraft}
-                    >
-                      임시 저장
-                    </button>
-                  )}
-                  {sel.status === 'published' && (
-                    <button
-                      className="a-btn a-btn-ghost"
-                      disabled={busy}
-                      onClick={() => open('hide')}
-                    >
-                      <EyeOff size={14} /> 내리기
-                    </button>
-                  )}
-                  {dirty && (
-                    <button className="a-btn a-btn-ghost" onClick={() => setForm(pick(sel))}>
-                      되돌리기
-                    </button>
-                  )}
-                  <button
-                    className="a-btn a-btn-ghost a-btn-del"
+                    className="a-icon-btn"
+                    aria-label="공지 편집 닫기"
                     disabled={busy}
-                    onClick={() => open('delete')}
+                    onClick={closeEditor}
                   >
-                    <Trash2 size={14} /> 삭제
+                    <X size={20} />
                   </button>
-                </div>
-              </div>
-            </div>
+                </header>
+                <div
+                  className="a-grid a-notice-editor-grid"
+                  style={{ minWidth: 0, alignItems: 'start' }}
+                  key={sel.id}
+                >
+                  <div {...reveal(1)}>
+                    <div className="a-card a-editor">
+                      <div className="a-card-head">
+                        <div>
+                          <h3>
+                            {sel.status === 'draft' && !sel.title ? '새 공지 쓰기' : '공지 수정'}
+                          </h3>
+                          <p className="a-cap">
+                            빈 줄로 문단을 나눠요 ·{' '}
+                            {sel.status === 'published'
+                              ? '고친 내용은 다시 게시해야 반영돼요'
+                              : '게시 전까지 이용자에게 보이지 않아요'}
+                          </p>
+                        </div>
+                        <span className={`a-badge ${statusText[sel.status][1]}`}>
+                          {statusText[sel.status][0]}
+                        </span>
+                      </div>
 
-            <div {...reveal(2)}>
-              <div className="a-card">
-                <div className="a-card-head" style={{ marginBottom: 18 }}>
-                  <div>
-                    <h3 style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <Eye size={14} /> 미리보기
-                    </h3>
-                    <p className="a-cap">공원 게시판에 이렇게 보여요</p>
+                      <label className="a-input">
+                        <span>
+                          분류{' '}
+                          <em>
+                            {form.label.length}/{LIMIT.label}
+                          </em>
+                        </span>
+                        <input
+                          value={form.label}
+                          onChange={(e) => setForm({ ...form, label: e.target.value })}
+                        />
+                      </label>
+                      <div className="a-chips" style={{ marginTop: -6 }}>
+                        {labelIdeas.map((l) => (
+                          <button
+                            key={l}
+                            className="a-chip"
+                            aria-pressed={form.label === l}
+                            onClick={() => setForm({ ...form, label: l })}
+                          >
+                            {l}
+                          </button>
+                        ))}
+                      </div>
+                      <label className="a-input">
+                        <span>
+                          제목{' '}
+                          <em>
+                            {form.title.length}/{LIMIT.title}
+                          </em>
+                        </span>
+                        <input
+                          value={form.title}
+                          placeholder="예: 이번 주말 밤 공연이 늘어나요"
+                          onChange={(e) => setForm({ ...form, title: e.target.value })}
+                        />
+                      </label>
+                      <label className="a-input">
+                        <span>
+                          본문{' '}
+                          <em>
+                            {form.body.length}/{LIMIT.body}
+                          </em>
+                        </span>
+                        <textarea
+                          rows={9}
+                          value={form.body}
+                          placeholder={'첫 문단\n\n두 번째 문단'}
+                          onChange={(e) => setForm({ ...form, body: e.target.value })}
+                        />
+                      </label>
+
+                      {problems.length > 0 && (dirty || sel.status !== 'published') && (
+                        <p className="a-warn">{problems[0]}</p>
+                      )}
+                      <div className="a-actions" style={{ flexWrap: 'wrap', marginTop: 4 }}>
+                        <button
+                          className="a-btn a-btn-primary"
+                          disabled={
+                            busy || problems.length > 0 || (sel.status === 'published' && !dirty)
+                          }
+                          onClick={() => open('publish')}
+                        >
+                          <Send size={14} />{' '}
+                          {sel.status === 'published' ? '수정 내용 게시' : '게시하기'}
+                        </button>
+                        {sel.status !== 'published' && (
+                          <button
+                            className="a-btn a-btn-ghost"
+                            disabled={busy || !dirty}
+                            onClick={saveDraft}
+                          >
+                            임시 저장
+                          </button>
+                        )}
+                        {sel.status === 'published' && (
+                          <button
+                            className="a-btn a-btn-ghost"
+                            disabled={busy}
+                            onClick={() => open('hide')}
+                          >
+                            <EyeOff size={14} /> 내리기
+                          </button>
+                        )}
+                        {dirty && (
+                          <button className="a-btn a-btn-ghost" onClick={() => setForm(pick(sel))}>
+                            되돌리기
+                          </button>
+                        )}
+                        <button
+                          className="a-btn a-btn-ghost a-btn-del"
+                          disabled={busy}
+                          onClick={() => open('delete')}
+                        >
+                          <Trash2 size={14} /> 삭제
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div {...reveal(2)}>
+                    <div className="a-card">
+                      <div className="a-card-head" style={{ marginBottom: 18 }}>
+                        <div>
+                          <h3 style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <Eye size={14} /> 미리보기
+                          </h3>
+                          <p className="a-cap">공원 게시판에 이렇게 보여요</p>
+                        </div>
+                      </div>
+                      <article className="a-paper">
+                        <span className="a-paper-pin" />
+                        <span className="a-paper-label">{form.label || '분류'}</span>
+                        <h4>{form.title || '제목을 입력해 주세요'}</h4>
+                        {(toParagraphs(form.body).length
+                          ? toParagraphs(form.body)
+                          : ['본문을 입력해 주세요']
+                        ).map((p, i) => (
+                          <p key={i}>{p}</p>
+                        ))}
+                        <footer>MUSIC TOWN</footer>
+                      </article>
+                    </div>
                   </div>
                 </div>
-                <article className="a-paper">
-                  <span className="a-paper-pin" />
-                  <span className="a-paper-label">{form.label || '분류'}</span>
-                  <h4>{form.title || '제목을 입력해 주세요'}</h4>
-                  {(toParagraphs(form.body).length
-                    ? toParagraphs(form.body)
-                    : ['본문을 입력해 주세요']
-                  ).map((p, i) => (
-                    <p key={i}>{p}</p>
-                  ))}
-                  <footer>MUSIC TOWN</footer>
-                </article>
               </div>
-            </div>
-          </div>
-        ) : (
-          <div {...reveal(1)}>
-            <div className="a-card">
-              <p className="a-cap">왼쪽에서 공지를 고르거나 새 공지를 만들어 주세요.</p>
-            </div>
-          </div>
-        )}
+            </div>,
+            document.body,
+          )}
       </div>
 
       {toast && <Toast text={toast.text} stamp={toast.n} />}

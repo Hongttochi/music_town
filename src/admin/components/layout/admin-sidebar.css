@@ -227,3 +227,41 @@
 .a-gate-card .a-logo {
   margin: 0 auto 16px;
 }
+
+.a-brand-row {
+  flex-direction: column;
+  gap: 6px;
+}
+.a-brand-logo {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  padding: 3px;
+  border-radius: 8px;
+  background: #faf6ee;
+  flex: none;
+}
+.a-brand-logo img {
+  display: block;
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+.wide .a-brand-row {
+  gap: 8px;
+  align-items: flex-start;
+  padding: 4px 4px 12px;
+}
+.wide .a-brand-logo {
+  width: 100%;
+  height: auto;
+  padding: 8px;
+}
+.wide .a-brand-logo img {
+  width: 100%;
+  height: auto;
+}
+.wide .a-brand {
+  padding-left: 4px;
+}

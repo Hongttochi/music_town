@@ -57,7 +57,7 @@ export function Overview() {
         ))}
       </div>
 
-      <div className="a-grid g-2-1" style={{ marginTop: 16 }}>
+      <div className="a-grid g-2-1 a-overview-charts" style={{ marginTop: 28 }}>
         <div {...reveal(5)}>
           <div className="a-card">
             <div className="a-card-head">
@@ -78,7 +78,7 @@ export function Overview() {
           </div>
         </div>
         <div {...reveal(6)}>
-          <div className="a-card" style={{ height: '100%' }}>
+          <div className="a-card">
             <div className="a-card-head">
               <div>
                 <h3>채널 혼잡도</h3>
