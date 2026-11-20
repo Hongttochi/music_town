@@ -59,7 +59,7 @@
 - 공원 게시판은 `town_notice_board()`를 읽고, 함수가 없거나 실패하면 앱에 실린 `src/data/notices.ts`를 보여준다.
 - `town_channels`의 `name`, `capacity`는 운영 DB마다 다를 수 있어 함수가 유연하게 읽는다. 정원이 없으면 인원만 표시한다.
 - 위반·분쟁 기록을 1년 보관하거나 예외 보존을 거는 일은 운영실에서 하지 않는다. `docs/reporting-setup.md`의 SQL 절차를 따른다.
-- 오류·음성 화면은 아직 연결 전이다. 오류 기록은 Logflare 조회 키, 음성은 LiveKit 서버 API를 쓰는 서버 함수가 필요하다.
+- 오류·음성 화면은 관리자 전용 `/api/admin-monitoring`에서 Logflare와 LiveKit을 조회한다. [연결 설정](./admin-monitoring.md)을 적용해야 실제 값이 표시된다. 미설정·조회 실패는 별도로 표시하며 예시 수치를 사용하지 않는다.
 
 ## 검증
 
