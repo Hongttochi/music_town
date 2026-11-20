@@ -19,8 +19,25 @@
   background: none;
   flex: none;
 }
-.resident-conversation .bar-dialogue-body p {
-  color: #222;
+dialog.bar-dialogue.resident-conversation {
+  background: #ffffff;
+  border-color: #d6d6d6;
+  color: #000000;
+  box-shadow: 0 8px 30px #00000020;
+}
+dialog.bar-dialogue.resident-conversation :is(.bar-dialogue-name, small, p, span, button) {
+  color: #000000;
+}
+dialog.bar-dialogue.resident-conversation :is(.bar-dialogue-name small, button) {
+  background: #ffffff;
+  border-color: #d6d6d6;
+}
+dialog.bar-dialogue.resident-conversation button:hover {
+  background: #f2f2f2;
+}
+dialog.bar-dialogue.resident-conversation button:focus-visible {
+  outline: 2px solid #777777;
+  outline-offset: 2px;
 }
 .resident-name {
   position: absolute;

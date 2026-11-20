@@ -1,10 +1,47 @@
+dialog.town-panel.town-office-dialog {
+  border-color: #b8b8b8;
+  color: #000000;
+}
+dialog.town-panel.town-office-dialog[open] .panel-heading {
+  border-color: #d6d6d6;
+}
+dialog.town-panel.town-office-dialog[open] .panel-heading h2.modal-title,
+dialog.town-panel.town-office-dialog .town-button {
+  color: #000000;
+}
+dialog.town-panel.town-office-dialog .town-button:not(.town-button--ghost) {
+  border-color: #d6d6d6;
+}
+dialog.town-panel.town-office-dialog .town-button--choice {
+  background: #ffffff;
+}
+dialog.town-panel.town-office-dialog .town-button--choice[aria-pressed='true'] {
+  background: #f0f0f0;
+  border-color: #888888;
+  box-shadow: inset 0 0 0 1px #888888;
+}
+dialog.town-panel.town-office-dialog .town-button:focus-visible {
+  outline: 2px solid #777777;
+  outline-offset: 2px;
+}
+dialog.town-panel.town-office-dialog .town-button--primary {
+  background: #ededed;
+  box-shadow: none;
+}
+dialog.town-panel.town-office-dialog .town-button:hover:not(:disabled) {
+  background: #e8e8e8;
+}
+.office-compose :is(input, textarea)::placeholder {
+  color: #000000;
+  opacity: 1;
+}
 .office-clerk {
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 12px 16px;
   background: #ffffff;
-  border: 1px solid #e5e5df;
+  border: 1px solid #d6d6d6;
   border-radius: 12px;
   margin: 14px 0;
 }
@@ -21,13 +58,13 @@
 .office-clerk-badge {
   font-size: 12px;
   font-weight: 700;
-  color: #526649;
+  color: #000000;
 }
 .office-clerk p {
   margin: 6px 0 0;
   line-height: 1.6;
   font-size: 12px;
-  color: #69745c;
+  color: #000000;
 }
 .office-tabs {
   display: grid;
@@ -43,7 +80,7 @@
   gap: 10px;
   margin: 14px 0;
   font-size: 12px;
-  color: #727b65;
+  color: #000000;
 }
 .office-compose {
   display: grid;
@@ -62,10 +99,10 @@
   width: 100%;
   min-width: 0;
   padding: 10px 12px;
-  border: 1px solid #d3d9c6;
+  border: 1px solid #d6d6d6;
   border-radius: 8px;
   background: #fffdf6;
-  color: #3f4938;
+  color: #000000;
   font: inherit;
 }
 .office-compose textarea {
@@ -75,7 +112,7 @@
 }
 .office-compose :is(input, select, textarea):focus-visible,
 .office-letter-row:focus-visible {
-  outline: 2px solid #79965b;
+  outline: 2px solid #777777;
   outline-offset: 2px;
 }
 .office-compose-footer {
@@ -84,19 +121,19 @@
 .office-empty {
   padding: 24px 12px;
   text-align: center;
-  color: #7a806f;
+  color: #000000;
   font-size: 13px;
   line-height: 1.7;
 }
 .office-success {
   padding: 10px;
   background: #e8f2df;
-  color: #3d5b32;
+  color: #000000;
   border-radius: 8px;
   font-size: 13px;
 }
 .office-error {
-  color: #a04439;
+  color: #000000;
   font-size: 13px;
   line-height: 1.6;
 }
@@ -110,10 +147,10 @@
   align-items: center;
   gap: 12px;
   padding: 14px;
-  border: 1px solid #dce1d2;
+  border: 1px solid #d6d6d6;
   border-radius: 10px;
   background: #fffdf5;
-  color: #536046;
+  color: #000000;
   text-align: left;
   font: inherit;
   cursor: pointer;
@@ -133,17 +170,17 @@
   display: block;
   margin-top: 6px;
   font-size: 11px;
-  color: #7b816f;
+  color: #000000;
 }
 .office-letter-row em {
   font-size: 10px;
   font-style: normal;
   white-space: nowrap;
-  color: #6b8153;
+  color: #000000;
 }
 .office-letter {
   padding: 16px;
-  border: 1px solid #e3ddc6;
+  border: 1px solid #d6d6d6;
   background: #fffdf4;
   border-radius: 10px;
 }
@@ -153,7 +190,7 @@
 .office-letter-meta {
   font-size: 12px;
   line-height: 1.8;
-  color: #7b816f;
+  color: #000000;
 }
 .office-letter-body {
   white-space: pre-wrap;
