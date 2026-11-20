@@ -35,3 +35,18 @@
     left 0.45s var(--a-ease),
     width 0.45s var(--a-ease);
 }
+
+.a-stage .a-tabs .a-tab-ink {
+  transition:
+    left 280ms var(--a-ease),
+    width 280ms var(--a-ease) !important;
+}
+.a-stage .a-tabs .a-tab {
+  transition: color 180ms ease-out !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .a-stage .a-tabs .a-tab-ink,
+  .a-stage .a-tabs .a-tab {
+    transition: none !important;
+  }
+}

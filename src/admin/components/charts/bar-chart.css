@@ -42,13 +42,13 @@
   width: min(26px, 70%);
   height: 0;
   border-radius: 5px 5px 2px 2px;
-  background: linear-gradient(180deg, var(--t-acc1), var(--t-acc2));
+  background: var(--t-acc2);
   box-shadow: 0 0 18px color-mix(in srgb, var(--t-acc2) 35%, transparent);
   transition: height 1s var(--a-ease);
   transition-delay: calc(var(--i, 0) * 28ms + 150ms);
 }
 .a-bar.night i {
-  background: linear-gradient(180deg, #8f7dff, #5a46d8);
+  background: var(--t-acc2);
 }
 .a-bar:hover i {
   filter: brightness(1.25);

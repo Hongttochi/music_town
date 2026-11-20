@@ -1,3 +1,17 @@
+.a-overview-charts > div {
+  display: flex;
+  min-width: 0;
+}
+.a-overview-charts > div > .a-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.a-overview-charts .a-chart {
+  flex: 1;
+  min-height: 210px;
+}
+
 .a-kpi p {
   margin: 0;
   color: var(--a-sub);
@@ -12,4 +26,32 @@
   font-size: 28px;
   font-weight: 650;
   letter-spacing: -0.02em;
+}
+
+.g-kpi {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 24px;
+}
+.g-kpi > div {
+  display: flex;
+  min-width: 0;
+}
+.g-kpi .a-kpi {
+  width: 100%;
+  min-height: 190px;
+}
+.a-kpi strong {
+  margin: 12px 0 10px;
+}
+.a-kpi .a-spark {
+  margin-top: 20px;
+}
+@media (max-width: 640px) {
+  .g-kpi {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+  }
+  .g-kpi .a-kpi {
+    min-height: 170px;
+  }
 }

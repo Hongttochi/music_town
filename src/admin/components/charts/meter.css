@@ -9,12 +9,12 @@
   height: 100%;
   width: 0;
   border-radius: 4px;
-  background: linear-gradient(90deg, var(--t-acc2), var(--t-acc1));
+  background: var(--t-acc2);
   box-shadow: 0 0 12px color-mix(in srgb, var(--t-acc2) 60%, transparent);
   transition: width 1s var(--a-ease);
   transition-delay: calc(var(--i, 0) * 80ms + 150ms);
 }
 .a-meter.hot i {
-  background: linear-gradient(90deg, #ff9a5a, #ff6b88);
+  background: var(--t-acc2);
   box-shadow: 0 0 12px rgba(255, 107, 136, 0.55);
 }

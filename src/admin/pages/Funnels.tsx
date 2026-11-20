@@ -74,7 +74,7 @@ export function Funnels() {
   };
 
   return (
-    <div className="a-grid g-1-3">
+    <div className="a-grid a-funnel-layout">
       <div {...reveal(0)}>
         <div className="a-card">
           <p className="a-list-title">가입 시기별</p>
@@ -142,7 +142,7 @@ export function Funnels() {
         {f && steps[0]?.value > 0 && (
           <div className="a-grid g-2-1">
             <div {...reveal(2)}>
-              <div className="a-card" key={`${step}-${days}-${seg}`}>
+              <div className="a-card" style={{ height: '100%' }} key={`${step}-${days}-${seg}`}>
                 <h3>
                   {step + 1}. {steps[step].label}
                 </h3>
