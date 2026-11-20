@@ -105,7 +105,7 @@ export function LoginPage({ children }: { children: (account: Account) => ReactN
   }
   const signOut = async () => {
     if (supabase && session) {
-      const { error: failure } = await supabase.auth.signOut();
+      const { error: failure } = await supabase.auth.signOut({ scope: 'local' });
       if (failure) throw failure;
     }
     setSession(null);

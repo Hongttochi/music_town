@@ -24,6 +24,16 @@
   align-items: center;
   gap: 8px;
   margin-left: auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.a-top-logout {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.a-logout-error {
+  color: var(--a-red);
+  font-size: 12px;
 }
 .a-live {
   display: inline-flex;

@@ -801,3 +801,141 @@ button {
     transition: none !important;
   }
 }
+.a-navigation {
+  min-width: 0;
+}
+.a-mobile-menu {
+  display: none;
+}
+.a-gate-demo {
+  margin-bottom: 24px;
+}
+@media (max-width: 900px) {
+  .a-stage {
+    padding: 10px;
+  }
+  .a-stage .a-frame,
+  .a-stage .a-frame.wide {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 10px;
+    gap: 12px;
+    border-radius: 18px;
+  }
+  .a-navigation {
+    display: none;
+  }
+  .mobile-menu-open .a-navigation {
+    display: block;
+  }
+  .a-mobile-menu {
+    display: grid;
+    flex-shrink: 0;
+  }
+  .a-navigation .a-side {
+    position: static;
+    height: auto;
+    padding: 14px;
+    width: 100%;
+  }
+  .a-navigation .a-brand-row {
+    display: none;
+  }
+  .a-navigation .a-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .a-navigation .a-nav-btn {
+    width: 100%;
+    min-height: 44px;
+    gap: 10px;
+    padding: 0 12px;
+  }
+  .a-navigation .a-label {
+    max-width: none;
+    opacity: 1;
+  }
+  .a-navigation .a-pill,
+  .a-navigation .a-tip,
+  .a-navigation .a-sep,
+  .a-navigation .a-me-row,
+  .a-navigation .a-nav > div[style*='flex:'] {
+    display: none;
+  }
+  .a-navigation .a-nav-btn[aria-current='page'] {
+    background: var(--t-acc2);
+  }
+  .a-top {
+    padding: 6px;
+    gap: 6px;
+  }
+  .a-top .a-crumbs {
+    display: none;
+  }
+  .a-top-right {
+    gap: 6px;
+  }
+  .a-top .a-icon-btn,
+  .a-top .a-btn {
+    min-height: 44px;
+  }
+  .a-top .a-icon-btn {
+    width: 40px;
+  }
+  .a-top .a-live {
+    padding: 4px 6px;
+    font-size: 10px;
+  }
+  .a-top .a-top-logout {
+    padding: 0 9px;
+    font-size: 12px;
+  }
+  .a-page {
+    padding: 20px 0;
+  }
+  .a-page .a-title {
+    font-size: 25px;
+  }
+  .a-page .a-subtitle {
+    font-size: 12px;
+  }
+  .a-page .a-grid {
+    gap: 12px;
+  }
+  .a-page .g-kpi {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .a-page .g-kpi .a-kpi {
+    min-height: 130px;
+    padding: 16px;
+  }
+  .a-page .g-kpi > div:last-child {
+    grid-column: 1 / -1;
+  }
+  .a-page .a-kpi strong {
+    font-size: 26px;
+    margin: 8px 0;
+  }
+  .a-page .a-kpi .a-spark {
+    margin-top: 10px;
+  }
+  .a-page .a-card {
+    padding: 16px;
+    min-width: 0;
+  }
+  .a-page .g-2-1,
+  .a-page .g-1-3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .a-page .a-tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .a-page .a-tab {
+    min-height: 44px;
+    flex-shrink: 0;
+  }
+  .a-page .a-table {
+    min-width: 560px;
+  }
+}

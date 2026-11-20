@@ -16,6 +16,7 @@ export function AdminApp() {
   const [active, setActive] = useState(fromHash);
   const [shown, setShown] = useState(active);
   const [wide, setWide] = useState(() => readSaved(WIDE_KEY, false));
+  const [menuOpen, setMenuOpen] = useState(false);
   const [settings, setSettings] = useState(false);
   const [theme, setTheme] = useTheme();
   // The bell count and the reports dot follow the real number of open reports.
@@ -34,6 +35,7 @@ export function AdminApp() {
 
   // Navigate immediately without a staged animation.
   const go = (key: string) => {
+    setMenuOpen(false);
     if (key === active) return;
     setActive(key);
     history.replaceState(null, '', `#/${key}`);
@@ -51,22 +53,29 @@ export function AdminApp() {
   const Page = page.Page;
   return (
     <div className="a-stage">
-      <div className={`a-frame ${wide ? 'wide' : ''}`}>
-        <AdminSidebar
-          groups={pageGroups}
-          active={active}
-          wide={wide}
-          openReports={openReports}
-          onNavigate={go}
-          onToggleWide={toggleWide}
-          onOpenSettings={() => setSettings(true)}
-        />
+      <div className={`a-frame ${wide ? 'wide' : ''} ${menuOpen ? 'mobile-menu-open' : ''}`}>
+        <div id="admin-navigation" className="a-navigation">
+          <AdminSidebar
+            groups={pageGroups}
+            active={active}
+            wide={wide}
+            openReports={openReports}
+            onNavigate={go}
+            onToggleWide={() => {
+              if (window.matchMedia('(max-width: 900px)').matches) setMenuOpen(false);
+              else toggleWide();
+            }}
+            onOpenSettings={() => setSettings(true)}
+          />
+        </div>
         <main className="a-main">
           <AdminTopbar
             page={page}
             openReports={openReports}
             onOpenSettings={() => setSettings(true)}
             onOpenReports={() => go('reports')}
+            onToggleMenu={() => setMenuOpen((open) => !open)}
+            menuOpen={menuOpen}
           />
           <section className="a-page" key={shown}>
             <div className="a-head">
